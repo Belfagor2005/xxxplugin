@@ -1,0 +1,10 @@
+<screen name="FullHD1" position="center,center" size="900,480" title="Player Choice" backgroundColor="#000000" flags="wfNoBorder">
+    <widget name="info" position="0,0" zPosition="4" size="900,48" font="Regular;36" foregroundColor="#ffffff" backgroundColor="#000000" halign="center" valign="center"/>
+    <widget name="list" position="60,60" size="780,270" foregroundColor="#ffffff" backgroundColor="#000000" zPosition="4" scrollbarMode="showOnDemand" itemHeight="54" backgroundColorSelected="#c10801"/>
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/key_red.png" position="60,420" size="30,30" alphatest="blend" zPosition="1"/>
+    <widget name="key_red" position="120,420" size="300,30" font="Regular;30" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+    <widget name="key_green" position="570,420" size="300,30" font="Regular;30" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/key_green.png" position="510,420" size="30,30" alphatest="blend" zPosition="1"/>
+    <widget name="progress" position="300,420" size="300,30" foregroundColor="#2a70a4" backgroundColor="#10000000" transparent="1" zPosition="5"/>
+    <widget source="progresstext" render="Label" font="Regular;21" position="300,420" size="300,30" backgroundColor="#202020" transparent="1" halign="center" zPosition="6"/>
+</screen>

@@ -1,0 +1,14 @@
+<screen name="xxx" position="0,0" size="1920,1080" backgroundColor="#ff000000" flags="wfNoBorder">
+  <widget name="title" position="16,6" size="1477,60" zPosition="5" halign="center" valign="top" foregroundColor="#7bd7f7" backgroundColor="#000000" font="Regular;40" transparent="1" />
+  <widget name="name" position="51,134" size="1207,60" noWrap="1" zPosition="1" transparent="1" font="Regular;33" valign="center" halign="left" backgroundColor="#30000000" foregroundColor="#00ffffff" />
+  <widget name="menulist" position="47,210" size="802,537" backgroundColor="#30000000" zPosition="1" scrollbarMode="showOnDemand" transparent="1" foregroundColor="#00ffffff" />
+  <widget name="text" position="42,753" size="1215,240" zPosition="1" backgroundColor="#30000000" transparent="1" font="Regular;33" halign="center" foregroundColor="#f4b700" />
+  <widget name="poster" position="862,222" size="390,510" zPosition="4" backgroundColor="#30000000" transparent="1" borderWidth="3" borderColor="#00ffffff" flags="wfBorder" alphatest="blend" />
+  <widget backgroundColor="#30000000" font="Regular;51" foregroundColor="#00ffffff" position="53,65" render="Label" size="1062,63" source="Title" transparent="1" halign="center" valign="center" noWrap="1" />
+  <widget name="red" font="Regular;30" halign="left" valign="center" position="50,1004" size="237,59" backgroundColor="#30000000" foregroundColor="#00ffffff" transparent="1" zPosition="1" />
+  <widget source="global.CurrentTime" render="Label" position="1674,1" size="150,42" font="Regular;39" halign="right" backgroundColor="#30000000" transparent="1" valign="center" foregroundColor="#00ffffff">
+    <convert type="ClockToText">Default</convert>
+  </widget>
+  <eLabel backgroundColor="#30000000" position="0,0" size="1920,1080" transparent="0" zPosition="-9" foregroundColor="#00ffffff" />
+  <ePixmap position="0,0" zPosition="-2" size="1920,1080" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/menu_plug.png" />
+</screen>

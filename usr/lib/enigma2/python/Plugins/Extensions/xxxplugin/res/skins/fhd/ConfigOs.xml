@@ -1,0 +1,14 @@
+<screen name="ConfigFHD" position="0,0" size="1920,1080" title="Config" backgroundColor="#ff000000" flags="wfNoBorder">
+    <ePixmap position="0,0" zPosition="-2" size="1920,1080" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/fanartfhd.jpg"/>
+    <!-- Menu List -->
+    <widget name="config" position="210,180" size="900,480" itemHeight="48" scrollbarMode="showOnDemand" transparent="1" zPosition="1" foregroundColor="#fcc000" foregroundColorSelected="#ffffff" backgroundColor="#4a5b6d" backgroundColorSelected="#000000"/>
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/backg2.png" position="1200,180" size="321,441" alphatest="on" zPosition="1"/>
+    <widget name="description" position="210,660" zPosition="1" size="1500,60" font="Regular;30" foregroundColor="#fcc000" backgroundColor="#4a5b6d" transparent="1" halign="left" valign="center"/>
+    <!-- MButton -->
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/key_red.png" position="210,780" size="30,30" alphatest="blend" zPosition="1"/>
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/key_green.png" position="510,780" size="30,30" alphatest="blend" zPosition="1"/>
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/key_yellow.png" position="810,780" size="30,30" alphatest="blend" zPosition="1"/>
+    <widget name="key_red" position="270,780" size="300,30" font="Regular;30" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+    <widget name="key_green" position="570,780" size="300,30" font="Regular;30" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+    <widget name="key_yellow" position="870,780" size="300,30" font="Regular;30" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+</screen>

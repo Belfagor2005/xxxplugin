@@ -1,0 +1,11 @@
+<screen name="AnimMain" position="center,center" size="1280,720" title="HOME LIST" flags="wfNoBorder" backgroundColor="#ff000000">
+    <widget name="title" position="80,520" size="1120,40" foregroundColor="#ffffff" backgroundColor="#000000" font="Regular;26" transparent="1" halign="left" valign="center" zPosition="3"/>
+    <ePixmap position="0,520" zPosition="-2" size="1280,204" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/icon/infobar2.png" alphatest="blend"/>
+    <widget name="pointer" position="616,540" size="50,150" zPosition="2" alphatest="blend"/>
+    <widget source="label1" render="Label" position="0,594" size="256,46" font="Regular;18" halign="center" valign="center" zPosition="2" noWrap="1" foregroundColor="#bbbbbb" backgroundColor="#000000" transparent="1"/>
+    <widget source="label2" render="Label" position="256,594" size="256,46" font="Regular;18" halign="center" valign="center" zPosition="2" noWrap="1" foregroundColor="#bbbbbb" backgroundColor="#000000" transparent="1"/>
+    <widget source="label3" render="Label" position="512,594" size="256,46" font="Regular;26" halign="center" valign="center" zPosition="3" noWrap="1" foregroundColor="#ffffff" backgroundColor="#000000" transparent="1"/>
+    <widget source="label4" render="Label" position="768,594" size="256,46" font="Regular;18" halign="center" valign="center" zPosition="2" noWrap="1" foregroundColor="#bbbbbb" backgroundColor="#000000" transparent="1"/>
+    <widget source="label5" render="Label" position="1024,594" size="256,46" font="Regular;18" halign="center" valign="center" zPosition="2" noWrap="1" foregroundColor="#bbbbbb" backgroundColor="#000000" transparent="1"/>
+    <widget name="info" position="79,5" zPosition="4" size="1120,170" font="Regular;22" foregroundColor="#ffff00" backgroundColor="#40000000" transparent="1" halign="left" valign="top"/>
+</screen>

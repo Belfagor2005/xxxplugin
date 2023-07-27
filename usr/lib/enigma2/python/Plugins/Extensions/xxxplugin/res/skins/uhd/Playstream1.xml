@@ -1,0 +1,10 @@
+<screen name="FullHD1" position="center,center" size="1200,640" title="Player Choice" backgroundColor="#000000" flags="wfNoBorder">
+    <widget name="info" position="0,0" zPosition="4" size="1200,64" font="Regular;48" foregroundColor="#ffffff" backgroundColor="#000000" halign="center" valign="center"/>
+    <widget name="list" position="80,80" size="1040,360" foregroundColor="#ffffff" backgroundColor="#000000" zPosition="4" scrollbarMode="showOnDemand" itemHeight="72" backgroundColorSelected="#c10801"/>
+    <ePixmap pixmap="skin_default/buttons/red.png" position="80,560" size="40,40" alphatest="blend" zPosition="1"/>
+    <widget name="key_red" position="160,560" size="400,40" font="Regular;40" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+    <widget name="key_green" position="760,560" size="400,40" font="Regular;40" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
+    <ePixmap pixmap="skin_default/buttons/green.png" position="680,560" size="40,40" alphatest="blend" zPosition="1"/>
+    <widget name="progress" position="400,560" size="400,40" foregroundColor="#2a70a4" backgroundColor="#10000000" transparent="1" zPosition="5"/>
+    <widget source="progresstext" render="Label" font="Regular;28" position="400,560" size="400,40" backgroundColor="#202020" transparent="1" halign="center" zPosition="6"/>
+</screen>

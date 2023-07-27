@@ -1,0 +1,6 @@
+<screen name="AboutFHD" position="0,0" size="1280,720" title="About" backgroundColor="#ff000000" flags="wfNoBorder">
+    <ePixmap position="0,0" zPosition="-2" size="1280,720" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/fanarthd.jpg"/>
+    <widget name="title" position="100,40" size="1080,40" zPosition="3" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#4a5b6d" font="Regular;26" transparent="1"/>
+    <widget name="info" position="200,120" zPosition="4" size="880,420" font="Regular;22" foregroundColor="#fcc000" backgroundColor="#4a5b6d" transparent="1" halign="center" valign="center"/>
+    <eLabel text="Se ti piace quello che facciamo e come lo facciamo ti invitiamo a contribuire alle nostre spese di hosting, domini .. Vieni su tivustream.com  Clicca sul logo PayPal e dona con il tuo account ...grazie DI CUORE ! " position="100,594" size="1080,126" font="Regular; 20" foregroundColor="#ffffff" backgroundColor="#392315" transparent="1" halign="center" valign="center" zPosition="6"/>
+</screen>

@@ -1,0 +1,11 @@
+Package: enigma2-plugin-extensions-xxxplugin
+Version: 1.0
+Section: extra
+Priority: optional
+Architecture: all
+Maintainer: @lululla
+Description: TiVuStream
+Source: @lululla
+Homepage: tivustream.com
+OE: 2.0-2.2-2.5
+License: O.S.

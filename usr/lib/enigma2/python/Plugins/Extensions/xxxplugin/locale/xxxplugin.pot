@@ -1,0 +1,322 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: xxxplugin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-27 13:39+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: ))^^(( <>\n"
+"Language-Team: *\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 1.8.7\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: plugin.py\n"
+"X-Poedit-SearchPath-1: Sites\n"
+
+#: Sites/adulttvlive.py:205 Sites/adulttvlive.py:297 Sites/adulttvlive.py:502
+#: Sites/alphaporno.py:221 Sites/alphaporno.py:366 Sites/alphaporno.py:437
+#: Sites/alphaporno.py:530 Sites/alphaporno.py:622 Sites/alphaporno.py:719
+#: Sites/alphaporno.py:914 Sites/born2tease.py:224 Sites/born2tease.py:317
+#: Sites/famefun.py:229 Sites/famefun.py:360 Sites/famefun.py:418
+#: Sites/famefun.py:513 Sites/famefun.py:714 Sites/heavyr.py:223
+#: Sites/heavyr.py:320 Sites/heavyr.py:385 Sites/hypnotube.py:231
+#: Sites/hypnotube.py:354 Sites/hypnotube.py:420 Sites/hypnotube.py:512
+#: Sites/hypnotube.py:605 Sites/hypnotube.py:801 Sites/luxuretv.py:229
+#: Sites/luxuretv.py:354 Sites/luxuretv.py:456 Sites/luxuretv.py:526
+#: Sites/luxuretv.py:621 Sites/luxuretv.py:816 Sites/manporn.py:235
+#: Sites/manporn.py:365 Sites/manporn.py:428 Sites/manporn.py:525
+#: Sites/manporn.py:735 Sites/motherless.py:231 Sites/motherless.py:354
+#: Sites/motherless.py:449 Sites/motherless.py:546 Sites/motherless.py:643
+#: Sites/motherless.py:811 Sites/mylust.py:223 Sites/mylust.py:345
+#: Sites/mylust.py:447 Sites/pornbimbo.py:232 Sites/pornbimbo.py:360
+#: Sites/pornbimbo.py:461 Sites/pornbimbo.py:524 Sites/pornbimbo.py:731
+#: Sites/pornheed.py:233 Sites/pornheed.py:358 Sites/pornheed.py:421
+#: Sites/pornheed.py:517 Sites/pornheed.py:612 Sites/pornheed.py:816
+#: Sites/pornstars.py:233 Sites/pornstars.py:362 Sites/pornstars.py:458
+#: Sites/pornstars.py:552 Sites/pornstars.py:617 Sites/pornstars.py:825
+#: Sites/specialtube.py:234 Sites/specialtube.py:380 Sites/specialtube.py:433
+#: Sites/specialtube.py:491 Sites/specialtube.py:594 Sites/specialtube.py:690
+#: Sites/thumbzilla.py:238 Sites/thumbzilla.py:378 Sites/thumbzilla.py:476
+#: Sites/thumbzilla.py:572 Sites/thumbzilla.py:745 Sites/xhamster.py:256
+#: Sites/xhamster.py:382 Sites/xhamster.py:479 Sites/xhamster.py:578
+#: Sites/xhamster.py:642 Sites/xhamster.py:706 Sites/xhamster.py:804
+#: Sites/xhamster.py:1040 Sites/xvideos18plus.py:226 Sites/xvideos18plus.py:350
+#: Sites/xvideos18plus.py:448 Sites/xvideos18plus.py:516
+#: Sites/xvideos18plus.py:612 Sites/xvideos18plus.py:706
+#: Sites/xvideos18plus.py:875
+msgid "Back"
+msgstr ""
+
+#: Sites/adulttvlive.py:503 Sites/alphaporno.py:915 Sites/famefun.py:715
+#: Sites/hypnotube.py:802 Sites/luxuretv.py:817 Sites/manporn.py:736
+#: Sites/motherless.py:812 Sites/pornbimbo.py:732 Sites/pornheed.py:817
+#: Sites/pornstars.py:826 Sites/thumbzilla.py:746 Sites/xhamster.py:1041
+#: Sites/xvideos18plus.py:876 plugin.py:596 plugin.py:778 plugin.py:986
+#: plugin.py:1484
+msgid "Select"
+msgstr ""
+
+#: Sites/adulttvlive.py:527 Sites/alphaporno.py:939 Sites/famefun.py:739
+#: Sites/hypnotube.py:826 Sites/luxuretv.py:841 Sites/manporn.py:760
+#: Sites/motherless.py:836 Sites/pornbimbo.py:756 Sites/pornheed.py:841
+#: Sites/pornstars.py:850 Sites/thumbzilla.py:770 Sites/xhamster.py:1065
+#: Sites/xvideos18plus.py:900 plugin.py:1511
+msgid "You are already downloading!!!"
+msgstr ""
+
+#: Sites/adulttvlive.py:531 Sites/alphaporno.py:943 Sites/famefun.py:743
+#: Sites/hypnotube.py:830 Sites/luxuretv.py:845 Sites/manporn.py:764
+#: Sites/motherless.py:840 Sites/pornbimbo.py:760 Sites/pornheed.py:845
+#: Sites/pornstars.py:854 Sites/thumbzilla.py:774 Sites/xhamster.py:1069
+#: Sites/xvideos18plus.py:904 plugin.py:1515
+#, python-format
+msgid ""
+"DOWNLOAD VIDEO?\n"
+"%s"
+msgstr ""
+
+#: Sites/adulttvlive.py:534 Sites/alphaporno.py:946 Sites/famefun.py:746
+#: Sites/hypnotube.py:833 Sites/luxuretv.py:848 Sites/manporn.py:767
+#: Sites/motherless.py:843 Sites/pornbimbo.py:763 Sites/pornheed.py:848
+#: Sites/pornstars.py:857 Sites/thumbzilla.py:777 Sites/xhamster.py:1072
+#: Sites/xvideos18plus.py:907 plugin.py:1518
+msgid "Only VOD Movie allowed or not .ext Filtered!!!"
+msgstr ""
+
+#: Sites/adulttvlive.py:555 Sites/adulttvlive.py:575 Sites/alphaporno.py:967
+#: Sites/alphaporno.py:987 Sites/famefun.py:767 Sites/famefun.py:787
+#: Sites/hypnotube.py:854 Sites/hypnotube.py:874 Sites/luxuretv.py:869
+#: Sites/luxuretv.py:889 Sites/manporn.py:788 Sites/manporn.py:808
+#: Sites/motherless.py:864 Sites/motherless.py:884 Sites/pornbimbo.py:784
+#: Sites/pornbimbo.py:804 Sites/pornheed.py:869 Sites/pornheed.py:889
+#: Sites/pornstars.py:878 Sites/pornstars.py:898 Sites/thumbzilla.py:798
+#: Sites/thumbzilla.py:818 Sites/xhamster.py:1093 Sites/xhamster.py:1113
+#: Sites/xvideos18plus.py:928 Sites/xvideos18plus.py:948 plugin.py:1560
+msgid "Download Failed!!!"
+msgstr ""
+
+#: Sites/adulttvlive.py:718 Sites/alphaporno.py:1133 Sites/famefun.py:933
+#: Sites/hypnotube.py:1022 Sites/luxuretv.py:1035 Sites/manporn.py:954
+#: Sites/motherless.py:1030 Sites/pornbimbo.py:952 Sites/pornheed.py:1035
+#: Sites/pornstars.py:1046 Sites/thumbzilla.py:964 Sites/xhamster.py:1261
+#: Sites/xvideos18plus.py:1094 plugin.py:1661
+msgid "Install Streamlink first"
+msgstr ""
+
+#: Sites/alphaporno.py:263 Sites/famefun.py:257 Sites/hypnotube.py:274
+#: Sites/luxuretv.py:271 Sites/manporn.py:277 Sites/motherless.py:273
+#: Sites/mylust.py:277 Sites/pornbimbo.py:274 Sites/pornheed.py:275
+#: Sites/pornstars.py:276 Sites/specialtube.py:276 Sites/thumbzilla.py:280
+#: Sites/xhamster.py:299 Sites/xvideos18plus.py:268 plugin.py:745
+msgid "Filter this category..."
+msgstr ""
+
+#: Sites/alphaporno.py:403 Sites/heavyr.py:356 Sites/hypnotube.py:389
+#: Sites/luxuretv.py:495 Sites/manporn.py:399 Sites/motherless.py:679
+#: Sites/pornheed.py:392 Sites/pornstars.py:588 Sites/specialtube.py:460
+#: Sites/specialtube.py:725 Sites/thumbzilla.py:612 Sites/xhamster.py:613
+#: Sites/xhamster.py:677 Sites/xvideos18plus.py:487 Sites/xvideos18plus.py:742
+msgid "Please select ..."
+msgstr ""
+
+#: Sites/alphaporno.py:407 Sites/famefun.py:398 Sites/heavyr.py:360
+#: Sites/hypnotube.py:393 Sites/luxuretv.py:499 Sites/manporn.py:403
+#: Sites/motherless.py:683 Sites/pornbimbo.py:504 Sites/pornheed.py:396
+#: Sites/pornstars.py:592 Sites/specialtube.py:464 Sites/specialtube.py:729
+#: Sites/thumbzilla.py:616 Sites/xhamster.py:617 Sites/xhamster.py:681
+#: Sites/xvideos18plus.py:491 Sites/xvideos18plus.py:746
+msgid "Nothing ... Retry"
+msgstr ""
+
+#: plugin.py:302
+msgid "IPTV(4097)"
+msgstr ""
+
+#: plugin.py:303
+msgid "Dvb(1)"
+msgstr ""
+
+#: plugin.py:304
+msgid "eServiceUri(8193)"
+msgstr ""
+
+#: plugin.py:308
+msgid "Gstreamer(5001)"
+msgstr ""
+
+#: plugin.py:311
+msgid "Exteplayer3(5002)"
+msgstr ""
+
+#: plugin.py:314
+msgid "DreamOS GStreamer(8193)"
+msgstr ""
+
+#: plugin.py:319
+msgid "yes"
+msgstr ""
+
+#: plugin.py:319
+msgid "no"
+msgstr ""
+
+#: plugin.py:595 plugin.py:777 plugin.py:985
+msgid "Cancel"
+msgstr ""
+
+#: plugin.py:612 plugin.py:726
+msgid "About"
+msgstr ""
+
+#: plugin.py:612
+msgid "Information Us"
+msgstr ""
+
+#: plugin.py:613 plugin.py:729
+msgid "Config"
+msgstr ""
+
+#: plugin.py:613
+msgid "Setup Plugin"
+msgstr ""
+
+#: plugin.py:614 plugin.py:732
+msgid "Live TV"
+msgstr ""
+
+#: plugin.py:614
+msgid "Live TV Stream"
+msgstr ""
+
+#: plugin.py:615 plugin.py:732
+msgid "Film"
+msgstr ""
+
+#: plugin.py:615
+msgid "Film and Movie"
+msgstr ""
+
+#: plugin.py:616 plugin.py:732
+msgid "Serie"
+msgstr ""
+
+#: plugin.py:616
+msgid "Series"
+msgstr ""
+
+#: plugin.py:617 plugin.py:739
+msgid "Search"
+msgstr ""
+
+#: plugin.py:617
+msgid "Search your Movie"
+msgstr ""
+
+#: plugin.py:795
+msgid "==  WELCOME to WWW.TIVUSTREAM.COM ==\n"
+msgstr ""
+
+#: plugin.py:796
+msgid "== SUPPORT ON: WWW.CORVOBOYS.ORG http://t.me/tivustream ==\n"
+msgstr ""
+
+#: plugin.py:797
+msgid "== thank's to @PCD @KIDDAC @MMARK @LINUXSAT-SUPPORT.COM\n"
+msgstr ""
+
+#: plugin.py:798 plugin.py:805
+msgid "========================================\n"
+msgstr ""
+
+#: plugin.py:799
+msgid "DISCLAIMER:\n"
+msgstr ""
+
+#: plugin.py:800
+msgid "The lists created at HOC contain addresses freely and freely found on\n"
+msgstr ""
+
+#: plugin.py:801
+msgid "the net and not protected by subscription or subscription.\n"
+msgstr ""
+
+#: plugin.py:802
+msgid "The structural reference server for projects released\n"
+msgstr ""
+
+#: plugin.py:803
+msgid "is not a source of any stream/flow.\n"
+msgstr ""
+
+#: plugin.py:804
+msgid "Absolutely PROHIBITED to use this lists without authorization\n"
+msgstr ""
+
+#: plugin.py:828
+msgid "SETUP PLUGIN"
+msgstr ""
+
+#: plugin.py:832 plugin.py:1483
+msgid "Exit"
+msgstr ""
+
+#: plugin.py:833
+msgid "Save"
+msgstr ""
+
+#: plugin.py:834
+msgid "Empty Cache"
+msgstr ""
+
+#: plugin.py:866
+msgid "All cache fold empty!"
+msgstr ""
+
+#: plugin.py:871
+msgid "Services Player Reference type"
+msgstr ""
+
+#: plugin.py:871
+msgid "Configure Service Player Reference, Enigma restart required"
+msgstr ""
+
+#: plugin.py:872
+msgid "Cache folder"
+msgstr ""
+
+#: plugin.py:872
+msgid "Folder Cache Path (eg.: /media/hdd), Enigma restart required"
+msgstr ""
+
+#: plugin.py:873
+msgid "Movie folder"
+msgstr ""
+
+#: plugin.py:873
+msgid "Folder Movie Path (eg.: /media/hdd/movie), Enigma restart required"
+msgstr ""
+
+#: plugin.py:886
+msgid "SELECT YOUR CHOICE"
+msgstr ""
+
+#: plugin.py:927
+msgid "Choose Directory:"
+msgstr ""
+
+#: plugin.py:928
+msgid "Choose Directory"
+msgstr ""
+
+#: plugin.py:951
+msgid "Settings saved correctly!"
+msgstr ""
+
+#: plugin.py:960
+msgid "Really close without saving settings?"
+msgstr ""

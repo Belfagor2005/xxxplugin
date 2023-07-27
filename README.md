@@ -8,5 +8,5 @@ This Plugin for Adult XXX
 by Lululla
 Version 1.0
 
-<img src="https://github.com/Belfagor2005/xxxplugin/blob/main/screen/main.png?raw=true">
+<img src="https://github.com/Belfagor2005/xxxplugin/blob/main/screenshot/main.png?raw=true?raw=true">
 

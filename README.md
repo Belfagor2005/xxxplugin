@@ -3,6 +3,10 @@
 
 This Plugin for Adult XXX
 
-Adapted for Enigma2 by Lululla
+<img src="https://raw.githubusercontent.com/Belfagor2005/xxxplugin/main/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/icon.png?raw=true">
+
+by Lululla
 Version 1.0
+
+<img src="https://github.com/Belfagor2005/xxxplugin/blob/main/screen/main.png?raw=true">
 

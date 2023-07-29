@@ -14,6 +14,7 @@
 from __future__ import print_function
 from Components.AVSwitch import AVSwitch
 from Components.ActionMap import ActionMap
+from Components.Button import Button
 from Components.Label import Label
 from Components.MenuList import MenuList
 from Components.MultiContent import MultiContentEntryPixmapAlphaTest
@@ -291,7 +292,6 @@ class main(Screen):
     def resetSearch(self):
         global search
         search = False
-        return
 
     def ok(self):
         self.keyNumberGlobalCB(self['menulist'].getSelectedIndex())
@@ -569,14 +569,16 @@ class specialtube3(Screen):
             print("content B =", content)
             fpage = Utils.getUrl(url)
             regexvideo = "video_url: '(.*?)'"
+            # regexvideo = 'video src="(.*?)"'  
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             url1 = match[0]
+            url1 = url1.replace('function/0/', '')  # .replace('.mp4/','.mp4')
             self.play_that_shit(url1, name)
         except Exception as e:
             print(e)
 
     def play_that_shit(self, url, name):
-        self.session.open(Playstream2, str(name), str(url))
+        self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
         self.close()
@@ -835,6 +837,253 @@ class TvInfoBarShowHide():
         print(text + " %s\n" % obj)
 
 
+
+class Playstream1(Screen):
+
+    def __init__(self, session, name, url):
+        Screen.__init__(self, session)
+        self.session = session
+        skin = os.path.join(skin_path, 'Playstream1.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        f.close()
+        self.setup_title = ('Select Player Stream')
+        self.list = []
+        self.name1 = name
+        self.url = url
+        self.desc = ''
+        print('In Playstream1 self.url =', url)
+        self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
+        self['list'] = m2list([])
+        self['info'] = Label()
+        self['info'].setText(name)
+        self['key_red'] = Button(_('Back'))
+        self['key_green'] = Button(_('Select'))
+        self['progress'] = ProgressBar()
+        self['progresstext'] = StaticText()
+        self["progress"].hide()
+        self.downloading = False
+        self['actions'] = ActionMap(['ColorActions',
+                                     'CancelActions',
+                                     'TimerEditActions',
+                                     'OkCancelActions',
+                                     'InfobarInstantRecord'], {'red': self.cancel,
+                                                               'green': self.okClicked,
+                                                               'back': self.cancel,
+                                                               'cancel': self.cancel,
+                                                               'rec': self.runRec,
+                                                               'instantRecord': self.runRec,
+                                                               'ShortRecord': self.runRec,
+                                                               'ok': self.okClicked}, -2)
+        self.onLayoutFinish.append(self.openTest)
+        return
+
+    def runRec(self):
+        self.namem3u = self.name1
+        self.urlm3u = self.url
+        if self.downloading is True:
+            self.session.open(MessageBox, _('You are already downloading!!!'), MessageBox.TYPE_INFO, timeout=5)
+            return
+        else:
+            if '.mp4' or '.mkv' or '.flv' or '.avi' in self.urlm3u:  # or 'm3u8':
+                self.session.openWithCallback(self.download_m3u, MessageBox, _("DOWNLOAD VIDEO?\n%s" % self.namem3u), type=MessageBox.TYPE_YESNO, timeout=10, default=False)
+            else:
+                self.downloading = False
+                self.session.open(MessageBox, _('Only VOD Movie allowed or not .ext Filtered!!!'), MessageBox.TYPE_INFO, timeout=5)
+
+    def download_m3u(self, result):
+        if result:
+            if 'm3u8' not in self.urlm3u:
+                # path = urlparse(self.urlm3u).path
+                ext = os.path.splitext(path)[1]
+                if ext != '.mp4' or ext != '.mkv' or ext != '.avi' or ext != '.flv':  # or ext != 'm3u8':
+                    ext = '.mp4'
+                fileTitle = re.sub(r'[\<\>\:\"\/\\\|\?\*\[\]]', '_', self.namem3u)
+                fileTitle = re.sub(r' ', '_', fileTitle)
+                fileTitle = re.sub(r'_+', '_', fileTitle)
+                fileTitle = fileTitle.replace("(", "_").replace(")", "_").replace("#", "").replace("+", "_").replace("\'", "_").replace("'", "_").replace("!", "_").replace("&", "_")
+                fileTitle = fileTitle.lower() + ext
+                self.in_tmp = Path_Movies + fileTitle
+                self.downloading = True
+                self.download = downloadWithProgress(self.urlm3u, self.in_tmp)
+                self.download.addProgress(self.downloadProgress)
+                self.download.start().addCallback(self.check).addErrback(self.showError)
+            else:
+                self.downloading = False
+                self.session.open(MessageBox, _('Download Failed!!!'), MessageBox.TYPE_INFO, timeout=5)
+        else:
+            self.downloading = False
+
+    def downloadProgress(self, recvbytes, totalbytes):
+        self["progress"].show()
+        self['progress'].value = int(100 * recvbytes / float(totalbytes))
+        self['progresstext'].text = '%d of %d kBytes (%.2f%%)' % (recvbytes / 1024, totalbytes / 1024, 100 * recvbytes / float(totalbytes))
+
+    def check(self, fplug):
+        checkfile = self.in_tmp
+        if file_exists(checkfile):
+            self.downloading = False
+            self['progresstext'].text = ''
+            self.progclear = 0
+            self['progress'].setValue(self.progclear)
+            self["progress"].hide()
+
+    def showError(self, error):
+        self.downloading = False
+        self.session.open(MessageBox, _('Download Failed!!!'), MessageBox.TYPE_INFO, timeout=5)
+
+    def openTest(self):
+        url = self.url
+        self.names = []
+        self.urls = []
+        self.names.append('Play Now')
+        self.urls.append(url)
+        self.names.append('Download Now-ATTENTION!')
+        self.urls.append(url)
+        self.names.append('Play HLS')
+        self.urls.append(url)
+        self.names.append('Play TS')
+        self.urls.append(url)
+        self.names.append('Streamlink')
+        self.urls.append(url)
+        self.names.append('YoutubeDl')
+        self.urls.append(url)
+        showlist(self.names, self['list'])
+
+    def okClicked(self):
+        i = len(self.names)
+        print('iiiiii= ', i)
+        if i < 0:
+            return
+        idx = self['list'].getSelectionIndex()
+        self.name = self.names[idx]
+        self.url = self.urls[idx]
+        if "youtube" in str(self.url):
+            # desc = self.desc
+            try:
+                from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
+                '''
+                ydl_opts = {'format': 'best'}
+                ydl_opts = {'format': 'bestaudio/best'}
+                '''
+                ydl_opts = {'format': 'best'}
+                ydl = YoutubeDL(ydl_opts)
+                ydl.add_default_info_extractors()
+                result = ydl.extract_info(self.url, download=False)
+                self.url = result["url"]
+            except:
+                pass
+            self.session.open(Playstream2, self.name, self.url)
+        if idx == 0:
+            self.name = self.names[idx]
+            self.url = self.urls[idx]
+            print('In playVideo url D=', self.url)
+            self.play()
+        if idx == 1:
+            # self.name = self.names[idx]
+            self.url = self.urls[idx]
+            print('In playVideo url D=', self.url)
+            self.runRec()
+            # return
+
+        elif idx == 2:
+            print('In playVideo url B=', self.url)
+            self.name = self.names[idx]
+            self.url = self.urls[idx]
+            try:
+                os.remove('/tmp/hls.avi')
+            except:
+                pass
+            header = ''
+            cmd = 'python "/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/lib/hlsclient.py" "' + self.url + '" "1" "' + header + '" + &'
+            print('In playVideo cmd =', cmd)
+            os.system(cmd)
+            os.system('sleep 3')
+            self.url = '/tmp/hls.avi'
+            self.play()
+        elif idx == 3:
+            print('In playVideo url A=', self.url)
+            url = self.url
+            try:
+                os.remove('/tmp/hls.avi')
+            except:
+                pass
+            cmd = 'python "/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/lib/tsclient.py" "' + url + '" "1" + &'
+            print('hls cmd = ', cmd)
+            os.system(cmd)
+            os.system('sleep 3')
+            self.url = '/tmp/hls.avi'
+            self.name = self.names[idx]
+            self.play()
+
+        elif idx == 4:
+            self.name = self.names[idx]
+            self.url = self.urls[idx]
+            print('In playVideo url D=', self.url)
+            self.play2()
+
+        elif idx == 5:
+        # if "youtube" in str(self.url):
+            # desc = self.desc
+            try:
+                url = self.url
+                content = Utils.getUrlresp(url)
+                if six.PY3:
+                    content = six.ensure_str(content)
+                print("content A =", content)
+
+                from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
+                '''
+                ydl_opts = {'format': 'best'}
+                ydl_opts = {'format': 'bestaudio/best'}
+                '''
+                ydl_opts = {'format': 'best'}
+                ydl = YoutubeDL(ydl_opts)
+                ydl.add_default_info_extractors()
+                result = ydl.extract_info(content, download=False)
+                self.url = result["url"]
+            except:
+                pass
+            self.session.open(Playstream2, self.name, self.url)
+        # else:
+            # self.name = self.names[idx]
+            # self.url = self.urls[idx]
+            # print('In playVideo url D=', self.url)
+            # self.play()
+        return
+
+    def playfile(self, serverint):
+        self.serverList[serverint].play(self.session, self.url, self.name)
+
+    def play(self):
+        # desc = self.desc
+        url = self.url
+        name = self.name1
+        self.session.open(Playstream2, name, url)
+
+    def play2(self):
+        if Utils.isStreamlinkAvailable:
+            # desc = self.desc
+            name = self.name1
+            # if file_exists("/usr/sbin/streamlinksrv"):
+            url = self.url
+            url = url.replace(':', '%3a')
+            print('In revolution url =', url)
+            ref = '5002:0:1:0:0:0:0:0:0:0:' + 'http%3a//127.0.0.1%3a8088/' + str(url)
+            sref = eServiceReference(ref)
+            print('SREF: ', sref)
+            sref.setName(name)
+            self.session.open(Playstream2, name, sref)
+            self.close()
+        else:
+            self.session.open(MessageBox, _('Install Streamlink first'), MessageBox.TYPE_INFO, timeout=5)
+
+    def cancel(self):
+        self.session.nav.stopService()
+        self.session.nav.playService(self.srefInit)
+        self.close()
+
+
 class Playstream2(
     InfoBarBase,
     InfoBarMenu,
@@ -876,6 +1125,7 @@ class Playstream2(
         self.url = url
         self.name = Utils.decodeHtml(name)
         self.state = self.STATE_PLAYING
+        self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
         self['actions'] = ActionMap(['MoviePlayerActions',
                                      'MovieSelectionActions',
                                      'MediaPlayerActions',

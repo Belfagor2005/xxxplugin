@@ -35,7 +35,7 @@ from Screens.Standby import TryQuitMainloop, Standby
 from Screens.InfoBarGenerics import InfoBarShowHide, InfoBarSubtitleSupport, InfoBarSummarySupport, \
     InfoBarNumberZap, InfoBarMenu, InfoBarEPG, InfoBarSeek, InfoBarMoviePlayerSummarySupport, \
     InfoBarAudioSelection, InfoBarNotifications, InfoBarServiceNotifications
-
+from ServiceReference import ServiceReference
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
 from Tools.Downloader import downloadWithProgress

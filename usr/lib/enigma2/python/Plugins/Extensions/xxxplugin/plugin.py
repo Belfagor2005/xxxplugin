@@ -1143,6 +1143,7 @@ class GridMain(Screen):
             "epg": self.showIMDB,
             "info": self.showIMDB,
             "cancel": self.cancel,
+            "menu": self.configure,
             "left": self.key_left,
             "right": self.key_right,
             "up": self.key_up,
@@ -1151,6 +1152,9 @@ class GridMain(Screen):
 
         print("Going in openTest")
         self.onLayoutFinish.append(self.openTest)
+
+    def configure(self):
+        self.session.open(ConfigEx)
 
     def cancel(self):
         self.close()

@@ -35,7 +35,7 @@ from enigma import eListboxPythonMultiContent, eServiceReference, eTimer, gFont,
 from itertools import cycle, islice
 from os.path import splitext
 from Plugins.Plugin import PluginDescriptor
-from PIL import Image, ImageChops, ImageFile
+from PIL import Image, ImageFile, ImageChops
 from Screens.InfoBarGenerics import InfoBarMenu, InfoBarSubtitleSupport, InfoBarNotifications, InfoBarSeek, InfoBarAudioSelection
 from Screens.LocationBox import LocationBox
 from Screens.MessageBox import MessageBox
@@ -51,8 +51,7 @@ import os
 import re
 import requests
 import sys
-
-import json
+# import json
 import six
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 _session = None
@@ -91,169 +90,159 @@ _firstStartxxxplugin = True
 _session = None
 
 currversion = getversioninfo()
+Version = currversion + ' - 12.07.2023'
+title_plug = '..:: XXX Revolution V. %s ::..' % Version
 folder_path = "/tmp/xxxplugin/"
 name_plug = 'XXX Revolution'
-
 piccons = os.path.join(THISPLUG, 'res/img/')
-piconinter = os.path.join(piccons, 'inter.png')
-piconlive = os.path.join(piccons, 'tv.png')
-piconmovie = os.path.join(piccons, 'cinema.png')
-piconsearch = os.path.join(piccons, 'search.png')
-piconseries = os.path.join(piccons, 'series.png')
+# piconinter = os.path.join(piccons, 'inter.png')
+# piconlive = os.path.join(piccons, 'tv.png')
+# piconmovie = os.path.join(piccons, 'cinema.png')
+# piconsearch = os.path.join(piccons, 'search.png')
+# piconseries = os.path.join(piccons, 'series.png')
 # pixmaps = os.path.join(piccons, 'backg.png')
-nextpng = 'next.png'
-prevpng = 'prev.png'
-
-
+# nextpng = 'next.png'
+# prevpng = 'prev.png'
 res_plugin_path = os.path.join(THISPLUG, 'res/')
 pngx = os.path.join(res_plugin_path, 'pics/setting2.png')
 
-# skin_path = THISPLUG
-SREF = ""
-
-Version = currversion + ' - 12.02.2023'
-title_plug = '..:: XXX Revolution V. %s ::..' % Version
 
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
 # screenwidth = getDesktop(0).size()
 if screenwidth.width() == 2560:
-    # skin_path = THISPLUG + '/res/skins/uhd/'
-    defpic = THISPLUG + '/res/pics/defaultL.png'
-    dblank = THISPLUG + '/res/pics/blankL.png'
+    defpic = THISPLUG + '/res/pics/no_work.png'
+    dblank = THISPLUG + '/res/pics/backg2.png'
 
 elif screenwidth.width() == 1920:
-    # skin_path = THISPLUG + '/res/skins/fhd/'
-    defpic = THISPLUG + '/res/pics/defaultL.png'
-    dblank = THISPLUG + '/res/pics/blankL.png'
+    defpic = THISPLUG + '/res/pics/no_work.png'
+    dblank = THISPLUG + '/res/pics/backg2.png'
 else:
-    # skin_path = THISPLUG + '/res/skins/hd/'
-    dblank = THISPLUG + '/res/pics/blank.png'
-    defpic = THISPLUG + '/res/pics/default.png'
+    defpic = THISPLUG + '/res/pics/no_work.png'
+    dblank = THISPLUG + '/res/pics/backg2.png'
 
 
+# # https twisted client hack #
+# try:
+    # from twisted.internet import ssl
+    # from twisted.internet._sslverify import ClientTLSOptions
+    # sslverify = True
+# except:
+    # sslverify = False
 
-# https twisted client hack #
-try:
-    from twisted.internet import ssl
-    from twisted.internet._sslverify import ClientTLSOptions
-    sslverify = True
-except:
-    sslverify = False
+# if sslverify:
+    # class SNIFactory(ssl.ClientContextFactory):
+        # def __init__(self, hostname=None):
+            # self.hostname = hostname
 
-if sslverify:
-    class SNIFactory(ssl.ClientContextFactory):
-        def __init__(self, hostname=None):
-            self.hostname = hostname
-
-        def getContext(self):
-            ctx = self._contextFactory(self.method)
-            if self.hostname:
-                ClientTLSOptions(self.hostname, ctx)
-            return ctx
+        # def getContext(self):
+            # ctx = self._contextFactory(self.method)
+            # if self.hostname:
+                # ClientTLSOptions(self.hostname, ctx)
+            # return ctx
 
 
-def piconlocal(name):
+# def piconlocal(name):
 
-    pngs = [
-        ["tv", "movie"],
-        ["commedia", "commedia"],
-        ["comedy", "commedia"],
-        ["thriller", "thriller"],
-        ["family", "family"],
-        ["famiglia", "family"],
-        ["azione", "azione"],
-        ["dramma", "dramma"],
-        ["drama", "dramma"],
-        ["western", "western"],
-        ["biografico", "biografico"],
-        ["storia", "biografico"],
-        ["documentario", "biografico"],
-        ["romantico", "romantico"],
-        ["romance", "romantico"],
-        ["horror", "horror"],
-        ["musica", "musical"],
-        ["show", "musical"],
-        ["guerra", "guerra"],
-        ["bambini", "bambini"],
-        ["bianco", "bianconero"],
-        ["tutto", "toto"],
-        ["cartoni", "cartoni"],
-        ["bud", "budterence"],
-        ["documentary", "documentary"],
-        ["crime", "crime"],
-        ["mystery", "mistery"],
-        ["mistero", "mistery"],
-        ["giallo", "mistery"],
-        ["fiction", "fiction"],
-        ["adventure", "mistery"],
-        ["action", "azione"],
-        ["007", "007"],
-        ["sport", "sport"],
-        ["teatr", "teatro"],
-        ["variet", "teatro"],
-        ["giallo", "teatro"],
-        ["extra", "extra"],
-        ["sexy", "fantasy"],
-        ["erotic", "fantasy"],
-        ["animazione", "bambini"],
-        ["search", "search"],
+    # pngs = [
+        # ["tv", "movie"],
+        # ["commedia", "commedia"],
+        # ["comedy", "commedia"],
+        # ["thriller", "thriller"],
+        # ["family", "family"],
+        # ["famiglia", "family"],
+        # ["azione", "azione"],
+        # ["dramma", "dramma"],
+        # ["drama", "dramma"],
+        # ["western", "western"],
+        # ["biografico", "biografico"],
+        # ["storia", "biografico"],
+        # ["documentario", "biografico"],
+        # ["romantico", "romantico"],
+        # ["romance", "romantico"],
+        # ["horror", "horror"],
+        # ["musica", "musical"],
+        # ["show", "musical"],
+        # ["guerra", "guerra"],
+        # ["bambini", "bambini"],
+        # ["bianco", "bianconero"],
+        # ["tutto", "toto"],
+        # ["cartoni", "cartoni"],
+        # ["bud", "budterence"],
+        # ["documentary", "documentary"],
+        # ["crime", "crime"],
+        # ["mystery", "mistery"],
+        # ["mistero", "mistery"],
+        # ["giallo", "mistery"],
+        # ["fiction", "fiction"],
+        # ["adventure", "mistery"],
+        # ["action", "azione"],
+        # ["007", "007"],
+        # ["sport", "sport"],
+        # ["teatr", "teatro"],
+        # ["variet", "teatro"],
+        # ["giallo", "teatro"],
+        # ["extra", "extra"],
+        # ["sexy", "fantasy"],
+        # ["erotic", "fantasy"],
+        # ["animazione", "bambini"],
+        # ["search", "search"],
 
-        ["abruzzo", "regioni/abruzzo"],
-        ["basilicata", "regioni/basilicata"],
-        ["calabria", "regioni/calabria"],
-        ["campania", "regioni/campania"],
-        ["emilia", "regioni/emiliaromagna"],
-        ["friuli", "regioni/friuliveneziagiulia"],
-        ["lazio", "regioni/lazio"],
-        ["liguria", "regioni/liguria"],
-        ["lombardia", "regioni/lombardia"],
-        ["marche", "regioni/marche"],
-        ["molise", "regioni/molise"],
-        ["piemonte", "regioni/piemonte"],
-        ["puglia", "regioni/puglia"],
-        ["sardegna", "regioni/sardegna"],
-        ["sicilia", "regioni/sicilia"],
-        ["toscana", "regioni/toscana"],
-        ["trentino", "regioni/trentino"],
-        ["umbria", "regioni/umbria"],
-        ["veneto", "regioni/veneto"],
-        ["aosta", "regioni/valledaosta"],
+        # ["abruzzo", "regioni/abruzzo"],
+        # ["basilicata", "regioni/basilicata"],
+        # ["calabria", "regioni/calabria"],
+        # ["campania", "regioni/campania"],
+        # ["emilia", "regioni/emiliaromagna"],
+        # ["friuli", "regioni/friuliveneziagiulia"],
+        # ["lazio", "regioni/lazio"],
+        # ["liguria", "regioni/liguria"],
+        # ["lombardia", "regioni/lombardia"],
+        # ["marche", "regioni/marche"],
+        # ["molise", "regioni/molise"],
+        # ["piemonte", "regioni/piemonte"],
+        # ["puglia", "regioni/puglia"],
+        # ["sardegna", "regioni/sardegna"],
+        # ["sicilia", "regioni/sicilia"],
+        # ["toscana", "regioni/toscana"],
+        # ["trentino", "regioni/trentino"],
+        # ["umbria", "regioni/umbria"],
+        # ["veneto", "regioni/veneto"],
+        # ["aosta", "regioni/valledaosta"],
 
-        ["mediaset", "mediaset"],
-        ["nazionali", "nazionali"],
-        ["news", "news"],
+        # ["mediaset", "mediaset"],
+        # ["nazionali", "nazionali"],
+        # ["news", "news"],
 
-        ["rai", "rai"],
-        ["webcam", "relaxweb"],
-        ["relax", "relaxweb"],
-        ["vecchi", "vecchi"],
-        ["muto", "vecchi"],
-        ["'italiani", "movie"],
+        # ["rai", "rai"],
+        # ["webcam", "relaxweb"],
+        # ["relax", "relaxweb"],
+        # ["vecchi", "vecchi"],
+        # ["muto", "vecchi"],
+        # ["'italiani", "movie"],
 
-        ["fantascienza", "fantascienza"],
-        ["fantasy", "fantasy"],
-        ["fantasia", "fantasia"],
-        ["film", "movie"],
-        ["samsung", "samsung"],
-        ["plutotv", "plutotv"]
-    ]
+        # ["fantascienza", "fantascienza"],
+        # ["fantasy", "fantasy"],
+        # ["fantasia", "fantasia"],
+        # ["film", "movie"],
+        # ["samsung", "samsung"],
+        # ["plutotv", "plutotv"]
+    # ]
 
-    for png in pngs:
-        piconlocal = 'backg.png'
-        if png[0] in str(name).lower():
-            piconlocal = str(png[1]) + ".png"
-            break
+    # for png in pngs:
+        # piconlocal = 'backg.png'
+        # if png[0] in str(name).lower():
+            # piconlocal = str(png[1]) + ".png"
+            # break
 
-    if 'prev' in name.lower():
-        piconlocal = prevpng
-    elif 'next' in name.lower():
-        piconlocal = nextpng
+    # if 'prev' in name.lower():
+        # piconlocal = prevpng
+    # elif 'next' in name.lower():
+        # piconlocal = nextpng
 
-    print('>>>>>>>> ' + str(piccons) + str(piconlocal))
-    path = os.path.join(piccons, piconlocal)
-    return str(path)
+    # print('>>>>>>>> ' + str(piccons) + str(piconlocal))
+    # path = os.path.join(piccons, piconlocal)
+    # return str(path)
 
 
 class rvList(MenuList):
@@ -387,8 +376,7 @@ def threadGetPage(url=None, file=None, key=None, success=None, fail=None, *args,
 
 def getpics(names, pics, tmpfold, picfold):
     # from PIL import Image
-    global defpic
-    defpic = defpic
+    # global defpic
     pix = []
 
     if cfg.thumb.value == "False":
@@ -497,6 +485,8 @@ def getpics(names, pics, tmpfold, picfold):
                     size = [294, 440]
                 elif screenwidth.width() == 1920:
                     size = [220, 330]
+                else:
+                    size = [150, 220]
 
                 file_name, file_extension = os.path.splitext(tpicf)
                 try:
@@ -1627,7 +1617,7 @@ class Playstream1(Screen):
                     os.remove('/tmp/hls.avi')
                 except:
                     pass
-                cmd = 'python "/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/l/tsclient.py" "' + url + '" "1" + &'
+                cmd = 'python "/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/lib/tsclient.py" "' + url + '" "1" + &'
                 print('hls cmd = ', cmd)
                 os.system(cmd)
                 os.system('sleep 3')

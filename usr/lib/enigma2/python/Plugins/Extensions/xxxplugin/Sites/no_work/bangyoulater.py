@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 '''
 ****************************************
 *        coded by Lululla & PCD        *
 *             skin by MMark            *
-*             10/04/2022               *
+*             26/03/2023               *
 *       Skin by MMark                  *
 ****************************************
 # --------------------#
@@ -19,18 +20,14 @@ from Components.MenuList import MenuList
 from Components.MultiContent import MultiContentEntryPixmapAlphaTest
 from Components.MultiContent import MultiContentEntryText
 from Components.Pixmap import Pixmap
-from Components.PluginComponent import plugins
 from Components.ProgressBar import ProgressBar
-from Components.ScrollLabel import ScrollLabel
-from Components.SelectionList import SelectionList, SelectionEntryComponent
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
-from Components.Sources.List import List
 from Components.Sources.Progress import Progress
-from Components.Sources.Source import Source
 from Components.Sources.StaticText import StaticText
 from Components.config import config
 from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
+from Screens.InfoBar import InfoBar
 from Screens.InfoBar import MoviePlayer
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
@@ -38,20 +35,17 @@ from Screens.Standby import TryQuitMainloop, Standby
 from Screens.InfoBarGenerics import InfoBarShowHide, InfoBarSubtitleSupport, InfoBarSummarySupport, \
     InfoBarNumberZap, InfoBarMenu, InfoBarEPG, InfoBarSeek, InfoBarMoviePlayerSummarySupport, \
     InfoBarAudioSelection, InfoBarNotifications, InfoBarServiceNotifications
-from ServiceReference import ServiceReference
+
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
 from Tools.Downloader import downloadWithProgress
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Notifications import AddPopup
-from enigma import RT_HALIGN_CENTER, RT_VALIGN_CENTER
-from enigma import RT_HALIGN_LEFT, RT_HALIGN_RIGHT
-from enigma import eListbox
-from enigma import eListboxPythonMultiContent, eConsoleAppContainer
-from enigma import eServiceCenter
+from enigma import RT_HALIGN_LEFT
+from enigma import RT_VALIGN_CENTER
+from enigma import eListboxPythonMultiContent
 from enigma import ePicLoad
 from enigma import eServiceReference
-from enigma import eSize
 from enigma import eTimer
 from enigma import gFont
 from enigma import getDesktop
@@ -61,10 +55,8 @@ from enigma import loadPNG
 from enigma import quitMainloop
 from os import path, listdir, remove, mkdir, chmod
 from os.path import exists as file_exists
-from time import strptime, mktime
 from twisted.web.client import downloadPage, getPage
 from xml.dom import Node, minidom
-import base64
 import os
 import re
 import six
@@ -103,17 +95,26 @@ if sys.version_info >= (2, 7, 9):
     except:
         sslContext = None
 
-currversion = '1.1'
-title_plug = 'Luxuretv '
-desc_plugin = ('..:: Luxuretv by Lululla %s ::.. ' % currversion)
+currversion = '1.0'
+title_plug = 'bangyoulater '
+desc_plugin = ('..:: bangyoulater by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 print(current)
 print(parent)
-pluglogo = os.path.join(PLUGIN_PATH, 'pic/luxuretv.png')
-stripurl = "https://en.luxuretv.com/channels/"
+pluglogo = os.path.join(PLUGIN_PATH, 'pic/bangyoulater.png')
+referer = 'https://bangyoulater.net/'
+bangyoulaterlatest = 'https://bangyoulater.net/videos/'
+bangyoulaterurl = 'https://bangyoulater.net/videos/viewed/'
+caturl = 'https://bangyoulater.net/categories/'
+bangyoulaterpop = 'https://bangyoulater.net/most-popular/'
+# stripurl = "https://bangyoulater.net/channels/"
+# bangyoulaterstars = 'https://bangyoulater.net/models/'
+# bangyoulatertags = 'https://bangyoulater.net/tags/'
+
 _session = None
 Path_Movies = '/tmp/'
 global search
@@ -174,19 +175,7 @@ def show_(name, link):
     return res
 
 
-def cat_(letter, link):
-    res = [(letter, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
-
-
 def rvoneListEntry(name):
-
     res = [name]
     pngx = os.path.join(PLUGIN_PATH, 'res/pics/key_yellow.png')
     if screenwidth.width() == 2560:
@@ -213,7 +202,13 @@ def showlist(data, list):
 
 Panel_list = [
     ("SEARCH"),
+    ("LATEST"),
+    ("MOST POPULAR"),
     ("CATEGORIES"),
+    # ("TOP RATED"),
+    # ("CHANNELS"),
+    # ("MODELS"),
+    # ("TAGS"),
     ]
 
 
@@ -244,7 +239,7 @@ class main(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.onLayoutFinish.append(self.updateMenuList)
@@ -277,7 +272,7 @@ class main(Screen):
             url = self.urlx + name + '/'
             try:
                 search = True
-                self.session.open(luxuretvx, name, url)
+                self.session.open(bangyoulaterX, name, url)
             except:
                 return
         else:
@@ -298,20 +293,42 @@ class main(Screen):
         # if six.PY3:
             # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
-        if sel == ("SEARCH"):
-            lnk = ("https://luxuretv.com/searchgate/videos/")
-
+        if sel == ("LATEST"):
+            lnk = (bangyoulaterlatest)
+        if sel == ("MOST POPULAR"):
+            lnk = (bangyoulaterpop)
         if sel == ("CATEGORIES"):
-            lnk = ("https://en.luxuretv.com/channels/")
+            lnk = (caturl)
 
+        # if sel == ("TOP RATED"):
+            # lnk = (bangyoulaterurl)
+        # if sel == ("CHANNELS"):
+            # lnk = (stripurl)
+        # if sel == ("MODELS"):
+            # lnk = (bangyoulaterstars)
+        # if sel == ("TAGS"):
+            # lnk = (bangyoulatertags)
         namex = sel.upper()
         if sel == 'SEARCH':
+            lnk = ("https://bangyoulater.net/search/video/?s=")
             self.search_text(namex, lnk)
         else:
-            if namex == 'CATEGORIES':
-                self.session.open(luxuretv8, namex, lnk)
+            if 'LATEST' in namex:
+                self.session.open(bangyoulaterX, namex, lnk)
+            if 'MOST POPULAR' in namex:
+                self.session.open(bangyoulaterX, namex, lnk)
+            if 'CATEGORIES' in namex:
+                self.session.open(bangyoulater2, namex, lnk)
+            # if 'TOP RATED' in namex:
+                # self.session.open(bangyoulaterX, namex, lnk)
+            # if 'CHANNELS' in namex:
+                # self.session.open(bangyoulaterX, namex, lnk)
+            # if 'MODELS' in namex:
+                # self.session.open(bangyoulaterX, namex, lnk)
+            # if 'TAGS' in namex:
+                # self.session.open(bangyoulaterX, namex, lnk)
             else:
-                self.session.open(luxuretvx, namex, lnk)
+                return
 
     def up(self):
         self[self.currentList].up()
@@ -342,109 +359,7 @@ class main(Screen):
             self.close()
 
 
-class luxuretv8(Screen):
-    def __init__(self, session, name, url):
-        self.session = session
-        Screen.__init__(self, session)
-        skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
-            self.skin = f.read()
-        self.menulist = []
-        self['menulist'] = m2list([])
-        self['red'] = Label(_('Back'))
-        self['title'] = Label('+18')
-        self['name'] = Label('')
-        self['poster'] = Pixmap()
-        self['text'] = Label('Only for Adult by Lululla')
-        self['poster'] = Pixmap()
-        self.name = name
-        self.url = url
-        self.currentList = 'menulist'
-        self.loading_ok = False
-        self.count = 0
-        self.loading = 0
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions',
-                                     'DirectionActions',
-                                     'MovieSelectionActions'], {'up': self.up,
-                                                                'down': self.down,
-                                                                'left': self.left,
-                                                                'right': self.right,
-                                                                'ok': self.ok,
-                                                                # 'green': self.message2,
-                                                                'cancel': self.exit,
-                                                                'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.cat)
-        else:
-            self.timer.callback.append(self.cat)
-        self.timer.start(500, True)
-
-    def up(self):
-        self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def down(self):
-        self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def left(self):
-        self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def right(self):
-        self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def cat(self):
-        self.cat_list = []
-        try:
-            content = Utils.getUrl(self.url)
-            if six.PY3:
-                content = six.ensure_str(content)
-            print("content A =", content)
-
-            start = 0
-            n1 = content.find('<div id="main-wrapper">', start)
-            n2 = content.find('"pagination">', n1)
-            content2 = content[n1:n2]
-            print("content 2 =", content2)
-            regexcat = '<div class="content.*?<a href="(.*?)".*?img" src="(.*?)" alt="(.*?)"'
-            match = re.compile(regexcat, re.DOTALL).findall(content2)
-            for url, pic, name in match:
-                name1 = Utils.decodeHtml(name)
-                name = name1.capitalize()
-                pic = ''
-                url1 = url
-                self.cat_list.append(show_(name, url1))
-            if len(self.cat_list) < 0:
-                return
-            else:
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0][0]
-                self['name'].setText(str(auswahl))
-        except Exception as e:
-            print(e)
-
-    def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
-
-    def play_that_shit(self, url, name):
-        self.session.open(luxuretvx, name, url)
-
-    def exit(self):
-        self.close()
-
-
-class luxuretvx(Screen):
+class bangyoulaterX(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -464,10 +379,11 @@ class luxuretvx(Screen):
         self.loading = 0
         self.name = name
         self.url = url
+        self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
         self['actions'] = ActionMap(['OkCancelActions',
                                      'ColorActions'], {'ok': self.ok,
-                                                       'cancel': self.exit,
-                                                       'red': self.exit}, -1)
+                                                        'cancel': self.exit,
+                                                        'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
@@ -480,16 +396,13 @@ class luxuretvx(Screen):
         self.urls = []
         url = self.url
         try:
-            page = 1  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-            while page < 40:
-                if page == 1:
-                    url1 = url
-                else:
-                    url1 = url + "page" + str(page) + '.html'
+            pages = 100
+            i = 1
+            while i < pages:
+                page = i
+                url1 = url + str(page)
                 name = "Page " + str(page)
-                pic = " "
-                page = page + 1
+                i += 1
                 self.urls.append(url1)
                 self.names.append(name)
             self['name'].setText(_('Please select ...'))
@@ -506,15 +419,20 @@ class luxuretvx(Screen):
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        self.session.open(luxuretv18, name, url)
+        # if 'channels' in self.name.lower():
+            # self.session.open(bangyoulater1, name, url)
+        # elif 'models' in self.name.lower():
+            # self.session.open(bangyoulater1, name, url)
+        # else:
+        self.session.open(bangyoulaterX2, name, url)
 
     def exit(self):
         global search
         search = False
         self.close()
 
-
-class luxuretv18(Screen):
+# 2
+class bangyoulaterX2(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -524,11 +442,12 @@ class luxuretv18(Screen):
         self.menulist = []
         self['menulist'] = m2list([])
         self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
         self['title'] = Label('+18')
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
         self['poster'] = Pixmap()
-        self.name = name
+        self.name = html_conv.html_unescape(name)
         self.url = url
         self.currentList = 'menulist'
         self.loading_ok = False
@@ -575,17 +494,14 @@ class luxuretv18(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl(self.url)
+            content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
-            regexcat = '<div class="content.*?<a href="(.*?)" title="(.*?)">.*?src="(.*?)"'
+            regexcat = 'class="video">.*?a href="(.*?)" title="(.*?)".*?<img src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name, pic in match:
-                name1 = Utils.decodeHtml(name)
-                name = name1.capitalize()
-                pic = ''
-                url1 = url
+                name = html_conv.html_unescape(name)
+                url1 = "https://bangyoulater.net" + str(url)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -603,13 +519,13 @@ class luxuretv18(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        self.session.open(luxuretv9, name, url)
+        self.session.open(bangyoulater1, name, url)
 
     def exit(self):
         self.close()
 
 
-class luxuretv9(Screen):
+class bangyoulater1(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -619,6 +535,207 @@ class luxuretv9(Screen):
         self.menulist = []
         self['menulist'] = m2list([])
         self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['poster'] = Pixmap()
+        self['text'] = Label('Only for Adult by Lululla')
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self.name = name
+        self.url = url
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                # 'green': self.message2,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(500, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        try:
+            content = Utils.getUrl2(self.url, referer)
+            if six.PY3:
+                content = six.ensure_str(content)
+                # src':'https://cdn14.javtop.fun/9003277702/9003277702.mp4'
+            regexcat = "src':'(.*?)'"
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            for url in match:
+                name = self.name  # html_conv.html_unescape(name)
+                url1 = str(url)
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
+
+    def play_that_shit(self, url, name):
+        self.session.open(bangyoulater3, name, url)
+
+    # def ok(self):
+        # name = self['menulist'].getCurrent()[0][0]
+        # url = self['menulist'].getCurrent()[0][1]
+        # self.play_that_shit(url, name)
+
+    # def play_that_shit(self, url, name):
+        # self.session.open(Playstream1, str(name), str(url))
+
+    def exit(self):
+        self.close()
+
+# 6
+class bangyoulater2(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = m2list([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                # 'green': self.message2,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(500, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        try:
+            content = Utils.getUrl2(self.url, referer)
+            if six.PY3:
+                content = six.ensure_str(content)
+            start = 0
+            n1 = content.find('ul class="nav nav-stacked nav-list', start)
+            n2 = content.find('</div>', n1)
+            content2 = content[n1:n2]
+            print("content A =", content2)
+            regexcat = 'a href="(.*?)">(.*?)<'
+            match = re.compile(regexcat, re.DOTALL).findall(content2)
+            for url, name in match:
+                name = html_conv.html_unescape(name)
+                url1 = "https://bangyoulater.net" + str(url)
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
+
+    def play_that_shit(self, url, name):
+        self.session.open(bangyoulaterX, name, url)
+
+    def exit(self):
+        self.close()
+
+
+class bangyoulater3(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = m2list([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
         self['title'] = Label('+18')
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
@@ -671,12 +788,12 @@ class luxuretv9(Screen):
         self.cat_list = []
         try:
             content = Utils.getUrl(self.url)
-            # if six.PY3:
-                # content1 = six.ensure_str(content1)
-            print("content A =", content)
-            i = 0
-            if i == 0:
-                url1 = re.compile('source src="(.+?)" type=').findall(content)[0]
+            if six.PY3:
+                content = six.ensure_str(content)
+            regexcat = "sources'\:\[\{'src'\:'(.*?)'"
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            for url in match:
+                url1 = str(url)
                 name = self.name
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
@@ -690,7 +807,7 @@ class luxuretv9(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0]
+        name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
         self.play_that_shit(url, name)
 
@@ -850,7 +967,7 @@ class Playstream1(Screen):
     def download_m3u(self, result):
         if result:
             if 'm3u8' not in self.urlm3u:
-                path = urlparse(self.urlm3u).path
+                # path = urlparse(self.urlm3u).path
                 ext = os.path.splitext(path)[1]
                 if ext != '.mp4' or ext != '.mkv' or ext != '.avi' or ext != '.flv':  # or ext != 'm3u8':
                     ext = '.mp4'
@@ -1070,7 +1187,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         self.new_aspect = self.init_aspect
         self.service = None
         self.url = url
-        self.name = Utils.decodeHtml(name)
+        self.name = html_conv.html_unescape(name)
         self.state = self.STATE_PLAYING
         self['actions'] = ActionMap(['MoviePlayerActions',
                                      'MovieSelectionActions',
@@ -1135,7 +1252,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         # sTitle = ''
         # sServiceref = ''
         # try:
-            # servicename, serviceurl = Utils.getserviceinfo(self.sref)
+            # servicename, serviceurl = Utils.getserviceinfo(sref)
             # if servicename is not None:
                 # sTitle = servicename
             # else:
@@ -1204,7 +1321,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         # if "youtube" in str(self.url):
             # self.mbox = self.session.open(MessageBox, _('For Stream Youtube coming soon!'), MessageBox.TYPE_INFO, timeout=5)
             # return
-        # if isStreamlinkAvailable():
+        # if Utils.isStreamlinkAvailable():
             # streamtypelist.append("5002")
             # streaml = True
         # if file_exists("/usr/bin/gstplayer"):

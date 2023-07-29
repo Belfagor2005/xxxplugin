@@ -107,17 +107,18 @@ if sys.version_info >= (2, 7, 9):
     except:
         sslContext = None
 
-currversion = '1.1'
-title_plug = 'born2tease '
-desc_plugin = ('..:: born2tease by Lululla %s ::.. ' % currversion)
+currversion = '1.0'
+title_plug = 'empflix '
+desc_plugin = ('..:: empflix by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 print(current)
 print(parent)
-pluglogo = os.path.join(PLUGIN_PATH, 'pic/born2tease.png')
-stripurl = 'aHR0cHM6Ly9ib3JuMnRlYXNlLm5ldC9tb2RlbHMuaHRtbA=='
+pluglogo = os.path.join(PLUGIN_PATH, 'pic/empflix.png')
+referer = 'https://www.empflix.com/'
+stripurl = 'https://www.empflix.com/categories'
 _session = None
 Path_Movies = '/tmp/'
 
@@ -272,16 +273,16 @@ class main(Screen):
     def updateMenuList(self):
         self.cat_list = []
         try:
-            url = Utils.b64decoder(stripurl)
-            content = Utils.getUrl(url)
+            url = stripurl  # Utils.b64decoder(stripurl)
+            content = Utils.getUrl2(url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             print("content A =", content)
-            regexcat = 'div id="videothumbs2">(.*?)<.*?<a href="(.*?)"'
+            regexcat = r'class="col-6.+?href="([^"]+)">\s*<img.+?src="([^"]+).+?title">([^<]+)'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             print("match =", match)
-            for name, url in match:
-                url1 = url.replace("videos", "allvideos")
+            for url, pic, name in match:
+                url1 = url  # .replace("videos", "allvideos")
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -299,13 +300,13 @@ class main(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, name, url):
-        self.session.open(born2tease3, url, name)
+        self.session.open(empflix3, url, name)
 
     def exit(self):
         self.close()
 
 
-class born2tease3(Screen):
+class empflix3(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -367,20 +368,28 @@ class born2tease3(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl(self.url)
+            content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            regexcat = 'div id="videothumbs2.*?<a href="(.*?)"><img src="(.*?)" alt="(.*?)"'
+            regexcat = r'data-vid="([^"]+).+?src="([^"]+)"\s*alt="([^"]+).+?tion">([^<]+)'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("Love2tease Videos2 match =", match)
-            n = 0
-            for url, pic, name in match:
-                url1 = self.url.replace("allvideos.html", "") + url
-                pic1 = self.url.replace("allvideos.html", "") + pic
-                if "videos" in name.lower():
-                    continue
+            # print("Love2tease Videos2 match =", match)
+            n = 1
+            for url, pic, name, tmp in match:
+                name = name + '( ' + tmp + ' )'
+                url1 = url
+                pic1 = pic
+                # if "videos" in name.lower():
+                    # continue
                 self.cat_list.append(show_(name, url1))
+            # if len(match) == 35 or len(match) == 80:
+                # name = 'Next Page'
+                # url = url + '/' + n
+                # n += 1
+                
+                # self.cat_list.append(show_(name, url1))
+            
             if len(self.cat_list) < 0:
                 return
             else:
@@ -391,129 +400,31 @@ class born2tease3(Screen):
         except Exception as e:
             print(e)
 
+
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
 
         try:
-            # content = Utils.getUrl(url)
-            # if six.PY3:
-                # content = six.ensure_str(content)
-            # print("content B =", content)
+            content = Utils.getUrl(url)
+            if six.PY3:
+                content = six.ensure_str(content)
+            print("content B =", content)
             # start = 10
             # n1 = url.find("/", start)
             # n2 = url.find("/", (n1 + 1))
             # site = url[:(n2+1)]
-            # regexvideo = 'video src="(.*?)"'
-            # match = re.compile(regexvideo, re.DOTALL).findall(content)
-            # # print("match =", match)
-            # url1 = site + match[0]
+            regexvideo = r'source\s*src="([^"]+)'
+            match = re.compile(regexvideo, re.DOTALL).findall(content)
+            # print("match =", match)
+            url1 = match[0] + '|Referer=https://www.empflix.com/'
             # print("url B =", url1)
-            self.play_that_shit(url, name)
+            self.play_that_shit(url1, name)
         except Exception as e:
             print(e)
 
     def play_that_shit(self, url, name):
-        self.session.open(born2tease4, name, url)
-
-    def exit(self):
-        global search
-        search = False
-        self.close()
-
-
-class born2tease4(Screen):
-    def __init__(self, session, name, url):
-        self.session = session
-        Screen.__init__(self, session)
-        skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
-            self.skin = f.read()
-        self.menulist = []
-        self['menulist'] = m2list([])
-        self['red'] = Label(_('Back'))
-        # self['green'] = Label(_('Export'))
-        self['title'] = Label('+18')
-        self['name'] = Label('')
-        self['text'] = Label('Only for Adult by Lululla')
-        self['poster'] = Pixmap()
-        self.name = name
-        self.url = url
-        self.currentList = 'menulist'
-        self.loading_ok = False
-        self.count = 0
-        self.loading = 0
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions',
-                                     'DirectionActions',
-                                     'MovieSelectionActions'], {'up': self.up,
-                                                                'down': self.down,
-                                                                'left': self.left,
-                                                                'right': self.right,
-                                                                'ok': self.ok,
-                                                                # 'green': self.message2,
-                                                                'cancel': self.exit,
-                                                                'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.cat)
-        else:
-            self.timer.callback.append(self.cat)
-        self.timer.start(500, True)
-
-    def up(self):
-        self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0]
-        self['name'].setText(str(auswahl))
-
-    def down(self):
-        self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0]
-        self['name'].setText(str(auswahl))
-
-    def left(self):
-        self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0]
-        self['name'].setText(str(auswahl))
-
-    def right(self):
-        self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0]
-        self['name'].setText(str(auswahl))
-
-    def cat(self):
-        self.cat_list = []
-        try:
-            content = Utils.getUrl(self.url)
-            if six.PY3:
-                content = six.ensure_str(content)
-            start = 0
-            n1 = content.find('class="player', start)
-            n2 = content.find('sponsor">', n1)
-            content2 = content[n1:n2]
-            regexcat = 'source src="(.*?)"'
-            match = re.compile(regexcat, re.DOTALL).findall(content)
-            for url in match:
-                url1 = self.url.replace('videos.hml', '') + str(url).replace('.mp4/', '.mp4')
-                name = self.name
-                self.cat_list.append(show_(name, url1))
-            if len(self.cat_list) < 0:
-                return
-            else:
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0][0]
-                self['name'].setText(str(auswahl))
-        except Exception as e:
-            print(e)
-
-    def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
-
-    def play_that_shit(self, url, name):
-        self.session.open(Playstream1, str(name), str(url))
+        self.session.open(Playstream2, name, url)
 
     def exit(self):
         global search

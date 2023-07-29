@@ -322,7 +322,7 @@ class main(Screen):
         if sel == 'SEARCH':
             self.search_text(namex, lnk)
         else:
-            self.session.open(manporn, namex, lnk)
+            self.session.open(manporn1, namex, lnk)
 
     def up(self):
         self[self.currentList].up()
@@ -599,19 +599,106 @@ class manporn2(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
+
+    def play_that_shit(self, url, name):
+        self.session.open(manporn4, str(name), str(url))
+
+    def exit(self):
+        global search
+        search = False
+        self.close()
+
+
+class manporn4(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = m2list([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                # 'green': self.message2,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(500, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
         try:
-            name = self.name
-            url = self.url
-            content = Utils.getUrl(url)
+            content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
+            # start = 0
+            # n1 = content.find('class="player', start)
+            # n2 = content.find('sponsor">', n1)
+            # content2 = content[n1:n2]
             regexcat = 'source src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            url3 = match[0]
-            self.play_that_shit(url3, name)
+            for url in match:
+                url1 = str(url).replace('.mp4/', '.mp4')
+                name = self.name
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
+
+    def ok(self):
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))

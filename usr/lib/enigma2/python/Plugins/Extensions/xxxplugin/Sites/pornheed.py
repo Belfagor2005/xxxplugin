@@ -116,7 +116,7 @@ print(current)
 print(parent)
 pluglogo = os.path.join(PLUGIN_PATH, 'pic/pornheed.png')
 stripurl = 'aHR0cHM6Ly93d3cucG9ybmhlZWQuY29tL3Mv'
-referer = 'https://www.pornheed.com/'                                            
+referer = 'https://www.pornheed.com/'
 _session = None
 Path_Movies = '/tmp/'
 global search
@@ -313,7 +313,7 @@ class main(Screen):
             # lnk = b64decoder(stripurl)
         namex = sel.upper()
         if sel == 'SEARCH':
-            lnk = b64decoder(stripurl)
+            lnk = Utils.b64decoder(stripurl)
             self.search_text(namex, lnk)
         else:
             self.session.open(pornheed, namex, lnk)
@@ -367,11 +367,11 @@ class pornheed(Screen):
         self.loading = 0
         self.name = name
         self.url = url
-        self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()                                                                      
+        self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
         self['actions'] = ActionMap(['OkCancelActions',
                                      'ColorActions'], {'ok': self.ok,
-                                                        'cancel': self.exit,
-                                                        'red': self.exit}, -1)
+                                                       'cancel': self.exit,
+                                                       'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
@@ -426,7 +426,7 @@ class pornheed1(Screen):
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
         self['poster'] = Pixmap()
-        
+
         self.name = name
         self.url = url
         self.currentList = 'menulist'
@@ -780,7 +780,7 @@ class pornheed4(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            #rel="preload" href="https://v13.pornheed.com/570336.mp4"
+            # rel="preload" href="https://v13.pornheed.com/570336.mp4"
             # url1 = match[0]
             # fpage2 = Utils.getUrl2(url1, referer)
             regexvideo = '<source src="(.*?)"'
@@ -953,7 +953,7 @@ class Playstream1(Screen):
             return
         else:
             if '.mp4' or '.mkv' or '.flv' or '.avi' in self.urlm3u:  # or 'm3u8':
-                self.session.openWithCallback(self.download_m3u, MessageBox, _("DOWNLOAD VIDEO?\n%s" %self.namem3u), type=MessageBox.TYPE_YESNO, timeout=10, default=False)
+                self.session.openWithCallback(self.download_m3u, MessageBox, _("DOWNLOAD VIDEO?\n%s" % self.namem3u), type=MessageBox.TYPE_YESNO, timeout=10, default=False)
             else:
                 self.downloading = False
                 self.session.open(MessageBox, _('Only VOD Movie allowed or not .ext Filtered!!!'), MessageBox.TYPE_INFO, timeout=5)
@@ -961,7 +961,7 @@ class Playstream1(Screen):
     def download_m3u(self, result):
         if result:
             if 'm3u8' not in self.urlm3u:
-                path = urlparse(self.urlm3u).path
+                # path = urlparse(self.urlm3u).path
                 ext = os.path.splitext(path)[1]
                 if ext != '.mp4' or ext != '.mkv' or ext != '.avi' or ext != '.flv':  # or ext != 'm3u8':
                     ext = '.mp4'

@@ -1,8 +1,8 @@
 <screen name="ConfigFHD" position="0,0" size="2560,1440" title="Config" backgroundColor="#ff000000" flags="wfNoBorder">
-    <ePixmap position="0,0" zPosition="-2" size="2560,1440" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/fanartfhd.jpg"/>
+    <ePixmap position="0,0" zPosition="-2" size="2560,1440" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/menu_plug.png"/>
     <!-- Menu List -->
     <widget name="config" textoffset="20,0" position="280,240" size="1200,640" font="Regular;40" secondfont="Regular;54" itemHeight="64" scrollbarMode="showOnDemand" transparent="1" zPosition="1" foregroundColor="#fcc000" foregroundColorSelected="#ffffff" backgroundColor="#4a5b6d" backgroundColorSelected="#000000"/>
-    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/backg2.png" position="1600,240" size="428,588" alphatest="on" zPosition="10"/>
+    <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/backg2.png" position="1600,240" size="420,568" alphatest="on" zPosition="10"/>
     <widget name="description" position="280,880" zPosition="1" size="2000,80" font="Regular;40" foregroundColor="#fcc000" backgroundColor="#4a5b6d" transparent="1" halign="left" valign="center"/>
     <!-- MButton -->
     <ePixmap pixmap="skin_default/buttons/red.png" position="280,1040" size="40,40" alphatest="blend" zPosition="1"/>

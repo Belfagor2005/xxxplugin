@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 '''
 ****************************************
 *        coded by Lululla & PCD        *
@@ -59,7 +60,6 @@ except:
     from urllib2 import Request
     from urllib2 import urlopen
 
-
 if sys.version_info >= (2, 7, 9):
     try:
         sslContext = ssl._create_unverified_context()
@@ -67,18 +67,20 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'born2tease '
-desc_plugin = ('..:: born2tease by Lululla %s ::.. ' % currversion)
+title_plug = 'Motherless '
+desc_plugin = ('..:: motherless by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 print(current)
 print(parent)
-pluglogo = os.path.join(PLUGIN_PATH, 'pic/born2tease.png')
-stripurl = 'aHR0cHM6Ly9ib3JuMnRlYXNlLm5ldC9tb2RlbHMuaHRtbA=='
+pluglogo = os.path.join(PLUGIN_PATH, 'pic/motherless.png')
+stripurl = 'https://motherless.com'
 _session = None
 Path_Movies = '/tmp/'
+global search
+search = False
 
 
 def show_(name, link):
@@ -101,6 +103,12 @@ def cat_(letter, link):
     else:
         res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
     return res
+
+
+Panel_list = [
+    ("MOTHERLESS"),
+    ("SEARCH"),
+    ]
 
 
 class main(Screen):
@@ -130,73 +138,103 @@ class main(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.updateMenuList)
+        self.onLayoutFinish.append(self.updateMenuList)
+
+    def updateMenuList(self):
+        self.menu_list = []
+        for x in self.menu_list:
+            del self.menu_list[0]
+        list = []
+        idx = 0
+        for x in Panel_list:
+            list.append(rvoneListEntry(x))
+            self.menu_list.append(x)
+            idx += 1
+        self['menulist'].setList(list)
+        auswahl = self['menulist'].getCurrent()[0]
+        print('auswahl: ', auswahl)
+        self['name'].setText(str(auswahl))
+
+    def search_text(self, name, url):
+        from Screens.VirtualKeyBoard import VirtualKeyBoard
+        self.namex = name
+        self.urlx = url
+        self.session.openWithCallback(self.filterChannels, VirtualKeyBoard, title=_("Filter this category..."), text='')
+
+    def filterChannels(self, result):
+        if result:
+            global search
+            name = str(result)
+            url = self.urlx + "/term/videos/" + name + "?range=0&size=0&sort=relevance"
+            try:
+                search = True
+                self.session.open(motherlessx, name, url)
+            except:
+                return
         else:
-            self.timer.callback.append(self.updateMenuList)
-        self.timer.start(500, True)
+            self.resetSearch()
+
+    def resetSearch(self):
+        global search
+        search = False
+        return
+
+    def ok(self):
+        self.keyNumberGlobalCB(self['menulist'].getSelectedIndex())
+
+    def keyNumberGlobalCB(self, idx):
+        global namex, lnk
+        namex = ''
+        # lnk = b64decoder(stripurl)
+        # if six.PY3:
+            # url = six.ensure_str(lnk)
+        sel = self.menu_list[idx]
+        if sel == ("MOTHERLESS"):
+            lnk = ("https://motherless.com/")
+        elif sel == ("SEARCH"):
+            lnk = ("https://motherless.com")
+        namex = sel.upper()
+        if sel == 'SEARCH':
+            self.search_text(namex, lnk)
+        else:
+            if namex == 'MOTHERLESS':
+                self.session.open(motherless1, namex, lnk)
+            else:
+                return
 
     def up(self):
         self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0][0]
+        auswahl = self['menulist'].getCurrent()[0]
         self['name'].setText(str(auswahl))
 
     def down(self):
         self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0][0]
+        auswahl = self['menulist'].getCurrent()[0]
         self['name'].setText(str(auswahl))
 
     def left(self):
         self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0][0]
+        auswahl = self['menulist'].getCurrent()[0]
         self['name'].setText(str(auswahl))
 
     def right(self):
         self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0][0]
+        auswahl = self['menulist'].getCurrent()[0]
         self['name'].setText(str(auswahl))
 
-    def updateMenuList(self):
-        self.cat_list = []
-        try:
-            url = Utils.b64decoder(stripurl)
-            content = Utils.getUrl(url)
-            if six.PY3:
-                content = six.ensure_str(content)
-            print("content A =", content)
-            regexcat = 'div id="videothumbs2">(.*?)<.*?<a href="(.*?)"'
-            match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match =", match)
-            for name, url in match:
-                url1 = url.replace("videos", "allvideos")
-                self.cat_list.append(show_(name, url1))
-            if len(self.cat_list) < 0:
-                return
-            else:
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0][0]
-                self['name'].setText(str(auswahl))
-        except Exception as e:
-            print(e)
-
-    def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
-
-    def play_that_shit(self, name, url):
-        self.session.open(born2tease3, url, name)
-
     def exit(self):
-        self.close()
+        global search
+        if search is True:
+            search = False
+            self.updateMenuList()
+        else:
+            self.close()
 
 
-class born2tease3(Screen):
+class motherless1(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -209,14 +247,14 @@ class born2tease3(Screen):
         # self['green'] = Label(_('Export'))
         self['title'] = Label('+18')
         self['name'] = Label('')
-        self['poster'] = Pixmap()
         self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
         self.currentList = 'menulist'
         self.loading_ok = False
         self.count = 0
         self.loading = 0
-        self.name = name
-        self.url = url
         self['actions'] = ActionMap(['OkCancelActions',
                                      'ColorActions',
                                      'DirectionActions',
@@ -225,7 +263,7 @@ class born2tease3(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -233,7 +271,7 @@ class born2tease3(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(1000, True)
+        self.timer.start(500, True)
 
     def up(self):
         self[self.currentList].up()
@@ -262,13 +300,11 @@ class born2tease3(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            regexcat = 'div id="videothumbs2.*?<a href="(.*?)"><img src="(.*?)" alt="(.*?)"'
+            regexcat = '<a href="/porn/(.*?)/videos'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("Love2tease Videos2 match =", match)
-            for url, pic, name in match:
-                url1 = self.url.replace("allvideos.html", "") + url
-                if "videos" in name.lower():
-                    continue
+            for url in match:
+                url1 = "https://motherless.com/porn/" + url
+                name = url.upper()
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -283,34 +319,112 @@ class born2tease3(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
-        try:
-            # content = Utils.getUrl(url)
-            # if six.PY3:
-                # content = six.ensure_str(content)
-            # print("content B =", content)
-            # start = 10
-            # n1 = url.find("/", start)
-            # n2 = url.find("/", (n1 + 1))
-            # site = url[:(n2+1)]
-            # regexvideo = 'video src="(.*?)"'
-            # match = re.compile(regexvideo, re.DOTALL).findall(content)
-            # # print("match =", match)
-            # url1 = site + match[0]
-            # print("url B =", url1)
-            self.play_that_shit(url, name)
-        except Exception as e:
-            print(e)
+        self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        self.session.open(born2tease4, name, url)
+        self.session.open(motherless2, name, url)
 
     def exit(self):
-        global search
-        search = False
         self.close()
 
 
-class born2tease4(Screen):
+class motherless2(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['poster'] = Pixmap()
+        self['text'] = Label('Only for Adult by Lululla')
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self.name = name
+        self.url = url
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                'green': self.ok,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(500, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        # url= b64decoder(stripurl)
+        try:
+            content = Utils.getUrl(self.url)
+            if six.PY3:
+                content = six.ensure_str(content)
+            # print("content A =", content)
+            regexcat = '<div class="thumb-container video".*?a href="(.*?)".*?<img class=.*?src="(.*?)".*?alt="(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            # print("match =", match)
+            for url, pic, name in match:
+                url1 = url
+                name = name.upper()
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
+
+    def play_that_shit(self, url, name):
+        self.session.open(motherless3, name, url)
+
+    def exit(self):
+        self.close()
+
+
+class motherless3(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -339,7 +453,7 @@ class born2tease4(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -372,19 +486,18 @@ class born2tease4(Screen):
     def cat(self):
         self.cat_list = []
         try:
+            name = self.name
+
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            start = 0
-            n1 = content.find('class="player', start)
-            n2 = content.find('sponsor">', n1)
-            content = content[n1:n2]
-            regexcat = 'source src="(.*?)"'
+            regexcat = "__fileurl = '(.*?)'"
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            for url in match:
-                url1 = self.url.replace('videos.hml', '') + str(url).replace('.mp4/', '.mp4')
-                name = self.name
-                self.cat_list.append(show_(name, url1))
+            print("match =", match)
+            url = match[0]
+            if url:
+                name = name.upper()
+                self.cat_list.append(show_(name, url))
             if len(self.cat_list) < 0:
                 return
             else:
@@ -402,6 +515,69 @@ class born2tease4(Screen):
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))
+
+    def exit(self):
+        self.close()
+
+
+class motherlessx(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions'], {'ok': self.ok,
+                                                       'cancel': self.exit,
+                                                       'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
+        else:
+            self.timer.callback.append(self._gotPageLoad)
+        self.timer.start(500, True)
+
+    def _gotPageLoad(self):
+        self.names = []
+        self.urls = []
+        url = self.url
+        try:
+            page = 1  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            while page < 20:
+                url1 = url + "&p=" + str(page)
+                name = "motherless-Page " + str(page)
+                page = page+1
+                self.urls.append(url1)
+                self.names.append(name)
+            self['name'].setText(_('Please select ...'))
+            showlist(self.names, self['menulist'])
+        except Exception as e:
+            print(e)
+            self['name'].setText(_('Nothing ... Retry'))
+
+    def ok(self):
+        i = len(self.names)
+        print('iiiiii= ', i)
+        if i < 0:
+            return
+        idx = self["menulist"].getSelectionIndex()
+        name = self.names[idx]
+        url = self.urls[idx]
+        self.session.open(motherless2, name, url)
 
     def exit(self):
         global search

@@ -32,6 +32,7 @@ import six
 import ssl
 import sys
 from Plugins.Extensions.xxxplugin.plugin import Playstream1, Playstream2, rvList
+from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path, screenwidth
@@ -103,32 +104,6 @@ def cat_(letter, link):
     else:
         res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
     return res
-
-
-def rvoneListEntry(name):
-
-    res = [name]
-    pngx = os.path.join(PLUGIN_PATH, 'res/pics/key_yellow.png')
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryPixmapAlphaTest(pos=(5, 5), size=(50, 50), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(90, 0), size=(1200, 50), font=0, text=name, color=0xa6d1fe, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryPixmapAlphaTest(pos=(5, 5), size=(40, 40), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(70, 0), size=(1000, 50), font=0, text=name, color=0xa6d1fe, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryPixmapAlphaTest(pos=(3, 10), size=(40, 40), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(50, 0), size=(500, 50), font=0, text=name, color=0xa6d1fe, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
-
-
-def showlist(data, list):
-    icount = 0
-    plist = []
-    for line in data:
-        name = data[icount]
-        plist.append(rvoneListEntry(name))
-        icount = icount+1
-        list.setList(plist)
 
 
 def cleanTitle(x):
@@ -742,22 +717,22 @@ class xhamster4(Screen):
 
     def up(self):
         self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def down(self):
         self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def left(self):
         self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def right(self):
         self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def cat(self):

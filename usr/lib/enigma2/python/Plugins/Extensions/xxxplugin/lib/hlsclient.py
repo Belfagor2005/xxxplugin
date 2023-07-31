@@ -32,7 +32,7 @@ from random import choice
 from six.moves.urllib.request import urlopen
 from six.moves.urllib.request import Request
 from six.moves.urllib.parse import urlparse
-try: 
+try:
     import queue
 except ImportError:
     import Queue as queue

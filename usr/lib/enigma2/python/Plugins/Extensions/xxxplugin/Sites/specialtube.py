@@ -15,50 +15,26 @@ from __future__ import print_function
 from Components.ActionMap import ActionMap
 from Components.Button import Button
 from Components.Label import Label
-from Components.MultiContent import MultiContentEntryPixmapAlphaTest
-from Components.MultiContent import MultiContentEntryText
 from Components.Pixmap import Pixmap
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
-from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER
 from enigma import eTimer
-from enigma import loadPNG
-from os.path import exists as file_exists
 import os
 import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1, returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
+from Plugins.Extensions.xxxplugin.plugin import show_, cat_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path, screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
-try:
-    import http.cookiejar as cookielib
-    from urllib.parse import urlencode
-    from urllib.parse import quote
-    from urllib.parse import urlparse
-    from urllib.request import Request
-    from urllib.request import urlopen
-    from urllib import request as urllib2
-    PY3 = True
-    unicode = str
-    unichr = chr
-    long = int
-    xrange = range
-except:
-    import cookielib
-    from urllib import urlencode
-    from urllib import quote
-    from urlparse import urlparse
-    from urllib2 import Request
-    from urllib2 import urlopen
 
 if sys.version_info >= (2, 7, 9):
     try:
@@ -81,28 +57,6 @@ _session = None
 Path_Movies = '/tmp/'
 global search
 search = False
-
-
-def show_(name, link):
-    res = [(name, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
-
-
-def cat_(letter, link):
-    res = [(letter, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
 
 
 Panel_list = [
@@ -193,21 +147,21 @@ class main(Screen):
         lnk = Utils.b64decoder(stripurl)
         sel = self.menu_list[idx]
         if sel == ("Specialtube latest"):
-                namex = "latest"
-                lnk = 'http://specialtube.com/latest-updates/'
-                self.session.open(specialtube2, namex, lnk)
+            namex = "latest"
+            lnk = 'http://specialtube.com/latest-updates/'
+            self.session.open(specialtube2, namex, lnk)
         elif sel == ("Specialtube top rated"):
-                namex = "top"
-                lnk = 'http://specialtube.com/top-rated/'
-                self.session.open(specialtube2, namex, lnk)
+            namex = "top"
+            lnk = 'http://specialtube.com/top-rated/'
+            self.session.open(specialtube2, namex, lnk)
         elif sel == ("Specialtube most popular"):
-                namex = "popular"
-                lnk = 'http://specialtube.com/most-popular/'
-                self.session.open(specialtube2, namex, lnk)
+            namex = "popular"
+            lnk = 'http://specialtube.com/most-popular/'
+            self.session.open(specialtube2, namex, lnk)
         elif sel == ("Specialtube categories"):
-                namex = "categories"
-                lnk = 'http://specialtube.com/categories/'
-                self.session.open(categories, namex, lnk)
+            namex = "categories"
+            lnk = 'http://specialtube.com/categories/'
+            self.session.open(categories, namex, lnk)
 
         if sel == 'SEARCH':
             namex = sel.upper()
@@ -278,17 +232,14 @@ class specialtube(Screen):
         self.url = url
         self.currentList = 'menulist'
         self['actions'] = ActionMap(['OkCancelActions',
-         'ColorActions',
-         'DirectionActions',
-         'MovieSelectionActions'], {'cancel': self.exit,
-         # 'ok': self.ok,
-         'red': self.exit}, -1)
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'cancel': self.exit,
+                                                                # 'ok': self.ok,
+                                                                'red': self.exit}, -1)
         self.onLayoutFinish.append(self.cat)
 
     def cat(self):
-        # if "search" in self.name.lower():
-            # mode = 4
-            # _session.open(Search, _sname, mode)
         if "categories" in self.name.lower():
             self.session.open(categories, self.name, self.url)
         else:
@@ -463,7 +414,9 @@ class specialtube3(Screen):
             # regexvideo = 'video src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             url1 = match[0]
+
             url1 = url1.replace('function/0/', '')  # .replace('.mp4/','.mp4')
+            print("url1 B =", url1)
             self.play_that_shit(url1, name)
         except Exception as e:
             print(e)
@@ -540,10 +493,10 @@ class categories(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            regexcat2 = '<a href="http://specialtube.com/tags/(.*?)".*?">(.*?)<'
+            regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating"'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
             for url, name in match2:
-                url1 = "http://specialtube.com/tags/" + url
+                url1 = 'https://specialtube.com/categories/' + url
                 self.cat_list.append(show_(name, url1))
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
@@ -591,9 +544,9 @@ class specialtube5(Screen):
         self.count = 0
         self.loading = 0
         self['actions'] = ActionMap(['OkCancelActions',
-         'ColorActions'], {'ok': self.ok,
-         'cancel': self.exit,
-         'red': self.exit}, -1)
+                                     'ColorActions'], {'ok': self.ok,
+                                                       'cancel': self.exit,
+                                                       'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)

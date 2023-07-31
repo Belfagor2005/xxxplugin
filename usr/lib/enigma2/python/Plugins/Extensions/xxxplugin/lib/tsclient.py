@@ -22,24 +22,27 @@ Modified for KodiDirect, KodiLite and IPTVworld by pcd
 import sys
 import threading
 import time
-import queue
 import os
-import re
-import operator
-import six
+# import re
+# import operator
+# import six
 from six.moves.urllib.request import urlopen
-from six.moves.urllib.request import Request
-from six.moves.urllib.error import HTTPError, URLError
-from six.moves.urllib.parse import urlparse
-from six.moves.urllib.parse import quote
-from six.moves.urllib.parse import urlencode
-from six.moves.urllib.parse import unquote
-from six.moves.urllib.parse import quote_plus
-from six.moves.urllib.parse import unquote_plus
-from six.moves.urllib.parse import parse_qs
-from six.moves.urllib.request import urlretrieve
-from sys import version_info
+# from six.moves.urllib.request import Request
+# from six.moves.urllib.error import HTTPError, URLError
+# from six.moves.urllib.parse import urlparse
+# from six.moves.urllib.parse import quote
+# from six.moves.urllib.parse import urlencode
+# from six.moves.urllib.parse import unquote
+# from six.moves.urllib.parse import quote_plus
+# from six.moves.urllib.parse import unquote_plus
+# from six.moves.urllib.parse import parse_qs
+# from six.moves.urllib.request import urlretrieve
+import bitstring
 PY3 = sys.version_info.major >= 3
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 
 
 def log(msg):
@@ -51,9 +54,6 @@ def log(msg):
 
 SUPPORTED_VERSION = 3
 STREAM_PFILE = '/tmp/hls.avi'
-
-import bitstring
-
 defualtype = ""
 
 
@@ -503,7 +503,7 @@ class hlsclient(threading.Thread):
                     continue
             lc = len(lastchunk)
             fpts = firstpts
-            lastpts=getLastPTS(lastchunk, fixpid, defualtype)
+            lastpts = getLastPTS(lastchunk, fixpid, defualtype)
             if (lastpts is None) or (lastpts == "None"):
                 lastpts = 0
             videotime = lastpts - firstpts
@@ -555,6 +555,7 @@ class hlsclient(threading.Thread):
         if self.thread:
             self.thread._Thread__stop()
         self._Thread__stop()
+
 
 if __name__ == '__main__':
     try:

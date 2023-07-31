@@ -15,51 +15,27 @@ from __future__ import print_function
 from Components.ActionMap import ActionMap
 from Components.Button import Button
 from Components.Label import Label
-from Components.MultiContent import MultiContentEntryPixmapAlphaTest
-from Components.MultiContent import MultiContentEntryText
 from Components.Pixmap import Pixmap
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
-from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER
 from enigma import eTimer
-from enigma import loadPNG
-from os.path import exists as file_exists
 import os
 import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import Playstream1, Playstream2, rvList
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1, Playstream2  # , returnIMDB
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
+from Plugins.Extensions.xxxplugin.plugin import show_, cat_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path, screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
 
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
-try:
-    import http.cookiejar as cookielib
-    from urllib.parse import urlencode
-    from urllib.parse import quote
-    from urllib.parse import urlparse
-    from urllib.request import Request
-    from urllib.request import urlopen
-    from urllib import request as urllib2
-    PY3 = True
-    unicode = str
-    unichr = chr
-    long = int
-    xrange = range
-except:
-    import cookielib
-    from urllib import urlencode
-    from urllib import quote
-    from urlparse import urlparse
-    from urllib2 import Request
-    from urllib2 import urlopen
 
 if sys.version_info >= (2, 7, 9):
     try:
@@ -82,28 +58,6 @@ _session = None
 Path_Movies = '/tmp/'
 global search
 search = False
-
-
-def show_(name, link):
-    res = [(name, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
-
-
-def cat_(letter, link):
-    res = [(letter, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
 
 
 def cleanTitle(x):
@@ -473,9 +427,9 @@ class xhamsterx2(Screen):
         self.name = name
         self.url = url
         self['actions'] = ActionMap(['OkCancelActions',
-         'ColorActions'], {'ok': self.ok,
-         'cancel': self.exit,
-         'red': self.exit}, -1)
+                                     'ColorActions'], {'ok': self.ok,
+                                                       'cancel': self.exit,
+                                                       'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
@@ -536,9 +490,9 @@ class xhamsterx(Screen):
         self.name = name
         self.url = url
         self['actions'] = ActionMap(['OkCancelActions',
-         'ColorActions'], {'ok': self.ok,
-         'cancel': self.exit,
-         'red': self.exit}, -1)
+                                     'ColorActions'], {'ok': self.ok,
+                                                       'cancel': self.exit,
+                                                       'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)

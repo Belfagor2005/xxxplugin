@@ -37,7 +37,6 @@ from enigma import gFont
 from enigma import iPlayableService
 from enigma import loadPNG
 from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER
-from itertools import cycle, islice
 from os.path import splitext
 from Plugins.Plugin import PluginDescriptor
 from PIL import Image, ImageFile, ImageChops
@@ -110,15 +109,15 @@ if not file_exists(folder_path):
 
 # screenwidth = getDesktop(0).size()
 if screenwidth.width() == 2560:
-    defpic = THISPLUG + '/res/img/no_work.png'
-    dblank = THISPLUG + '/res/pics/undefinided.png'
+    defpic = THISPLUG + 'res/img/no_work.png'
+    dblank = THISPLUG + 'res/img/undefinided.png'
 
 elif screenwidth.width() == 1920:
-    defpic = THISPLUG + '/res/img/no_work.png'
-    dblank = THISPLUG + '/res/pics/undefinided.png'
+    defpic = THISPLUG + 'res/img/no_work.png'
+    dblank = THISPLUG + 'res/img/undefinided.png'
 else:
-    defpic = THISPLUG + '/res/img/no_work.png'
-    dblank = THISPLUG + '/res/pics/undefinided.png'
+    defpic = THISPLUG + 'res/img/no_work.png'
+    dblank = THISPLUG + 'res/img/undefinided.png'
 
 
 class rvList(MenuList):
@@ -161,6 +160,28 @@ def showlist(data, list):
         plist.append(rvoneListEntry(name))
         icount += 1
         list.setList(plist)
+
+
+def show_(name, link):
+    res = [(name, link)]
+    if screenwidth.width() == 2560:
+        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    elif screenwidth.width() == 1920:
+        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    else:
+        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    return res
+
+
+def cat_(letter, link):
+    res = [(letter, link)]
+    if screenwidth.width() == 2560:
+        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    elif screenwidth.width() == 1920:
+        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    else:
+        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    return res
 
 
 mdpchoices = [
@@ -254,7 +275,6 @@ def getpics(names, pics, tmpfold, picfold):
     # from PIL import Image
     # global defpic
     pix = []
-
     if cfg.thumb.value == "False":
         npic = len(pics)
         i = 0
@@ -262,13 +282,10 @@ def getpics(names, pics, tmpfold, picfold):
             pix.append(defpic)
             i += 1
         return pix
-
     cmd = "rm " + tmpfold + "/*"
     os.system(cmd)
-
     npic = len(pics)
     j = 0
-
     while j < npic:
         name = names[j]
         if name is None or name == '':
@@ -701,7 +718,6 @@ class ConfigEx(ConfigListScreen, Screen):
 
 class Main(Screen):
     def __init__(self, session):
-        # def __init__(self, session, name, url):
         Screen.__init__(self, session)
         self.session = session
         global _session
@@ -725,15 +741,12 @@ class Main(Screen):
                                                             "red": self.close,
                                                             "green": self.okClicked,
                                                            }, -1)
-        # self.name = name
-        # self.url = url
         self.onLayoutFinish.append(self.startSession)
 
     def startSession(self):
         self.names = []
         self.urls = []
         self.pics = []
-        # self.infos = []
         i = 0
         name = ""
         desc = ""
@@ -745,7 +758,7 @@ class Main(Screen):
             for root, dirs, files in os.walk(path):
                 # print(files)
                 for file in files:
-                    if file.endswith('.py'):
+                    if file.endswith('.py') and not file.endswith('.pyo') and not file.endswith('.pyc'):
                         print('name= ', file)
                         if "pycache" in file:
                             continue
@@ -759,35 +772,21 @@ class Main(Screen):
                             continue
                         if 'no_work' in file:
                             continue
-                        # else:
-                        # name = file.replace('.py','')
                         name, ext = file.split(".")  # [-1]
                         desc = 'XXX %s' % name
                         url = THISPLUG + "Sites/%s.py" % name
                         pic = os.path.join(piccons, '%s.png' % name)
-                        self.names.append(name)
-                        self.urls.append(url)
-                        self.pics.append(pic)
-                        i += 1
+                        if name not in self.names:
+                            self.names.append(name)
+                            self.urls.append(url)
+                            self.pics.append(pic)
+                            i += 1
                         print(name + '\n' + desc + '\n' + url + '\n' + pic)
         except Exception as e:
             print(e)
         title = name_plug
-        # if _("Live") in self.name:
-            # nextmodule = "Videos3"
-        # elif _("Film") in self.name:
-            # nextmodule = "Videos4"
-        # elif _("Serie") in self.name:
-            # nextmodule = "Videos1"
-
         if cfg.thumb.value == "True":
-            # print("In Main Going in GridMain")
-            # menuTitle, nextmodule, names, urls, infos, pics=[]
             self.session.open(GridMain, title, self.names, self.urls, pics=self.pics)
-        """
-        else:
-            self.session.open(AnimMain, title, nextmodule, self.menu)
-            """
 
     def okClicked(self):
         pass
@@ -908,23 +907,6 @@ class GridMain(Screen):
         text_clear = self.names[idx]
         if returnIMDB(text_clear):
             print('show imdb/tmdb')
-
-    # def info(self):
-        # itype = self.index
-        # self.inf = self.infos[itype]
-        # # self.inf = ''
-        # try:
-            # self.inf = self.infos[itype]
-        # except:
-            # pass
-        # if self.inf:
-            # try:
-                # self["info"].setText(self.inf)
-                # # print('infos: ', self.inf)
-            # except:
-                # self["info"].setText('')
-                # # print('except info')
-        # print("In GridMain infos =", self.inf)
 
     def paintFrame(self):
         # print("In paintFrame self.index, self.minentry, self.maxentry =", self.index, self.minentry, self.maxentry)
@@ -1056,23 +1038,6 @@ class GridMain(Screen):
         itype = self.index
         name = self.names[itype]
         url = self.urls[itype]
-        # inf = self.infos[itype]
-        print("In GridMain name =", name)
-        print("In GridMain url =", url)
-        # print("In GridMain self.nextmodule =", self.nextmodule)
-        # if name == _("Config"):
-            # self.session.open(ConfigEx)
-        # elif name == _("About"):
-            # self.session.open(Abouttvr)
-        # elif _('Search') in str(name):
-            # global search
-            # search = True
-            # # print('Search go movie: ', search)
-            # self.search_text(name, url)
-        # try:
-            # vid2 = nextVideos1(self.session, name, url)
-            # vid2.startSession()
-
         if PY3:
             modl = name.lower()
             import importlib.util
@@ -1080,40 +1045,13 @@ class GridMain(Screen):
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
             print("In GridMain Going in PY3")
-            # foo.main(self.session)
             self.session.open(foo.main)
         else:
             modl = name.lower()
             import imp
             foo = imp.load_source(modl, url)
             print("In GridMain Going in PY2")
-            # foo.main(self.session)
-            # foo.main(self.updateMenuList)
             self.session.open(foo.main)
-        # except:
-            # pass
-
-    # def search_text(self, name, url):
-        # self.namex = name
-        # self.urlx = url
-        # self.session.openWithCallback(self.filterChannels, VirtualKeyBoard, title=_("Filter this category..."), text=name)
-
-    # def filterChannels(self, result):
-        # if result:
-            # name = str(result)
-            # url = self.urlx + str(result)
-            # try:
-                # vid2 = nextVideos4(self.session, name, url)
-                # vid2.startSession()
-            # except:
-                # return
-        # else:
-            # self.resetSearch()
-
-    # def resetSearch(self):
-        # global search
-        # search = False
-        # return
 
 
 class TvInfoBarShowHide():
@@ -1590,16 +1528,16 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         self.session.nav.playService(sref)
 
     def cicleStreamType(self):
-        global streaml
-        from itertools import cycle, islice
+        # global streaml
+        # from itertools import cycle, islice
         self.servicetype = str(cfg.services.value)
         print('servicetype1: ', self.servicetype)
         url = str(self.url)
         if str(splitext(url)[-1]) == ".m3u8":
             if self.servicetype == "1":
                 self.servicetype = "4097"
-        currentindex = 0
-        streamtypelist = ["4097"]
+        # currentindex = 0
+        # streamtypelist = ["4097"]
         """
         # if "youtube" in str(self.url):
             # self.mbox = self.session.open(MessageBox, _('For Stream Youtube coming soon!'), MessageBox.TYPE_INFO, timeout=5)
@@ -1612,14 +1550,14 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         # if file_exists("/usr/bin/exteplayer3"):
             # streamtypelist.append("5002")
             """
-        if file_exists("/usr/bin/apt-get"):
-            streamtypelist.append("8193")
-        for index, item in enumerate(streamtypelist, start=0):
-            if str(item) == str(self.servicetype):
-                currentindex = index
-                break
-        nextStreamType = islice(cycle(streamtypelist), currentindex + 1, None)
-        self.servicetype = str(next(nextStreamType))
+        # if file_exists("/usr/bin/apt-get"):
+            # streamtypelist.append("8193")
+        # for index, item in enumerate(streamtypelist, start=0):
+            # if str(item) == str(self.servicetype):
+                # currentindex = index
+                # break
+        # nextStreamType = islice(cycle(streamtypelist), currentindex + 1, None)
+        # self.servicetype = str(next(nextStreamType))
         print('servicetype2: ', self.servicetype)
         self.openPlay(self.servicetype, url)
 

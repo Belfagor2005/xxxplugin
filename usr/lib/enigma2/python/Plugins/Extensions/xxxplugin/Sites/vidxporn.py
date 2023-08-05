@@ -126,7 +126,7 @@ class main(Screen):
             url = self.urlx + str(result)
             try:
                 search = True
-                self.session.open(vidxporn5, name, url)
+                self.session.open(vidxporn2, name, url)
             except:
                 return
         else:

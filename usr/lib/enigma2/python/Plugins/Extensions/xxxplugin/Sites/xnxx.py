@@ -127,7 +127,7 @@ class main(Screen):
             url = self.urlx + name + '/'
             try:
                 search = True
-                self.session.open(xnxx4, name, url)
+                self.session.open(xnxxplus2, name, url)
             except:
                 return
         else:
@@ -270,7 +270,7 @@ class xnxx1(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
@@ -351,7 +351,8 @@ class xnxxplus2(Screen):
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-
+        # name = self['menulist'].getCurrent()[0][0]
+        # url = self['menulist'].getCurrent()[0][1]
         if 'xnxx.com/hits' in url:
             print('xnxx.com/hits select url', url)
             self.session.open(xnxx4, name, url)
@@ -441,7 +442,7 @@ class xnxx2(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
@@ -536,7 +537,7 @@ class xnxx3(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)

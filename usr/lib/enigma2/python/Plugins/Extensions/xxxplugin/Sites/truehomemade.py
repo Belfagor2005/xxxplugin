@@ -100,6 +100,11 @@ class main(Screen):
                 content = six.ensure_str(content)
             regexcat = '<div class="preview".*?href="(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
+            
+            name = 'SEARCH'
+            url1 = 'https://truehomemade.com/search/'
+            self.cat_list.append(show_(name, url1))
+            
             for url, name in match:
                 url1 = "https://truehomemade.com" + url
                 name = name.upper()
@@ -128,7 +133,7 @@ class main(Screen):
             url = self.urlx + str(result)
             try:
                 search = True
-                self.session.open(truehomemade3, name, url)
+                self.session.open(truehomemadeplus2, name, url)
             except:
                 return
         else:
@@ -308,8 +313,8 @@ class truehomemade2(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            url = Utils.b64decoder(stripurl)
-            content = Utils.getUrl(url)
+            # url = Utils.b64decoder(stripurl)
+            content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
             regexcat = '<div class="preview".*?href="(.*?)".*?title="(.*?)"'

@@ -122,7 +122,7 @@ class main(Screen):
             url = self.urlx + str(result)
             try:
                 search = True
-                self.session.open(superzooi5, name, url)
+                self.session.open(superzooi2, str(name), str(url))
             except:
                 return
         else:
@@ -275,7 +275,7 @@ class categories(Screen):
             print(e)
 
     def play_that_shit(self, url, name):
-        self.session.open(superzooi2, name, url)
+        self.session.open(superzooi2, str(name), str(url))
 
     def exit(self):
         self.close()
@@ -318,7 +318,16 @@ class superzooi2(Screen):
         try:
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
             for page in pages:
-                url1 = self.url + 'recent/' + str(page) + "/"
+
+                if 'http://superzooi.com/search/video' in self.url:
+                    # # http://superzooi.com/search/video/anal/2/
+                    # if page == 0:
+                       # url1 = self.url # + str(page) + "/"
+                    # else:
+                    url1 = self.url + str(page) + "/"
+                    print('is search url', url1)
+                else:    
+                    url1 = self.url + 'recent/' + str(page) + "/"
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -355,7 +364,7 @@ class superzooi3(Screen):
         self.menulist = []
         self['menulist'] = rvList([])
         self['red'] = Label(_('Back'))
-        self['green'] = Label(_('Export'))
+        # self['green'] = Label(_('Export'))
         self['title'] = Label('+18')
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
@@ -414,7 +423,7 @@ class superzooi3(Screen):
             regexvideo = 'li class="span3".*?a href="(.*?)" title="(.*?)"><img src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name, pic in match:
-                url1 = "http://superzooi.com" + url
+                url1 = "http://superzooi.com" + str(url)
                 self.cat_list.append(show_(name, url1))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -453,7 +462,7 @@ class superzooi4(Screen):
         self.menulist = []
         self['menulist'] = rvList([])
         self['red'] = Label(_('Back'))
-        self['green'] = Label(_('Export'))
+        # self['green'] = Label(_('Export'))
         self['title'] = Label('+18')
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')

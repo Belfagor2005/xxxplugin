@@ -551,7 +551,7 @@ class alphaporno2(Screen):
             regexcat = '<a href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content2)
             for url, name in match:
-                 name = html_conv.html_unescape(name)
+                name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:

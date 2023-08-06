@@ -243,7 +243,7 @@ class vidxporn2(Screen):
         try:
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             for page in pages:
-                url1 = self.url + 'page' + str(page) + ".html"
+                url1 = self.url + '/page' + str(page) + ".html"
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -335,9 +335,9 @@ class vidxporn3(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             print("content A =", content)
-            regexvideo = 'video-link" href="(.*?)" title="(.*?)".*?data-original="(.*?)"'
+            regexvideo = 'video-link".*?href="(.*?)".*?title="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
-            for url, name, pic in match:
+            for url, name in match:
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)

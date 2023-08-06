@@ -132,7 +132,7 @@ class main(Screen):
         if result:
             global search
             name = str(result)
-            url = self.urlx + name + '/'
+            url = self.urlx + name 
             try:
                 search = True
                 self.session.open(alphapornoX, name, url)
@@ -261,7 +261,7 @@ class alphapornoX(Screen):
             i = 1
             while i < pages:
                 page = i
-                url1 = url + str(page)
+                url1 = url + '/' + str(page)
                 name = "Page " + str(page)
                 i += 1
                 self.urls.append(url1)
@@ -280,6 +280,7 @@ class alphapornoX(Screen):
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
+        print('ok pages url: ', url)
         if 'channels' in self.name.lower():
             self.session.open(alphaporno1, name, url)
         else:

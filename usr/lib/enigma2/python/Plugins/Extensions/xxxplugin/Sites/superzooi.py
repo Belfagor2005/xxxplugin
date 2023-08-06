@@ -47,6 +47,7 @@ PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin')
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
+referer = 'https://www.superzooi.com/'
 print(current)
 print(parent)
 pluglogo = os.path.join(PLUGIN_PATH, 'pic/superzooi.png')
@@ -324,10 +325,10 @@ class superzooi2(Screen):
                     # if page == 0:
                        # url1 = self.url # + str(page) + "/"
                     # else:
-                    url1 = self.url + str(page) + "/"
+                    url1 = self.url + '/' + str(page) + "/"
                     print('is search url', url1)
                 else:    
-                    url1 = self.url + 'recent/' + str(page) + "/"
+                    url1 = self.url + '/recent/' + str(page) + "/"
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -345,7 +346,7 @@ class superzooi2(Screen):
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        # print("superzooi2 = ", url)
+        print("superzooi2 = ", url)
         self.session.open(superzooi3, name, url)
 
     def exit(self):
@@ -416,13 +417,13 @@ class superzooi3(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl(self.url)
+            content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            regexvideo = 'li class="span3".*?a href="(.*?)" title="(.*?)"><img src="(.*?)"'
+            regexvideo = 'li class="span3".*?a href="(.*?)".*?title="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
-            for url, name, pic in match:
+            for url, name in match:
                 url1 = "http://superzooi.com" + str(url)
                 self.cat_list.append(show_(name, url1))
             self['menulist'].l.setList(self.cat_list)
@@ -439,7 +440,7 @@ class superzooi3(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            # print("url1 B =", url)
+            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -514,7 +515,7 @@ class superzooi4(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl(self.url)
+            content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)

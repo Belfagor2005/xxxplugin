@@ -62,8 +62,8 @@ search = False
 
 
 Panel_list = [
-    ('Top Rated Pornstars'),
-    ('Category'),
+    ('TOP RATED'),
+    ('CATEGORY'),
     ('SEARCH'),
     ]
 
@@ -149,8 +149,8 @@ class main(Screen):
         # if six.PY3:
             # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
-        if sel == ("Category"):
-            namex = "Category"
+        if sel == ("CATEGORY"):
+            namex = "CATEGORY"
             self.session.open(pornbimbo, namex, lnk)
         # elif sel == ("TAGS"):
                 # namex = "Tags"
@@ -160,7 +160,7 @@ class main(Screen):
             namex = "Search"
             lnk = 'http://pornbimbo.com/search/'
             self.search_text(namex, lnk)
-        if sel == ("Top Rated Pornstars"):
+        if sel == ("TOP RATED"):
             namex = "Top"
             lnk = 'http://pornbimbo.com/models/'
             self.session.open(pornbimbo, namex, lnk)
@@ -334,7 +334,7 @@ class pornbimbox(Screen):
             pages = [2, 3, 4, 5, 6, 7, 8, 9, 10]
             for page in pages:
                 p = page - 1
-                url1 = url + "/" + str(p) + "/"
+                url1 = url + str(p) + "/"
                 name = "pornbimbo-Page " + str(p)
                 name = name.upper()
                 self.cat_list.append(show_(name, url1))
@@ -352,6 +352,7 @@ class pornbimbox(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
+        print('pages url: ', url)
         self.session.open(pornbimbo2, name, url)
 
     def exit(self):
@@ -425,11 +426,10 @@ class pornbimbo2(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            regexcat = '<div class="item.*?href="(.*?)" title="(.*?)".*?data-original="(.*?)"'
+            regexcat = '<div class="item.*?href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             print("match =", match)
-            for url, name, pic in match:
-                pic = pic
+            for url, name in match:
                 url1 = url
                 name = name.replace('"', '')
                 name = name.upper()

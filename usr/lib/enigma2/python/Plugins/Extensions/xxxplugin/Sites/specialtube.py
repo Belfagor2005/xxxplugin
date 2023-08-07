@@ -125,7 +125,7 @@ class main(Screen):
         if result:
             global search
             name = str(result)
-            url = self.urlx + str(result)
+            url = self.urlx + str(result) + '/'
             try:
                 search = True
                 self.session.open(specialtube5, name, url)
@@ -295,7 +295,12 @@ class specialtube2(Screen):
         try:
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             for page in pages:
-                url1 = self.url + str(page) + "/"
+                if page == 1:
+                    # page = ''
+                    url1 = self.url
+                else:
+                    url1 = self.url + str(page)  # + "/"
+                # url1 = self.url + str(page) + "/"
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -387,9 +392,9 @@ class specialtube3(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             print("content A =", content)
-            regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)".*?data-original="(.*?)"'
+            regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)"'  # .*?data-original="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
-            for url, name, pic in match:
+            for url, name in match:
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -412,9 +417,19 @@ class specialtube3(Screen):
             fpage = Utils.getUrl(url)
             regexvideo = "video_url: '(.*?)'"
             # regexvideo = 'video src="(.*?)"'
+
+            # # <iframe width="640" height="360" src="https://specialtube.com/embed/1932" frameborder="0" allowfullscreen></iframe>
+            # regexvideo = '<iframe width=".*?src="(.*?)".*?</iframe'
+            # match = re.compile(regexvideo, re.DOTALL).findall(fpage)
+            # a = 1
+            # for url in match:
+                # name = name + str(a)
+                # url1 = url
+                # if a == 1:
+                    # break
+
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             url1 = match[0]
-
             url1 = url1.replace('function/0/', '')  # .replace('.mp4/','.mp4')
             print("url1 B =", url1)
             self.play_that_shit(url1, name)

@@ -320,13 +320,15 @@ class superzooi2(Screen):
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
             for page in pages:
 
-                if 'http://superzooi.com/search/video' in self.url:
-                    # # http://superzooi.com/search/video/anal/2/
-                    # if page == 0:
-                       # url1 = self.url # + str(page) + "/"
-                    # else:
-                    url1 = self.url + '/' + str(page) + "/"
+                if 'superzooi.com/search/video' in self.url:
+                    # # http://www.superzooi.com/search/video/anal/4/
+                    if page == 1:
+                        page = ''
+                        url1 = self.url + str(page)  # + "/"
+                    else:
+                        url1 = self.url + '/' + str(page) + "/"
                     print('is search url', url1)
+                    
                 else:    
                     url1 = self.url + '/recent/' + str(page) + "/"
                 name = "Page " + str(page)
@@ -519,14 +521,14 @@ class superzooi4(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             # print("content A =", content)
-            regexvideo = 'src=".*?embed.heavy(.*?)"'
+            regexvideo = 'player-embed">.*?src="https://embed.heavy(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             url = "http://embed.heavy" + match[0]
             reference = "http://superzooi.com/"
             content2 = Utils.getUrl2(url, reference)
             if six.PY3:
                 content2 = six.ensure_str(content)
-            regexvideo = '"video/mp4" src="(.*?)"'
+            regexvideo = 'type="video/mp4" src="(.*?)"'
             match2 = re.compile(regexvideo,re.DOTALL).findall(content2)
             url = match2[0]
             name = self.name

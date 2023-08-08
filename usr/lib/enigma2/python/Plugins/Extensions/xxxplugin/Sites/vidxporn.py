@@ -142,7 +142,6 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        lnk = Utils.b64decoder('https://www.vidxporn.com/')
         sel = self.menu_list[idx]
         if sel == ("vidxporn Recent"):
             namex = "recent"

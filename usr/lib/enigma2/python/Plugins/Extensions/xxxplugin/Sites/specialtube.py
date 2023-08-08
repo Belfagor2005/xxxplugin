@@ -165,7 +165,7 @@ class main(Screen):
 
         if sel == 'SEARCH':
             namex = sel.upper()
-            lnk = 'http://specialtube.com/search/'
+            lnk = 'https://specialtube.com/search/'
             self.search_text(namex, lnk)
         # else:
             # self.adultonly(namex, lnk)
@@ -300,7 +300,6 @@ class specialtube2(Screen):
                     url1 = self.url
                 else:
                     url1 = self.url + str(page)  # + "/"
-                # url1 = self.url + str(page) + "/"
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -391,10 +390,11 @@ class specialtube3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
+            # print("content A =", content)
             regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)"'  # .*?data-original="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
+                print("cat bbb url =", url)
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -413,14 +413,12 @@ class specialtube3(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content B =", content)
+            # print("content B =", content)
             fpage = Utils.getUrl(url)
-            regexvideo = "video_url: '(.*?)'"
-            # regexvideo = 'video src="(.*?)"'
-
-            # # <iframe width="640" height="360" src="https://specialtube.com/embed/1932" frameborder="0" allowfullscreen></iframe>
-            # regexvideo = '<iframe width=".*?src="(.*?)".*?</iframe'
-            # match = re.compile(regexvideo, re.DOTALL).findall(fpage)
+            # regexvideo = "video_url: '(.*?)'"
+            # <iframe width="640" height="360" src="https://specialtube.com/embed/1932" frameborder="0" allowfullscreen></iframe>
+            regexvideo = '<iframe width=".*?src="(.*?)".*?</iframe'
+            match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             # a = 1
             # for url in match:
                 # name = name + str(a)
@@ -428,11 +426,124 @@ class specialtube3(Screen):
                 # if a == 1:
                     # break
 
-            match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             url1 = match[0]
-            url1 = url1.replace('function/0/', '')  # .replace('.mp4/','.mp4')
-            print("url1 B =", url1)
+
+            # url1 = url1.replace('function/0/', '')  # .replace('.mp4/','.mp4')
+            print("url1 BBBB =", url1)
             self.play_that_shit(url1, name)
+        except Exception as e:
+            print(e)
+
+    def play_that_shit(self, url, name):
+        self.session.open(specialtube4, str(name), str(url))
+
+    def exit(self):
+        self.close()
+
+
+class specialtube4(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                # 'green': self.message2,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(600, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        try:
+            content = Utils.getUrl(self.url)
+            if six.PY3:
+                content = six.ensure_str(content)
+            # print("content A =", content)
+
+            # <iframe width="640" height="360" src="https://specialtube.com/embed/1932" frameborder="0" allowfullscreen></iframe>
+            regexvideo = "rnd: '(.*?)'.*?https://specialtube.com/get_file(.*?).mp4"
+            # regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)"'  # .*?data-original="(.*?)"'
+            match = re.compile(regexvideo, re.DOTALL).findall(content)
+            for rnd, url in match:  # , name, pic in match:
+                name = self.name
+                url = 'https://specialtube.com/get_file' + url + '.mp4/?embed=true&rnd=' + str(rnd)
+                print("UrlAAA =", url)
+                self.cat_list.append(show_(name, url))
+            self['menulist'].l.setList(self.cat_list)
+            self['menulist'].moveToIndex(0)
+            if len(self.cat_list) < 0:
+                return
+            else:
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            # content = Utils.getUrl(url)
+            # if six.PY3:
+                # content = six.ensure_str(content)
+            # print("content B =", content)
+            # fpage = Utils.getUrl(url)
+            # regexvideo = "video_url: '(.*?)'"
+            # # regexvideo = 'video src="(.*?)"'
+            # match = re.compile(regexvideo, re.DOTALL).findall(fpage)
+            # url = match[0]
+
+            # url = url.replace('function/0/', '')  # .replace('.mp4/','.mp4')
+            print("url1 B =", url)
+            self.play_that_shit(url, name)
         except Exception as e:
             print(e)
 

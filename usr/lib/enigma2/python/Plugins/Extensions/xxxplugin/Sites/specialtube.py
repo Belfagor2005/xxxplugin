@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,14 +24,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 
 if sys.version_info >= (2, 7, 9):
@@ -42,7 +38,7 @@ if sys.version_info >= (2, 7, 9):
     except:
         sslContext = None
 
-currversion = '1.1'
+currversion = '1.0'
 title_plug = 'Specialtube '
 desc_plugin = ('..:: Specialtube by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
@@ -112,7 +108,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -167,34 +162,21 @@ class main(Screen):
             namex = sel.upper()
             lnk = 'https://specialtube.com/search/'
             self.search_text(namex, lnk)
-        # else:
-            # self.adultonly(namex, lnk)
-        # elif sel == ("Search"):
-                # namex = "search"
-                # lnk = lnk          #http://specialtube.com/search/anal/       #specialtube5
-                # self.session.open(specialtube, namex, lnk)
-        # return
 
     def up(self):
         self[self.currentList].up()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def down(self):
         self[self.currentList].down()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def left(self):
         self[self.currentList].pageUp()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def right(self):
         self[self.currentList].pageDown()
@@ -296,7 +278,6 @@ class specialtube2(Screen):
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             for page in pages:
                 if page == 1:
-                    # page = ''
                     url1 = self.url
                 else:
                     url1 = self.url + str(page)  # + "/"
@@ -311,7 +292,6 @@ class specialtube2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -390,11 +370,9 @@ class specialtube3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)"'  # .*?data-original="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
-                print("cat bbb url =", url)
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -413,23 +391,10 @@ class specialtube3(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content B =", content)
             fpage = Utils.getUrl(url)
-            # regexvideo = "video_url: '(.*?)'"
-            # <iframe width="640" height="360" src="https://specialtube.com/embed/1932" frameborder="0" allowfullscreen></iframe>
             regexvideo = '<iframe width=".*?src="(.*?)".*?</iframe'
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
-            # a = 1
-            # for url in match:
-                # name = name + str(a)
-                # url1 = url
-                # if a == 1:
-                    # break
-
             url1 = match[0]
-
-            # url1 = url1.replace('function/0/', '')  # .replace('.mp4/','.mp4')
-            print("url1 BBBB =", url1)
             self.play_that_shit(url1, name)
         except Exception as e:
             print(e)
@@ -506,16 +471,11 @@ class specialtube4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
-
-            # <iframe width="640" height="360" src="https://specialtube.com/embed/1932" frameborder="0" allowfullscreen></iframe>
             regexvideo = "rnd: '(.*?)'.*?https://specialtube.com/get_file(.*?).mp4"
-            # regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)"'  # .*?data-original="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for rnd, url in match:  # , name, pic in match:
                 name = self.name
                 url = 'https://specialtube.com/get_file' + url + '.mp4/?embed=true&rnd=' + str(rnd)
-                print("UrlAAA =", url)
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -531,18 +491,6 @@ class specialtube4(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            # content = Utils.getUrl(url)
-            # if six.PY3:
-                # content = six.ensure_str(content)
-            # print("content B =", content)
-            # fpage = Utils.getUrl(url)
-            # regexvideo = "video_url: '(.*?)'"
-            # # regexvideo = 'video src="(.*?)"'
-            # match = re.compile(regexvideo, re.DOTALL).findall(fpage)
-            # url = match[0]
-
-            # url = url.replace('function/0/', '')  # .replace('.mp4/','.mp4')
-            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -618,7 +566,6 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating"'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
             for url, name in match2:
@@ -700,7 +647,6 @@ class specialtube5(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()

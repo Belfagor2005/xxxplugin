@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -70,7 +68,6 @@ Panel_list = [
     ("MOST POPULAR"),
     ("LONGEST"),
     ("CHANNELS"),
-    # ("PORNSTARS"),
     ("CATEGORIES"),
     ]
 
@@ -132,7 +129,7 @@ class main(Screen):
         if result:
             global search
             name = str(result)
-            url = self.urlx + name 
+            url = self.urlx + name
             try:
                 search = True
                 self.session.open(alphapornoX, name, url)
@@ -152,9 +149,6 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        # lnk = b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("SEARCH"):
             lnk = ("https://www.alphaporno.com/search/?q=")
@@ -166,8 +160,6 @@ class main(Screen):
             lnk = (alphalong)
         if sel == ("CHANNELS"):
             lnk = (stripurl)
-        # if sel == ("PORNSTARS"):
-            # lnk = (alphastars)
         if sel == ("CATEGORIES"):
             lnk = (caturl)
         namex = sel.upper()
@@ -184,8 +176,6 @@ class main(Screen):
                 self.session.open(alphapornoX, namex, lnk)
             if 'CHANNELS' in namex:
                 self.session.open(alphapornoX, namex, lnk)
-            # if 'PORNSTARS' in namex:
-                # self.session.open(alphaporno2, namex, lnk)
             if 'CATEGORIES' in namex:
                 self.session.open(alphaporno2, namex, lnk)
             else:
@@ -274,13 +264,11 @@ class alphapornoX(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        print('ok pages url: ', url)
         if 'channels' in self.name.lower():
             self.session.open(alphaporno1, name, url)
         else:
@@ -548,7 +536,6 @@ class alphaporno2(Screen):
             n1 = content.find('span>Categories</span>', start)
             n2 = content.find('</ul>', n1)
             content2 = content[n1:n2]
-            print("content A =", content2)
             regexcat = '<a href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content2)
             for url, name in match:

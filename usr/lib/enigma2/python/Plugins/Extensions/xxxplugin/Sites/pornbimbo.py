@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
+from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -145,17 +142,10 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        lnk = Utils.b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("CATEGORY"):
             namex = "CATEGORY"
             self.session.open(pornbimbo, namex, lnk)
-        # elif sel == ("TAGS"):
-                # namex = "Tags"
-                # lnk = 'https://femefun.com/tags/'
-                # self.session.open(pornbimbotag, namex, lnk)
         elif sel == ("SEARCH"):
             namex = "Search"
             lnk = 'http://pornbimbo.com/search/'
@@ -228,7 +218,6 @@ class pornbimbo(Screen):
                                                                 # 'green': self.message2,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
-        # self.onFirstExecBegin.append(self.updateMenuList)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self.updateMenuList)
@@ -263,10 +252,8 @@ class pornbimbo(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = 'a class="item" href="(.*?)" title="(.*?)".*?img class="thumb" src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for url, name, pic in match:
                 url1 = url
                 name = name.replace('">', '')
@@ -397,7 +384,6 @@ class pornbimbo2(Screen):
         else:
             self.timer.callback.append(self.cat)
         self.timer.start(600, True)
-        # self.onFirstExecBegin.append(self.cat)
 
     def up(self):
         self[self.currentList].up()
@@ -425,7 +411,6 @@ class pornbimbo2(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat = '<div class="item.*?href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             print("match =", match)

@@ -12,10 +12,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -25,14 +23,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
+from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 if sys.version_info >= (2, 7, 9):
     try:
@@ -59,7 +55,6 @@ search = False
 
 Panel_list = [
  ('SEARCH'),
- # ('CATEGORIES'),
  ('ALL VIDEOS')]
 
 
@@ -105,7 +100,6 @@ class main(Screen):
     def filterChannels(self, result):
         if result:
             global search
-            # search = False
             name = str(result)
             url = self.urlx + str(result)
             try:
@@ -142,23 +136,15 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        lnk = Utils.b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("SEARCH"):
-                namex = "search"
-                lnk = 'https://femefun.com/search/'
-                self.search_text(namex, lnk)
-                # self.session.open(famefun, namex, lnk) #https://femefun.com/search/anal/
-        # elif sel == ("CATEGORIES"):
-                # namex = "categories"
-                # lnk = 'https://femefun.com/sitemap.xml?type=categories'
-                # self.session.open(famefunx, namex, lnk)
+            namex = "search"
+            lnk = 'https://femefun.com/search/'
+            self.search_text(namex, lnk)
         elif sel == ("ALL VIDEOS"):
-                namex = "Fameall"
-                lnk = 'https://femefun.com/sitemap.xml?type=videos&from_links_videos='
-                self.session.open(fameall, namex, lnk)
+            namex = "Fameall"
+            lnk = 'https://femefun.com/sitemap.xml?type=videos&from_links_videos='
+            self.session.open(fameall, namex, lnk)
 
     def up(self):
         self[self.currentList].up()
@@ -317,10 +303,8 @@ class fameall(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat = 'image\:loc>(.*?)<.*?title.*?CDATA\[(.*?)\].*?http(.*?)mp4'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for pic, name, url in match:
                 pic = pic
                 url1 = "http" + url + "mp4"
@@ -414,10 +398,8 @@ class fameallsrc(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = 'image\:loc>(.*?)<.*?title.*?CDATA\[(.*?)\].*?http(.*?)mp4'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match =", match)
             for pic, name, url in match:
                 if str(searchx) in name:
                     pic = pic

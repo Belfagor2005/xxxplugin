@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,15 +24,13 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1, Playstream2  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1, Playstream2
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
 
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 
 if sys.version_info >= (2, 7, 9):
@@ -132,8 +128,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
-
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -167,15 +161,15 @@ class main(Screen):
         global namex, lnk
         namex = ''
         lnk = 'https://xhamster.com/'
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("OTHER"):
             lnk = ("https://ita.xhamster.com/best/weekly")
         elif sel == ("CATEGORY"):
             lnk = ("https://xhamster.com/pornstars")
+
         elif sel == ("SEARCH"):
             lnk = ("https://xhamster.com/search/")
+
         namex = sel.upper()
         if sel == 'SEARCH':
             self.search_text(namex, lnk)
@@ -599,8 +593,6 @@ class xhamster2(Screen):
                 content = six.ensure_str(content)
             print("content A =", content)
             regexcat = '<div class="pornstar-thumb-container.*?a href="(.*?)".*?src="(.*?)" alt="(.*?)"'
-            
-            # regexcat = 'role-pop thumb-image-container".*?a href="(.*?)".*?src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             print("match =", match)
             for url, pic, name in match:

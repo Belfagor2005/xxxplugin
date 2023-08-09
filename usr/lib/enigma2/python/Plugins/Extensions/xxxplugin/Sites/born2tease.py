@@ -12,10 +12,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -25,12 +23,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -119,10 +116,8 @@ class main(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat = 'div id="videothumbs2">(.*?)<.*?<a href="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for name, url in match:
                 name = html_conv.html_unescape(name)
                 url1 = url.replace("videos", "allvideos")
@@ -211,34 +206,21 @@ class born2tease3(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            # txt = self.url
-            # urlad = (txt.rsplit('/', 1)[1])
-            # print(txt.rsplit('/', 1)[1])
-            # print('urlad ', urlad)
             start = 10
             n1 = self.url.find("/", start)
             n2 = self.url.find("/", (n1 + 1))
             site = self.url[:(n2+1)]
-            print('SITE ', site)
-
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat = 'div id="videothumbs2.*?<a href="(.*?)"><img src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("Love2tease Videos2 match =", match)
             for url, pic, name in match:
                 if 'http' in url:
                     url1 = url.replace("../", "")
                     pass
-                    print('url: ', url)
                 else:
-
                     url1 = site + str(url).replace("../", "")
-                # if "videos" in name.lower():
-                    # continue
-                print('url1: ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -254,19 +236,6 @@ class born2tease3(Screen):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
         try:
-            # content = Utils.getUrl(url)
-            # if six.PY3:
-                # content = six.ensure_str(content)
-            # print("content B =", content)
-            # start = 10
-            # n1 = url.find("/", start)
-            # n2 = url.find("/", (n1 + 1))
-            # site = url[:(n2+1)]
-            # regexvideo = 'video src="(.*?)"'
-            # match = re.compile(regexvideo, re.DOTALL).findall(content)
-            # # print("match =", match)
-            # url1 = site + match[0]
-            # print("url B =", url1)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -345,13 +314,10 @@ class born2tease4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-
             start = 10
             n1 = self.url.find("/", start)
             n2 = self.url.find("/", (n1 + 1))
             site = self.url[:(n2+1)]
-            print('SITE ', site)
-
             regexcat = '<video src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url in match:

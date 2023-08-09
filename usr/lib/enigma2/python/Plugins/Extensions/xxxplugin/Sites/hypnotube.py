@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,14 +24,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 
 if sys.version_info >= (2, 7, 9):
@@ -109,7 +105,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
 
         self['name'].setText(str(auswahl))
 
@@ -143,13 +138,9 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        # lnk = b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("SEARCH"):
             lnk = ("https://hypnotube.com/search/")
-            # lnk = ("https://www.hypnotube.com/video/search?q=")
         elif sel == ("HYPNOTUBE"):
             lnk = (stripurl)
         namex = sel.upper()
@@ -239,7 +230,6 @@ class hypnotubex(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -410,8 +400,7 @@ class hypnotube2(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
-            regexcat = '<div class="item-col col ".*?<a href="(.*?)" title="(.*?)"'  # .*?img data.*?src="(.*?)"'
+            regexcat = '<div class="item-col col ".*?<a href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
                 name = name.replace('"', '')

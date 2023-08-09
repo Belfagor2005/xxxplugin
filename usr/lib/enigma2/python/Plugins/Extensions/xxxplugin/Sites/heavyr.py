@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
+from Plugins.Extensions.xxxplugin.plugin import showlist
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -120,10 +117,8 @@ class main(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = 'div class="video-item category.*?a href="(.*?)".*?img src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for url, pic, name in match:
                 n1 = url.rfind("/")
                 url = url[(n1 + 1):]
@@ -204,7 +199,6 @@ class heavyr2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -281,10 +275,8 @@ class heavyr3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat = 'iv class="video-item compact.*?a href="(.*?)".*?img src="(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for url, pic, name in match:
                 name = name.replace('"', '')
                 pic = pic
@@ -307,11 +299,9 @@ class heavyr3(Screen):
         content = Utils.getUrl(url)
         if six.PY3:
             content = six.ensure_str(content)
-        print("content B =", content)
         regexvideo = 'type="video/mp4" src="(.*?)"'
         match = re.compile(regexvideo, re.DOTALL).findall(content)
         url = match[0]
-        print("url B =", url)
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):

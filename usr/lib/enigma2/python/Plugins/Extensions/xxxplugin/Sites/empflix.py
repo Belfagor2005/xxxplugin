@@ -12,10 +12,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,14 +24,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
+from Plugins.Extensions.xxxplugin.plugin import showlist
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 if sys.version_info >= (2, 7, 9):
     try:
@@ -117,14 +113,14 @@ class main(Screen):
     def updateMenuList(self):
         self.cat_list = []
         try:
-            url = stripurl  # Utils.b64decoder(stripurl)
+            url = stripurl
             content = Utils.getUrl2(url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             regexcat = r'class="col-6.+?href="([^"]+)">\s*<img.+?src="([^"]+).+?title">([^<]+)'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
-                url1 = url  # .replace("videos", "allvideos")
+                url1 = url
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -142,7 +138,6 @@ class main(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("play_that_shit main=", url)
         self.session.open(empflix3, name, url)
 
     def exit(self):
@@ -216,21 +211,10 @@ class empflix3(Screen):
                 content = six.ensure_str(content)
             regexcat = r'data-vid="([^"]+).+?src="([^"]+)"\s*alt="([^"]+).+?tion">([^<]+)'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            n = 1
             for url, pic, name, tmp in match:
                 name = name + '( ' + tmp + ' )'
-                url1 =  'https://player.empflix.com/ajax/video-player/' + url
-                # if "videos" in name.lower():
-                    # continue
-                print("play_that_shit cat empflix3 =", url1)
+                url1 = 'https://player.empflix.com/ajax/video-player/' + url
                 self.cat_list.append(show_(name, url1))
-            # if len(match) == 35 or len(match) == 80:
-                # name = 'Next Page'
-                # url = url + '/' + n
-                # n += 1
-
-                # self.cat_list.append(show_(name, url1))
-
             if len(self.cat_list) < 0:
                 return
             else:
@@ -245,17 +229,14 @@ class empflix3(Screen):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
         try:
-            print("url B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
 
     def play_that_shit(self, url, name):
         if 'https://www.empflix.com/' in url:
-            print("play_that_shit All =", url)
             self.session.open(empflix5, str(name), str(url))
         else:
-            print("play_that_shit empflix3 =", url)
             self.session.open(empflix5, str(name), str(url))
 
     def exit(self):
@@ -318,13 +299,11 @@ class empflix4(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        print("play_that_shit empflix4 =", url)
         self.session.open(empflix5, name, url)
 
     def exit(self):
@@ -401,8 +380,6 @@ class empflix5(Screen):
             content2 = json.loads(content).get('html')
             match = re.compile(r'source\s*src="([^"]+)').findall(content2)
             url1 = (match[0] + '|Referer=https://www.empflix.com/')
-            print("play_that_shit empflix5 =", url1)
-
             self.cat_list.append(show_(self.name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -416,7 +393,7 @@ class empflix5(Screen):
 
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]  # url = self['menulist'].getCurrent()[0][1]
+        url = self['menulist'].getCurrent()[0][1]
         try:
             self.play_that_shit(url, name)
         except Exception as e:

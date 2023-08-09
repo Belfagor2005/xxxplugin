@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,14 +24,13 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 
 if sys.version_info >= (2, 7, 9):
@@ -56,7 +53,6 @@ pluglogo = os.path.join(PLUGIN_PATH, 'pic/area51.png')
 referer = 'https://area51.porn/'
 area51url = 'https://area51.porn/top-rated/'
 area51latest = 'https://area51.porn/videos/'
-# area51pop = 'https://www.area51.com/most-popular/'
 stripurl = "https://www.area51.com/channels/"
 area51stars = 'https://area51.porn/models/'
 area51tags = 'https://area51.porn/tags/'
@@ -72,10 +68,6 @@ Panel_list = [
     ("SEARCH"),
     ("TOP RATED"),
     ("LATEST"),
-    # ("MOST POPULAR"),
-    # ("CHANNELS"),
-    # ("MODELS"),
-    # ("TAGS"),
     ("CATEGORIES"),
     ]
 
@@ -124,7 +116,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -157,22 +148,11 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        # lnk = b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("TOP RATED"):
             lnk = (area51url)
         if sel == ("LATEST"):
             lnk = (area51latest)
-        # if sel == ("MOST POPULAR"):
-            # lnk = (area51pop)
-        # if sel == ("CHANNELS"):
-            # lnk = (stripurl)
-        # if sel == ("MODELS"):
-            # lnk = (area51stars)
-        # if sel == ("TAGS"):
-            # lnk = (area51tags)
         if sel == ("CATEGORIES"):
             lnk = (caturl)
         namex = sel.upper()
@@ -184,14 +164,6 @@ class main(Screen):
                 self.session.open(area51X, namex, lnk)
             if 'LATEST' in namex:
                 self.session.open(area51X, namex, lnk)
-            # if 'MOST POPULAR' in namex:
-                # self.session.open(area51X, namex, lnk)
-            # if 'CHANNELS' in namex:
-                # self.session.open(area51X, namex, lnk)
-            # if 'MODELS' in namex:
-                # self.session.open(area51X, namex, lnk)
-            # if 'TAGS' in namex:
-                # self.session.open(area51X, namex, lnk)
             if 'CATEGORIES' in namex:
                 self.session.open(area512, namex, lnk)
             else:
@@ -280,7 +252,6 @@ class area51X(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -299,7 +270,6 @@ class area51X(Screen):
         self.close()
 
 
-# 10
 class area511(Screen):
     def __init__(self, session, name, url):
         self.session = session
@@ -393,7 +363,7 @@ class area511(Screen):
     def exit(self):
         self.close()
 
-# 3 - 2
+
 class area51X2(Screen):
     def __init__(self, session, name, url):
         self.session = session
@@ -487,7 +457,6 @@ class area51X2(Screen):
         self.close()
 
 
-# 9
 class area512(Screen):
     def __init__(self, session, name, url):
         self.session = session
@@ -557,7 +526,6 @@ class area512(Screen):
             n1 = content.find('<div class="main-content"', start)
             n2 = content.find('</div>', n1)
             content2 = content[n1:n2]
-            print("content A =", content2)
             regexcat = 'a href="(.*?)">(.*?)<'
             match = re.compile(regexcat, re.DOTALL).findall(content2)
             for url, name in match:

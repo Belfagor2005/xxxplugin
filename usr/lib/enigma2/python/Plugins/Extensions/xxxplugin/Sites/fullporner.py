@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  #, screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -115,7 +113,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -218,7 +215,6 @@ class fullporner1(Screen):
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
         self['poster'] = Pixmap()
-
         self.currentList = 'menulist'
         self.loading_ok = False
         self.count = 0
@@ -275,7 +271,6 @@ class fullporner1(Screen):
                 name = name.replace('"', '')
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com" + str(url)
-                print('fullporner1 url1= ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -346,7 +341,6 @@ class fullpornerX(Screen):
                 url1 = url + '/' + str(page)
                 name = "Page " + str(page)
                 i += 1
-                print('page number url1= ', url1)
                 self.urls.append(url1)
                 self.names.append(name)
             self['name'].setText(_('Please select ...'))
@@ -357,7 +351,6 @@ class fullpornerX(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -443,7 +436,6 @@ class fullpornerX2(Screen):
                 name = name.replace('"', '')
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com/watch/" + str(url)
-                print('fullpornerX2 url1= ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -461,7 +453,6 @@ class fullpornerX2(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print('play_that_shit fullpornerX2 url= ', url)
         self.session.open(fullporner3, name, url)
 
     def exit(self):
@@ -534,18 +525,12 @@ class fullporner2(Screen):
             content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            # start = 0
-            # n1 = content.find('<div class="main-content"', start)
-            # n2 = content.find('</div>', n1)
-            # content2 = content[n1:n2]
-            # print("content A =", content2)
             regexcat = 'div class="channels-card-image.*?<a class="popout" href="(.*?)".*?data-src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
                 name = name.replace('"', '')
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com" + str(url)
-                print('fullporner2 url1= ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -636,21 +621,12 @@ class fullporner3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # start = 0
-            # n1 = content.find('class="player', start)
-            # n2 = content.find('sponsor">', n1)
-            # content = content[n1:n2]
             regexcat = 'popout" href="/watch/(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
                 name = name.replace('"', '')
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com/watch/" + str(url)
-                # name = name
-                # if url.startswith('//'):
-                    # url1 = str(url).replace('//', 'http://')
-                # url1 = url1
-                print('fullporner3 url1= ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -668,7 +644,6 @@ class fullporner3(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print('play_that_shit fullporner3 url= ', url)
         self.session.open(fullporner4, str(name), str(url))
 
     def exit(self):
@@ -742,10 +717,6 @@ class fullporner4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # start = 0
-            # n1 = content.find('class="player', start)
-            # n2 = content.find('sponsor">', n1)
-            # content = content[n1:n2]
             regexcat = 'iframe width=.*?src="(.*?)" sandbox.*?</iframe'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url in match:
@@ -753,7 +724,6 @@ class fullporner4(Screen):
                 if url.startswith('//'):
                     url1 = str(url).replace('//', 'http://')
                 url1 = url1
-                print('fullporner3 url1= ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -845,16 +815,11 @@ class fullporner5(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # start = 0
-            # n1 = content.find('class="player', start)
-            # n2 = content.find('sponsor">', n1)
-            # content = content[n1:n2]
             regexcat = 'http(.*?).vid\"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url in match:
                 name = self.name
                 url1 = 'http' + str(url) + '.vid'
-                print('fullporner5 url1= ', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -872,7 +837,6 @@ class fullporner5(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print('play_that_shit fullporner5 url= ', url)
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):

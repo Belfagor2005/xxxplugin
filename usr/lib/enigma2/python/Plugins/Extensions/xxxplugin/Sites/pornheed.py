@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -112,7 +109,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -145,9 +141,6 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        # lnk = b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("Recently-added categories"):
             lnk = ("http://www.pornheed.com/categories/recently-added/")
@@ -155,8 +148,6 @@ class main(Screen):
             lnk = ("http://www.pornheed.com/categories/featured/")
         elif sel == ("Most-viewed categories"):
             lnk = ("http://www.pornheed.com/categories/most-viewed/")
-        # elif sel == ("SEARCH"):
-            # lnk = b64decoder(stripurl)
         namex = sel.upper()
         if sel == 'SEARCH':
             lnk = Utils.b64decoder(stripurl)
@@ -245,7 +236,6 @@ class pornheed(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -323,10 +313,8 @@ class pornheed1(Screen):
             content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = '<a href="/search/(.*?)".*?title="(.*?)".*?src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for url, name, pic in match:
                 url1 = "http://www.pornheed.com/search/" + url
                 name = name.upper()
@@ -421,7 +409,6 @@ class pornheed2(Screen):
                 content = six.ensure_str(content)
             regexcat = 'a href="/video/(.*?)".*?title="(.*?)".*?src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for url, name, pic in match:
                 url1 = "http://www.pornheed.com/video/" + url
                 pic = pic
@@ -487,7 +474,6 @@ class pornheed3(Screen):
         else:
             self.timer.callback.append(self.cat)
         self.timer.start(600, True)
-        # self.onFirstExecBegin.append(self.cat)
 
     def up(self):
         self[self.currentList].up()
@@ -515,16 +501,8 @@ class pornheed3(Screen):
             content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = "/><iframe width=.*?src='(.*?)'"
-            # /><iframe width='600' height='500' src='https://www.pornheed.com/embed/570336'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match 33=", match)
-            # url1 = "https://www.pornheed.com" + match[0]
-            # url1 = match[0]
-            # fpage2 = Utils.getUrl2(url1, referer)
-            # regexvideo = '<source src="(.*?)"'
-            # match = re.compile(regexvideo, re.DOTALL).findall(fpage2)
             url3 = match[0]
             if url3.startswith('http'):
                 pass
@@ -596,7 +574,6 @@ class pornheed4(Screen):
         else:
             self.timer.callback.append(self.cat)
         self.timer.start(600, True)
-        # self.onFirstExecBegin.append(self.cat)
 
     def up(self):
         self[self.currentList].up()
@@ -624,14 +601,10 @@ class pornheed4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
-            # rel="preload" href="https://v13.pornheed.com/570336.mp4"
-            # url1 = match[0]
-            # fpage2 = Utils.getUrl2(url1, referer)
             regexvideo = '<source src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             url3 = match[0]
-            name = self.name  # .upper()
+            name = self.name
             self.cat_list.append(show_(name, url3))
             if len(self.cat_list) < 0:
                 return

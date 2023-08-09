@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -114,7 +111,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -147,9 +143,6 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        # lnk = b64decoder(stripurl)
-        # if six.PY3:
-            # url = six.ensure_str(lnk)
         sel = self.menu_list[idx]
         if sel == ("Manporn-latest"):
             lnk = ("https://manporn.xxx/latest-updates/")
@@ -239,7 +232,7 @@ class manporn(Screen):
         try:
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
             for page in pages:
-                p = page  # -1
+                p = page
                 url1 = url + "/" + str(p) + "/"
                 name = "manporn-Page " + str(p)
                 self.urls.append(url1)
@@ -252,7 +245,6 @@ class manporn(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -325,15 +317,12 @@ class manporn1(Screen):
 
     def cat(self):
         self.cat_list = []
-        # url= b64decoder(stripurl)
         try:
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = '<div class="thumb".*?<a href="(.*?)".*?data-src="(.*?)".*?title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("match =", match)
             for url, pic, name in match:
                 url1 = url
                 name = name.upper()
@@ -426,10 +415,8 @@ class manporn2(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = '<iframe width=.*?src=\'(.*?)\''
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match =", match)
             url3 = match[0]
             name = self.name.upper()
             self.cat_list.append(show_(name, url3))
@@ -522,10 +509,6 @@ class manporn4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # start = 0
-            # n1 = content.find('class="player', start)
-            # n2 = content.find('sponsor">', n1)
-            # content2 = content[n1:n2]
             regexcat = 'source src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url in match:

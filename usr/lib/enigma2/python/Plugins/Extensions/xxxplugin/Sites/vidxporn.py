@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 if sys.version_info >= (2, 7, 9):
@@ -110,7 +107,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -168,28 +164,21 @@ class main(Screen):
             namex = sel.upper()
             lnk = 'https://www.vidxporn.com/search/'
             self.search_text(namex, lnk)
-        # return
 
     def up(self):
         self[self.currentList].up()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def down(self):
         self[self.currentList].down()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def left(self):
         self[self.currentList].pageUp()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def right(self):
         self[self.currentList].pageDown()
@@ -255,7 +244,6 @@ class vidxporn2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -334,7 +322,6 @@ class vidxporn3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexvideo = 'video-link".*?href="(.*?)".*?title="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
@@ -356,12 +343,10 @@ class vidxporn3(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content B =", content)
             fpage = Utils.getUrl(url)
             regexvideo = 'source src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             url1 = match[0]
-            print("url1 B =", url1)
             self.play_that_shit(url1, name)
         except Exception as e:
             print(e)
@@ -437,7 +422,6 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat2 = 'm-b-20">.*?href="(.*?)".*?title="(.*?)"'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
             for url, name in match2:

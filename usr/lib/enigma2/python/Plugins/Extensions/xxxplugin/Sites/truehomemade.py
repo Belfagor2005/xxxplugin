@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,15 +24,12 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
+from Plugins.Extensions.xxxplugin.plugin import showlist
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
-
 
 if sys.version_info >= (2, 7, 9):
     try:
@@ -100,11 +95,9 @@ class main(Screen):
                 content = six.ensure_str(content)
             regexcat = '<div class="preview".*?href="(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            
             name = 'SEARCH'
             url1 = 'https://truehomemade.com/search/'
             self.cat_list.append(show_(name, url1))
-            
             for url, name in match:
                 url1 = "https://truehomemade.com" + url
                 name = name.upper()
@@ -220,7 +213,7 @@ class truehomemadeplus2(Screen):
         url = self.url
         try:
             pages = []
-            page = 1  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            page = 1
             while page < 30:
                 pages.append(page)
                 page = page + 1
@@ -238,7 +231,6 @@ class truehomemadeplus2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -313,7 +305,6 @@ class truehomemade2(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            # url = Utils.b64decoder(stripurl)
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
@@ -339,7 +330,6 @@ class truehomemade2(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("url A =", url)
         self.session.open(truehomemade3, name, url)
 
     def exit(self):
@@ -434,7 +424,6 @@ class truehomemade3(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("url B =", url)
         self.session.open(truehomemade4, str(name), str(url))
 
     def exit(self):
@@ -508,14 +497,12 @@ class truehomemade4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content c =", content)
             start = 0
             n1 = content.find('<div class="full-play"', start)
             n2 = content.find(">Related videos<", n1)
             content2 = content[n1:n2]
             regexvideo = 'data-url=(.*?)>'
             match = re.compile(regexvideo, re.DOTALL).findall(content2)
-            print("match =", match[0])
             url = match[0]
             url1 = "https://truehomemade.com" + url  # match[0]
             name = self.name.upper()
@@ -537,7 +524,6 @@ class truehomemade4(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("url F =", url)
         self.session.open(truehomemade5, str(name), str(url))
 
     def exit(self):
@@ -611,15 +597,10 @@ class truehomemade5(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content e =", content)
             regexvideo = 'file": "https:(.*?).m3u8"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             url2 = match[0]
-            print("url d =", url2)
-            # pic = pic
-            # url1 = url
             url1 = "https:" + url2 + ".m3u8"  # match[0]
-            print("url 88 =", url1)
             name = self.name.upper()
             self.cat_list.append(show_(name, url1))
 
@@ -639,7 +620,6 @@ class truehomemade5(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("url F =", url)
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):

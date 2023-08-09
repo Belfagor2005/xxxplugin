@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -111,7 +108,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -345,14 +341,12 @@ class xnxxplus2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        # name = self['menulist'].getCurrent()[0][0]
-        # url = self['menulist'].getCurrent()[0][1]
+
         if 'xnxx.com/hits' in url:
             print('xnxx.com/hits select url', url)
             self.session.open(xnxx4, name, url)
@@ -548,8 +542,6 @@ class xnxx3(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("xnxx3 select= ", url)
-        # self.session.open(xnxx4, str(name), str(url))
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
@@ -623,17 +615,6 @@ class xnxx4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content c =", content)
-            # <div id="video_66859049" data-id="66859049" data-is-channel="1" class="thumb-block  with-uploader">
-            # <div class="thumb-inside"><div class="thumb">
-            # <a href="/search-video/eAE9UdFu2zAM_JVBz2oqUiIp5Qs2bCiKrnsY1kFwasMJ4MRBbDcphv37zn3Yi0Qe78ij9Mf9dFv32Xn3FfftdLsh_OK2qllKSMW7b277639mqbAIsTcSRli8KasFQ2BcYlHyJkmjBPGWWDiW4ikU6Ix8wmHFoteiVkQjODEoCQLhFLKI5wyJkIFDYmB7iyVTyuBE4qJoCHNGGRzJookJ05NZyooSgAxDkCcpGiHnENeijwFtdOXEEDiyrJyUEHoRNmyD6RqkYDHslZijEBoyYW2UOHFYRwAlUXgGgmERxvAIhZR-e_cDz_hy_3Zou_GO4hwuM4eX-90yzV1b57v-cBmm2g1DU_fjMLxfx7GtaTxR3V1fazMf664ZwGi77lybUzPUtjnXy7j0-zp1t9o3526qr8uxHk71OC4z4CsU47Xu5j5Yxvc9um3w7uHjfIadab40h34_r6WnD_Q70PDpvEzTO8BnpAT_WFNLxvejgcu2Id3EuCFS9_cftriKsA==/647518e0e1b131c146ab36e76925d8ba"
-            # ><img src="https://static-cdn77.xnxx-cdn.com/img/lightbox/lightbox-blank.gif"
-            # data-src="https://cdn77-pic.xnxx-cdn.com/videos/thumbs169xnxx/5b/ae/a2/5baea2cd9f572357437156d6dc511fc6-2/5baea2cd9f572357437156d6dc511fc6.17.jpg"
-             # data-idcdn="10" data-videoid="66859049" id="pic_66859049" alt="" /></a></div></div><div class="uploader">
-             # <a href="/porn-maker/anal-vids-trailers"><span class="name">Anal Vids Trailers</span></a></div><div class="thumb-under"><p>
-             # <a href="/search-video/eAE9UdFu2zAM_JVBz2oqUiIp5Qs2bCiKrnsY1kFwasMJ4MRBbDcphv37zn3Yi0Qe78ij9Mf9dFv32Xn3FfftdLsh_OK2qllKSMW7b277639mqbAIsTcSRli8KasFQ2BcYlHyJkmjBPGWWDiW4ikU6Ix8wmHFoteiVkQjODEoCQLhFLKI5wyJkIFDYmB7iyVTyuBE4qJoCHNGGRzJookJ05NZyooSgAxDkCcpGiHnENeijwFtdOXEEDiyrJyUEHoRNmyD6RqkYDHslZijEBoyYW2UOHFYRwAlUXgGgmERxvAIhZR-e_cDz_hy_3Zou_GO4hwuM4eX-90yzV1b57v-cBmm2g1DU_fjMLxfx7GtaTxR3V1fazMf664ZwGi77lybUzPUtjnXy7j0-zp1t9o3526qr8uxHk71OC4z4CsU47Xu5j5Yxvc9um3w7uHjfIadab40h34_r6WnD_Q70PDpvEzTO8BnpAT_WFNLxvejgcu2Id3EuCFS9_cftriKsA==/647518e0e1b131c146ab36e76925d8ba"
-             # title="Busted T-Girls, Ella Hollywood, 4on1, BWC, ATM, Balls Deep Anal, DAP, Rough Sex, Gapes, Cum in Mouth, Swallow BTG078"
-            # >Busted T-Girls, Ella Hollywood, 4on1, BWC, ATM, Balls Deep Anal, DAP, Rough Sex, Gapes, Cum in Mouth, Swallow BTG078</a></p><p class="metadata"><span class="right">
             regexvideo = 'data-src="(.*?)".*?a href="(.*?)".*?title="(.*?)">'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for pic, url, name in match:
@@ -656,7 +637,6 @@ class xnxx4(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
-        print("xnxx4 select= ", url)
         self.session.open(xnxx3, str(name), str(url))
 
     def exit(self):

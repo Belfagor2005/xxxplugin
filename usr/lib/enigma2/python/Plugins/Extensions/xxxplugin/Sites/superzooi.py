@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 if sys.version_info >= (2, 7, 9):
@@ -107,7 +104,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -150,28 +146,21 @@ class main(Screen):
             namex = sel.upper()
             lnk = 'http://superzooi.com/search/video/'
             self.search_text(namex, lnk)
-        # return
 
     def up(self):
         self[self.currentList].up()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def down(self):
         self[self.currentList].down()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def left(self):
         self[self.currentList].pageUp()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def right(self):
         self[self.currentList].pageDown()
@@ -251,7 +240,6 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat2 = '<li class="category span.*?<a href="(.*?)"><img src="(.*?)".*?a href.*?">(.*?)<'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
             for url, pic, name in match2:
@@ -319,17 +307,15 @@ class superzooi2(Screen):
         try:
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
             for page in pages:
-
                 if 'superzooi.com/search/video' in self.url:
-                    # # http://www.superzooi.com/search/video/anal/4/
                     if page == 1:
                         page = ''
                         url1 = self.url + str(page)  # + "/"
                     else:
                         url1 = self.url + '/' + str(page) + "/"
                     print('is search url', url1)
-                    
-                else:    
+
+                else:
                     url1 = self.url + '/recent/' + str(page) + "/"
                 name = "Page " + str(page)
                 self.urls.append(url1)
@@ -342,13 +328,11 @@ class superzooi2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        print("superzooi2 = ", url)
         self.session.open(superzooi3, name, url)
 
     def exit(self):
@@ -422,7 +406,6 @@ class superzooi3(Screen):
             content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexvideo = 'li class="span3".*?a href="(.*?)".*?title="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
@@ -442,7 +425,6 @@ class superzooi3(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -520,7 +502,6 @@ class superzooi4(Screen):
             content = Utils.getUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexvideo = 'player-embed">.*?src="https://embed.heavy(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             url = "http://embed.heavy" + match[0]
@@ -529,7 +510,7 @@ class superzooi4(Screen):
             if six.PY3:
                 content2 = six.ensure_str(content)
             regexvideo = 'type="video/mp4" src="(.*?)"'
-            match2 = re.compile(regexvideo,re.DOTALL).findall(content2)
+            match2 = re.compile(regexvideo, re.DOTALL).findall(content2)
             url = match2[0]
             name = self.name
             self.cat_list.append(show_(name, url))

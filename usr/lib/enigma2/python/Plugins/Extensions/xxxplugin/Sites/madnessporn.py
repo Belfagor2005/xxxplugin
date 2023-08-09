@@ -107,7 +107,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -171,23 +170,17 @@ class main(Screen):
     def up(self):
         self[self.currentList].up()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def down(self):
         self[self.currentList].down()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def left(self):
         self[self.currentList].pageUp()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def right(self):
         self[self.currentList].pageDown()

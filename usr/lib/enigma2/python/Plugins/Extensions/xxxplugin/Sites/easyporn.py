@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -111,7 +108,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -161,28 +157,21 @@ class main(Screen):
             namex = sel.upper()
             lnk = 'https://www.hd-easyporn.com/search/?k='
             self.search_text(namex, lnk)
-        # return
 
     def up(self):
         self[self.currentList].up()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def down(self):
         self[self.currentList].down()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def left(self):
         self[self.currentList].pageUp()
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
-        # self.load_poster()
 
     def right(self):
         self[self.currentList].pageDown()
@@ -284,7 +273,6 @@ class easyporn2(Screen):
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
             for page in pages:
                 if page == 1:
-                    # page = ''
                     url1 = self.url
                 else:
                     url1 = self.url + "?p=" + str(page)  # + "/"
@@ -299,7 +287,6 @@ class easyporn2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -378,12 +365,10 @@ class easyporn3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexvideo = '<div class="grid_box.*?a href="(.*?)".*?alt="(.*?)"'  # .*?data-original="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
                 url = "https://www.hd-easyporn.com" + url
-                print("cat bbb url =", url)
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -399,7 +384,6 @@ class easyporn3(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 BBBB =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -476,13 +460,11 @@ class easyporn4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexvideo = 'source src="(.*?)".*?data-label="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
                 name = name
                 url = "https://www.hd-easyporn.com" + url
-                print("UrlAAA =", url)
                 self.cat_list.append(show_(name, url))
             self['menulist'].l.setList(self.cat_list)
             self['menulist'].moveToIndex(0)
@@ -574,7 +556,6 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
             regexcat2 = 'div class="cat grid_box.*?a href="(.*?)".*?alt="(.*?)"'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
             for url, name in match2:

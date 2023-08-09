@@ -13,10 +13,8 @@
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
-from Components.Button import Button
 from Components.Label import Label
 from Components.Pixmap import Pixmap
-from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
@@ -26,12 +24,11 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1  # , returnIMDB
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_, cat_
+from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path  # , screenwidth
+from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 if sys.version_info >= (2, 7, 9):
@@ -41,15 +38,15 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'vidxporn '
-desc_plugin = ('..:: vidxporn by Lululla %s ::.. ' % currversion)
+title_plug = 'madnessporn '
+desc_plugin = ('..:: madnessporn by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 print(current)
 print(parent)
-pluglogo = os.path.join(PLUGIN_PATH, 'pic/vidxporn.png')
+pluglogo = os.path.join(PLUGIN_PATH, 'pic/madnessporn.png')
 _session = None
 Path_Movies = '/tmp/'
 global search
@@ -57,11 +54,11 @@ search = False
 
 
 Panel_list = [
- ('vidxporn Recent'),
- ('vidxporn Viewed'),
- ('vidxporn Top Rated'),
- ('vidxporn Longest'),
- ('vidxporn Categories'),  # 5
+ ('madnessporn Top Rated'),
+ ('madnessporn Viewed'),
+ ('madnessporn Longest'),
+ ('madnessporn Recent'),
+ ('madnessporn Categories'),  # 5
  ('SEARCH'),
  ]
 
@@ -123,10 +120,10 @@ class main(Screen):
         if result:
             global search
             name = str(result)
-            url = self.urlx + str(result)
+            url = self.urlx + str(result) + '/'
             try:
                 search = True
-                self.session.open(vidxporn2, name, url)
+                self.session.open(madnessporn2, name, url)
             except:
                 return
         else:
@@ -143,30 +140,31 @@ class main(Screen):
         global namex, lnk
         namex = ''
         sel = self.menu_list[idx]
-        if sel == ("vidxporn Recent"):
-            namex = "recent"
-            lnk = 'https://www.vidxporn.com/most-recent/'
-            self.session.open(vidxporn2, namex, lnk)
-        elif sel == ("vidxporn Viewed"):
-            namex = "viewed"
-            lnk = 'https://www.vidxporn.com/most-viewed/'
-            self.session.open(vidxporn2, namex, lnk)
-        elif sel == ("vidxporn Top Rated"):
+
+        if sel == ("madnessporn Top Rated"):
             namex = "toprated"
-            lnk = 'https://www.vidxporn.com/top-rated/'
-            self.session.open(vidxporn2, namex, lnk)
-        elif sel == ("vidxporn Longest"):
+            lnk = 'http://madnessporn.com/top-rated/'
+            self.session.open(madnessporn2, namex, lnk)
+        elif sel == ("madnessporn Viewed"):
+            namex = "viewed"
+            lnk = 'http://madnessporn.com/most-viewed/'
+            self.session.open(madnessporn2, namex, lnk)
+        elif sel == ("madnessporn Longest"):
             namex = "longest"
-            lnk = 'https://www.vidxporn.com/longest/'
-            self.session.open(vidxporn2, namex, lnk)
-        elif sel == ("vidxporn Categories"):
+            lnk = 'http://madnessporn.com/longest/'
+            self.session.open(madnessporn2, namex, lnk)
+        elif sel == ("madnessporn Recent"):
+            namex = "recent"
+            lnk = 'http://madnessporn.com/most-discussed/'
+            self.session.open(madnessporn2, namex, lnk)
+        elif sel == ("madnessporn Categories"):
             namex = "categories"
-            lnk = 'https://www.vidxporn.com/channels/'
+            lnk = 'http://madnessporn.com/channels/'
             self.session.open(categories, namex, lnk)
 
         if sel == 'SEARCH':
             namex = sel.upper()
-            lnk = 'https://www.vidxporn.com/search/'
+            lnk = 'https://www.madnessporn.com/search/'
             self.search_text(namex, lnk)
         # return
 
@@ -205,7 +203,7 @@ class main(Screen):
             self.close()
 
 
-class vidxporn2(Screen):
+class madnessporn2(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -228,7 +226,6 @@ class vidxporn2(Screen):
         self['actions'] = ActionMap(['OkCancelActions',
                                      'ColorActions'], {'ok': self.ok,
                                                        'cancel': self.exit,
-                                                       'green': self.ok,
                                                        'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
@@ -243,7 +240,7 @@ class vidxporn2(Screen):
         try:
             pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             for page in pages:
-                url1 = self.url + '/page' + str(page) + ".html"
+                url1 = self.url + "page" + page + ".html"
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -255,13 +252,12 @@ class vidxporn2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        self.session.open(vidxporn3, name, url)
+        self.session.open(madnessporn3, name, url)
 
     def exit(self):
         global search
@@ -269,7 +265,7 @@ class vidxporn2(Screen):
         self.close()
 
 
-class vidxporn3(Screen):
+class madnessporn3(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -298,7 +294,7 @@ class vidxporn3(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                'green': self.ok,
+                                                                # 'green': self.message2,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -334,8 +330,7 @@ class vidxporn3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
-            regexvideo = 'video-link".*?href="(.*?)".*?title="(.*?)"'
+            regexvideo = '<div class="content ">.*?a href="(.*?)" title="(.*?)">'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             for url, name in match:
                 self.cat_list.append(show_(name, url))
@@ -356,17 +351,16 @@ class vidxporn3(Screen):
             content = Utils.getUrl(url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content B =", content)
             fpage = Utils.getUrl(url)
-            regexvideo = 'source src="(.*?)"'
+            regexvideo = '<source src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
             url1 = match[0]
-            print("url1 B =", url1)
             self.play_that_shit(url1, name)
         except Exception as e:
             print(e)
 
     def play_that_shit(self, url, name):
+        print("url1 B =", url)
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
@@ -401,7 +395,7 @@ class categories(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                'green': self.ok,
+                                                                # 'green': self.message2,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -437,12 +431,10 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("content A =", content)
-            regexcat2 = 'm-b-20">.*?href="(.*?)".*?title="(.*?)"'
+            regexcat2 = 'title-thumb-channel">.*?a href="(.*?)">(.*?)<'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
             for url, name in match2:
-                url1 = url
-                self.cat_list.append(show_(name, url1))
+                self.cat_list.append(show_(name, url))
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
             if len(self.cat_list) < 0:
@@ -462,7 +454,7 @@ class categories(Screen):
             print(e)
 
     def play_that_shit(self, url, name):
-        self.session.open(vidxporn2, name, url)
+        self.session.open(madnessporn2, name, url)
 
     def exit(self):
         self.close()

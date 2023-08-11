@@ -237,7 +237,7 @@ class xhamster5(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -333,7 +333,7 @@ class xhamster7(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -369,7 +369,7 @@ class xhamster7(Screen):
             content = Utils.getUrl2(self.url, "https://xhamster.com")
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
+            # print("content A =", content)
             regexcat = 'a href="https\://xhamster\.com/categories/(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
 
@@ -436,7 +436,7 @@ class xhamsterx2(Screen):
         self.urls = []
         url = self.url
         try:
-            page = 1  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            page = 1
             while page < 21:
                 url1 = url + "/" + str(page)
                 name = "xhamster-Page " + str(page)
@@ -451,7 +451,6 @@ class xhamsterx2(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -499,7 +498,7 @@ class xhamsterx(Screen):
         self.urls = []
         url = self.url
         try:
-            page = 1  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            page = 1
             while page < 21:
                 url1 = url + "/" + str(page)
                 name = "xhamster-Page " + str(page)
@@ -514,7 +513,6 @@ class xhamsterx(Screen):
 
     def ok(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self["menulist"].getSelectionIndex()
@@ -555,7 +553,7 @@ class xhamster2(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -591,10 +589,8 @@ class xhamster2(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = '<div class="pornstar-thumb-container.*?a href="(.*?)".*?src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match =", match)
             for url, pic, name in match:
                 pic = pic
                 name = name.upper()
@@ -653,7 +649,7 @@ class xhamster4(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -690,10 +686,8 @@ class xhamster4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            print("content A =", content)
             regexcat = 'div class="thumb-list__item video-thumb.*?href="(.*?)".*?src="(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match =", match)
             items = []
             for url, pic, name in match:
                 name = cleanTitle(name)
@@ -739,10 +733,8 @@ class xhamster4(Screen):
                 content = Utils.getUrl(url)
                 if six.PY3:
                     content = six.ensure_str(content)
-                print("content A =", content)
                 regexcat = '<link rel="preload" href="(.*?)"'
                 match = re.compile(regexcat, re.DOTALL).findall(content)
-                print("match =", match)
                 for url in match:
                     if 'video' in str(url) or url.endswith('.mp4') or url.endswith('.m3u8'):
                         self.play_that_shit(url, name)

@@ -8,8 +8,8 @@
 *             26/03/2023               *
 *       Skin by MMark                  *
 ****************************************
-#--------------------#
-#Info http://t.me/tivustream
+# --------------------#
+# Info http://t.me/tivustream
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap

@@ -8,8 +8,8 @@
 *             26/03/2023               *
 *       Skin by MMark                  *
 ****************************************
-#--------------------#
-#Info http://t.me/tivustream
+# --------------------#
+# Info http://t.me/tivustream
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
@@ -30,7 +30,6 @@ from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 
 if sys.version_info >= (2, 7, 9):
@@ -280,7 +279,7 @@ class pornheed1(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()

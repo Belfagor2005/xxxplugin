@@ -221,11 +221,13 @@ class pornheed(Screen):
         self.urls = []
         url = self.url
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
             for page in pages:
-                p = page  # -1
-                url1 = url + "/" + str(p) + "/"
-                name = "pornheed-Page " + str(p)
+                if page == 1:
+                    url1 = url
+                else:
+                    url1 = url + "/" + str(page) + "/"
+                name = "pornheed-Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
             self['name'].setText(_('Please select ...'))
@@ -241,6 +243,7 @@ class pornheed(Screen):
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
+        print('pornheed url: ', url)
         self.session.open(pornheed1, name, url)
 
     def exit(self):
@@ -310,7 +313,7 @@ class pornheed1(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl2(self.url, referer)
+            content = Utils.ReadUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             regexcat = '<a href="/search/(.*?)".*?title="(.*?)".*?src="(.*?)"'
@@ -336,11 +339,74 @@ class pornheed1(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
+        print('pornheed1 url: ', url)
         self.session.open(pornheed2, name, url)
 
     def exit(self):
         self.close()
 
+
+class pornheed22(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with open(skin, 'r') as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['poster'] = Pixmap()
+        self['text'] = Label('Only for Adult by Lululla')
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self.name = name
+        self.url = url
+        self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions'], {'ok': self.ok,
+                                                       'cancel': self.exit,
+                                                       'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
+        else:
+            self.timer.callback.append(self._gotPageLoad)
+        self.timer.start(500, True)
+
+    def _gotPageLoad(self):
+        self.names = []
+        self.urls = []
+        url = self.url
+        try:
+            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            for page in pages:
+                url1 = url + "/" + str(page)
+                name = "pornheed22-Page " + str(page)
+                self.urls.append(url1)
+                self.names.append(name)
+            self['name'].setText(_('Please select ...'))
+            showlist(self.names, self['menulist'])
+        except Exception as e:
+            print(e)
+            self['name'].setText(_('Nothing ... Retry'))
+
+    def ok(self):
+        i = len(self.names)
+        if i < 0:
+            return
+        idx = self["menulist"].getSelectionIndex()
+        name = self.names[idx]
+        url = self.urls[idx]
+        print('pornheed22 url: ', url)
+        self.session.open(pornheed2, name, url)
+
+    def exit(self):
+        self.close()
 
 class pornheed2(Screen):
     def __init__(self, session, name, url):
@@ -379,7 +445,7 @@ class pornheed2(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
+        self.timer.start(500, True)
 
     def up(self):
         self[self.currentList].up()
@@ -404,15 +470,16 @@ class pornheed2(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl(self.url)
+            content = Utils.ReadUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
-            regexcat = 'a href="/video/(.*?)".*?title="(.*?)".*?src="(.*?)"'
+            print('content: ', content)
+            regexcat = '<a href="/video/(.*?)".*?title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            for url, name, pic in match:
+            for url, name in match:
                 url1 = "http://www.pornheed.com/video/" + url
-                pic = pic
-                name = name.upper()
+                print(name + '\n' + url + '\n')
+                name = name  # .upper()
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -430,6 +497,7 @@ class pornheed2(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
+        print('pornheed2 url: ', url)
         self.session.open(pornheed3, name, url)
 
     def exit(self):
@@ -473,7 +541,7 @@ class pornheed3(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
+        self.timer.start(800, True)
 
     def up(self):
         self[self.currentList].up()
@@ -498,7 +566,7 @@ class pornheed3(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl2(self.url, referer)
+            content = Utils.ReadUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             regexcat = "/><iframe width=.*?src='(.*?)'"
@@ -528,6 +596,7 @@ class pornheed3(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
+        print('pornheed3 url: ', url)
         self.session.open(pornheed4, str(name), str(url))
 
     def exit(self):
@@ -598,14 +667,15 @@ class pornheed4(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            content = Utils.getUrl(self.url)
+            content = Utils.ReadUrl2(self.url, referer)
             if six.PY3:
                 content = six.ensure_str(content)
             regexvideo = '<source src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(content)
-            url3 = match[0]
-            name = self.name
-            self.cat_list.append(show_(name, url3))
+            for url in match:
+                url3 = url  # match[0]
+                name = self.name
+                self.cat_list.append(show_(name, url3))
             if len(self.cat_list) < 0:
                 return
             else:
@@ -622,6 +692,7 @@ class pornheed4(Screen):
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
+        print('pornheed4 url: ', url)
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):

@@ -14,7 +14,10 @@ from __future__ import print_function
 from . import _, skin_path, screenwidth
 from .lib import Utils
 from .lib import html_conv
-from Components.AVSwitch import AVSwitch
+try:
+    from Components.AVSwitch import eAVSwitch
+except Exception:
+    from Components.AVSwitch import iAVSwitch as eAVSwitch
 from Components.ActionMap import ActionMap
 from Components.Button import Button
 from Components.config import config, ConfigSubsection
@@ -577,7 +580,7 @@ class ConfigEx(ConfigListScreen, Screen):
         self.onChangedEntry = []
         self.list = []
         ConfigListScreen.__init__(self, self.list, session=self.session, on_change=self.changedEntry)
-        self['key_red'] = Label(_('Exit'))
+        self['key_red'] = Label(_('Back'))
         self['key_green'] = Label(_('Save'))
         self['key_yellow'] = Button(_('Empty Cache'))
         self["description"] = Label('')

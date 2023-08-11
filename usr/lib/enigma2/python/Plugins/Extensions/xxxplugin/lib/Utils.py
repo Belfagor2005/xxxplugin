@@ -492,10 +492,10 @@ def checkRedirect(url):
         return str(url)
 
 
-def checkRedirect2(url):
+# def checkRedirect2(url):
     # print("*** check redirect ***")
-    import requests
-    from requests.adapters import HTTPAdapter
+    # import requests
+    # from requests.adapters import HTTPAdapter
     # hdr = {"User-Agent": "Enigma2 - Enigma2 Plugin"}
     # x = ""
     # adapter = HTTPAdapter()
@@ -508,8 +508,8 @@ def checkRedirect2(url):
     # except Exception as e:
         # print(e)
         # return str(url)
-    import ssl
-    from urllib3 import poolmanager
+    # import ssl
+    # from urllib3 import poolmanager
     # class TLSAdapter(requests.adapters.HTTPAdapter):
 
 
@@ -943,7 +943,7 @@ def ReadUrl2(url, referer):
     except:
         CONTEXT = None
 
-    TIMEOUT_URL = 15
+    TIMEOUT_URL = 30
     print('ReadUrl1:\n  url = %s' % url)
     try:
 
@@ -1010,7 +1010,7 @@ def ReadUrl(url):
     except:
         CONTEXT = None
 
-    TIMEOUT_URL = 15
+    TIMEOUT_URL = 30
     print('ReadUrl1:\n  url = %s' % url)
     try:
         req = urllib2.Request(url)
@@ -1072,14 +1072,14 @@ if PY3:
         req = urllib2.Request(url)
         req.add_header('User-Agent', RequestAgent())
         try:
-            response = urlopen(req)
+            response = urlopen(req, timeout=20)
             link = response.read().decode(errors='ignore')
             response.close()
             # return link
         except:
             import ssl
             gcontext = ssl._create_unverified_context()
-            response = urlopen(req, context=gcontext)
+            response = urlopen(req, timeout=20, context=gcontext)
             link = response.read().decode(errors='ignore')
             response.close()
         return link
@@ -1089,14 +1089,14 @@ if PY3:
         req.add_header('User-Agent', RequestAgent())
         req.add_header('Referer', referer)
         try:
-            response = urlopen(req)
+            response = urlopen(req, timeout=20)
             link = response.read().decode()
             response.close()
             # return link
         except:
             import ssl
             gcontext = ssl._create_unverified_context()
-            response = urlopen(req, context=gcontext)
+            response = urlopen(req, timeout=20, context=gcontext)
             link = response.read().decode()
             response.close()
         return link
@@ -1105,12 +1105,12 @@ if PY3:
         req = urllib2.Request(url)
         req.add_header('User-Agent', RequestAgent())
         try:
-            response = urlopen(req)
+            response = urlopen(req, timeout=20)
             # return response
         except:
             import ssl
             gcontext = ssl._create_unverified_context()
-            response = urlopen(req, context=gcontext)
+            response = urlopen(req, timeout=20, context=gcontext)
         return response
 else:
     import sys
@@ -1123,14 +1123,14 @@ else:
         req = urllib2.Request(url)
         req.add_header('User-Agent', RequestAgent())
         try:
-            response = urlopen(req)
+            response = urlopen(req, timeout=20)
             link = response.read()
             response.close()
             # return link
         except:
             import ssl
             gcontext = ssl._create_unverified_context()
-            response = urlopen(req, context=gcontext)
+            response = urlopen(req, timeout=20, context=gcontext)
             link = response.read()
             response.close()
         return link
@@ -1140,14 +1140,14 @@ else:
         req.add_header('User-Agent', RequestAgent())
         req.add_header('Referer', referer)
         try:
-            response = urlopen(req)
+            response = urlopen(req, timeout=20)
             link = response.read()
             response.close()
             # return link
         except:
             import ssl
             gcontext = ssl._create_unverified_context()
-            response = urlopen(req, context=gcontext)
+            response = urlopen(req, timeout=20, context=gcontext)
             link = response.read()
             response.close()
         return link
@@ -1156,12 +1156,12 @@ else:
         req = urllib2.Request(url)
         req.add_header('User-Agent', RequestAgent())
         try:
-            response = urlopen(req)
+            response = urlopen(req, timeout=20)
             # return response
         except:
             import ssl
             gcontext = ssl._create_unverified_context()
-            response = urlopen(req, context=gcontext)
+            response = urlopen(req, timeout=20, context=gcontext)
         return response
 
 

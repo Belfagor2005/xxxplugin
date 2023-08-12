@@ -94,7 +94,12 @@ class main(Screen):
                                                                 'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
-        self.onLayoutFinish.append(self.updateMenuList)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.updateMenuList)
+        else:
+            self.timer.callback.append(self.updateMenuList)
+        self.timer.start(500, True)
 
     def updateMenuList(self):
         self.menu_list = []

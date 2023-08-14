@@ -80,7 +80,7 @@ HTTPConnection.debuglevel = 1
 
 
 def getversioninfo():
-    currversion = '1.8'
+    currversion = '1.0'
     version_file = os.path.join(THISPLUG, 'version')
     if file_exists(version_file):
         try:
@@ -294,7 +294,7 @@ def getpics(names, pics, tmpfold, picfold):
         if name is None or name == '':
             name = "Video"
         url = pics[j]
-        ext = str(os.path.splitext(url)[-1])
+        ext = str(splitext(url)[-1])
         picf = os.path.join(picfold, str(name + ext))
         tpicf = os.path.join(tmpfold, str(name + ext))
 
@@ -306,12 +306,10 @@ def getpics(names, pics, tmpfold, picfold):
             cmd = "cp " + picf + " " + tmpfold
             print("In getpics fileExists(picf) cmd =", cmd)
             os.system(cmd)
-
         # test remove this
         # if file_exists(tpicf):
             # cmd = "rm " + tpicf
             # os.system(cmd)
-
         if not file_exists(picf):
             # if plugin_path in url:
             if THISPLUG in url:
@@ -330,7 +328,6 @@ def getpics(names, pics, tmpfold, picfold):
                     if poster:
                         # if PY3:
                             # poster = poster.encode()
-
                         if "|" in url:
                             n3 = url.find("|", 0)
                             n1 = url.find("Referer", n3)
@@ -384,7 +381,7 @@ def getpics(names, pics, tmpfold, picfold):
                 else:
                     size = [150, 220]
 
-                file_name, file_extension = os.path.splitext(tpicf)
+                file_name, file_extension = splitext(tpicf)
                 try:
                     im = Image.open(tpicf).convert("RGBA")
                     # shrink if larger
@@ -912,8 +909,6 @@ class GridMain(Screen):
             print('show imdb/tmdb')
 
     def paintFrame(self):
-        # print("In paintFrame self.index, self.minentry, self.maxentry =", self.index, self.minentry, self.maxentry)
-        # print("In paintFrame self.ipage = ", self.ipage)
         try:
             ifr = self.index - (10 * (self.ipage - 1))
             # print("ifr =", ifr)
@@ -953,18 +948,12 @@ class GridMain(Screen):
             idx = self.minentry + i
             self["label" + str(i + 1)].setText(self.names[idx])
             pic = self.pics[idx]
-            '''
-            print("i, idx =", i, idx)
-            print("self.names[idx] B=", self.names[idx])
-            print("idx, self.pics[idx]", idx, self.pics[idx])
-            print("pic =", pic)
-            '''
             if file_exists(pic):
                 print("pic path exists")
             else:
                 print("pic path not exists")
             picd = defpic
-            file_name, file_extension = os.path.splitext(pic)
+            file_name, file_extension = splitext(pic)
             if file_extension != ".png":
                 pic = str(file_name) + ".png"
             if self["pixmap" + str(i + 1)].instance:
@@ -976,7 +965,6 @@ class GridMain(Screen):
             i += 1
 
         self.index = self.minentry
-        # print("self.minentry, self.index =", self.minentry, self.index)
         self.paintFrame()
 
     def key_left(self):
@@ -1001,10 +989,7 @@ class GridMain(Screen):
             self.paintFrame()
 
     def key_up(self):
-        # print("keyup self.index, self.minentry = ", self.index, self.minentry)
         self.index = self.index - 5
-        # print("keyup self.index, self.minentry 2 = ", self.index, self.minentry)
-        # print("keyup self.ipage = ", self.ipage)
         if self.index < (self.minentry):
             if self.ipage > 1:
                 self.ipage = self.ipage - 1
@@ -1018,10 +1003,7 @@ class GridMain(Screen):
             self.paintFrame()
 
     def key_down(self):
-        # print("keydown self.index, self.maxentry = ", self.index, self.maxentry)
         self.index = self.index + 5
-        # print("keydown self.index, self.maxentry 2= ", self.index, self.maxentry)
-        # print("keydown self.ipage = ", self.ipage)
         if self.index > (self.maxentry):
             if self.ipage < self.npage:
                 self.ipage = self.ipage + 1
@@ -1031,7 +1013,6 @@ class GridMain(Screen):
                 self.ipage = 1
                 self.openTest()
             else:
-                # print("keydown self.index, self.maxentry 3= ", self.index, self.maxentry)
                 self.index = 0
             self.paintFrame()
         else:
@@ -1210,7 +1191,7 @@ class Playstream1(Screen):
         if result:
             if 'm3u8' not in self.urlm3u:
                 path = urlparse(self.urlm3u).path
-                ext = os.path.splitext(path)[1]
+                ext = splitext(path)[1]
                 if ext != '.mp4' or ext != '.mkv' or ext != '.avi' or ext != '.flv':  # or ext != 'm3u8':
                     ext = '.mp4'
                 fileTitle = re.sub(r'[\<\>\:\"\/\\\|\?\*\[\]]', '_', self.namem3u)
@@ -1289,17 +1270,17 @@ class Playstream1(Screen):
             except:
                 pass
             self.session.open(Playstream2, self.name, self.url)
+
         if idx == 0:
             self.name = self.names[idx]
             self.url = self.urls[idx]
             print('In playVideo url D=', self.url)
             self.play()
+
         if idx == 1:
-            # self.name = self.names[idx]
             self.url = self.urls[idx]
             print('In playVideo url D=', self.url)
             self.runRec()
-            # return
 
         elif idx == 2:
             print('In playVideo url B=', self.url)
@@ -1316,6 +1297,7 @@ class Playstream1(Screen):
             os.system('sleep 3')
             self.url = '/tmp/hls.avi'
             self.play()
+
         elif idx == 3:
             print('In playVideo url A=', self.url)
             url = self.url
@@ -1338,8 +1320,6 @@ class Playstream1(Screen):
             self.play2()
 
         elif idx == 5:
-            # if "youtube" in str(self.url):
-            # desc = self.desc
             try:
                 url = self.url
                 content = Utils.getUrlresp(url)
@@ -1360,27 +1340,20 @@ class Playstream1(Screen):
             except:
                 pass
             self.session.open(Playstream2, self.name, self.url)
-        # else:
-            # self.name = self.names[idx]
-            # self.url = self.urls[idx]
-            # print('In playVideo url D=', self.url)
-            # self.play()
+
         return
 
     def playfile(self, serverint):
         self.serverList[serverint].play(self.session, self.url, self.name)
 
     def play(self):
-        # desc = self.desc
         url = self.url
         name = self.name1
         self.session.open(Playstream2, name, url)
 
     def play2(self):
         if Utils.isStreamlinkAvailable:
-            # desc = self.desc
             name = self.name1
-            # if file_exists("/usr/sbin/streamlinksrv"):
             url = self.url
             url = url.replace(':', '%3a')
             print('In revolution url =', url)
@@ -1452,14 +1425,10 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
                                                              'cancel': self.cancel,
                                                              'back': self.cancel}, -1)
 
-        # self.onLayoutFinish.append(self.cicleStreamType)
-        # self.onClose.append(self.cancel)
-        # self.onClose.append(self.__onClose)
         if '8088' in str(self.url):
             self.onFirstExecBegin.append(self.slinkPlay)
         else:
             self.onFirstExecBegin.append(self.cicleStreamType)
-        # return
 
     def getAspect(self):
         return eAVSwitch().getAspectRatioSetting()
@@ -1603,32 +1572,32 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         self.close()
 
 
-# class AutoStartTimerxxxplugin:
+class AutoStartTimerxxxplugin:
 
-    # def __init__(self, session):
-        # self.session = session
-        # global _firstStartxxxplugin
-        # if _firstStartxxxplugin:
-            # self.runUpdate()
+    def __init__(self, session):
+        self.session = session
+        global _firstStartxxxplugin
+        if _firstStartxxxplugin:
+            self.runUpdate()
 
-    # def runUpdate(self):
-        # print("*** running update ***")
-        # try:
-            # from . import Update
-            # Update.upd_done()
-            # _firstStartxxxplugin = False
-        # except Exception as e:
-            # print('error _firstStartxxxplugin', e)
+    def runUpdate(self):
+        print("*** running update ***")
+        try:
+            from . import Update
+            Update.upd_done()
+            _firstStartxxxplugin = False
+        except Exception as e:
+            print('error _firstStartxxxplugin', e)
 
 
-# def autostart(reason, session=None, **kwargs):
-    # global autoStartTimerxxxplugin
-    # global _firstStartxxxplugin
-    # if reason == 0:
-        # if session is not None:
-            # _firstStartxxxplugin = True
-            # autoStartTimerxxxplugin = AutoStartTimerxxxplugin(session)
-    # return
+def autostart(reason, session=None, **kwargs):
+    global autoStartTimerxxxplugin
+    global _firstStartxxxplugin
+    if reason == 0:
+        if session is not None:
+            _firstStartxxxplugin = True
+            autoStartTimerxxxplugin = AutoStartTimerxxxplugin(session)
+    return
 
 
 def main(session, **kwargs):
@@ -1666,6 +1635,7 @@ def main(session, **kwargs):
 def Plugins(**kwargs):
     icona = 'icon.png'
     extDescriptor = PluginDescriptor(name=name_plug, description=_(title_plug), where=PluginDescriptor.WHERE_EXTENSIONSMENU, icon=icona, fnc=main)
-    result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main)]
+    result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main),
+              PluginDescriptor(name=name_plug, description=title_plug, where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=autostart)]
     result.append(extDescriptor)
     return result

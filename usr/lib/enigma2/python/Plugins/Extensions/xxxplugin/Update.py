@@ -8,6 +8,7 @@ print("Update.py")
 
 def upd_done():
     from os import popen, system
+    system('rm -rf /tmp/xxxplugin.tar')
     cmd01 = "wget http://patbuweb.com/adultlive/xxxplugin.tar -O /tmp/xxxplugin.tar ; tar -xvf /tmp/xxxplugin.tar -C /"
     cmd02 = "wget --no-check-certificate -U 'Enigma2 - xxxplugin Plugin' -c 'http://patbuweb.com/adultlive/xxxplugin.tar' -O '/tmp/xxxplugin.tar'; tar -xvf /tmp/xxxplugin.tar -C /"
     cmd22 = 'find /usr/bin -name "wget"'

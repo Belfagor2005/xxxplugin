@@ -94,18 +94,17 @@ def getversioninfo():
 
 
 global defpic, dblank
-_firstStartxxxplugin = True
+# _firstStartxxxplugin = True
 _session = None
 
 currversion = getversioninfo()
 Version = currversion + ' - 12.07.2023'
 title_plug = '..:: XXX Revolution V. %s ::..' % Version
-folder_path = "/tmp/xxxplugin/"
+folder_path = "/tmp/xplugin/"
 name_plug = 'XXX Revolution'
 piccons = os.path.join(THISPLUG, 'res/img/')
 res_plugin_path = os.path.join(THISPLUG, 'res/')
 pngx = os.path.join(res_plugin_path, 'pics/setting2.png')
-
 
 if not file_exists(folder_path):
     os.makedirs(folder_path)
@@ -1591,12 +1590,12 @@ class AutoStartTimerxxxplugin:
 
 
 def autostart(reason, session=None, **kwargs):
-    global autoStartTimerxxxplugin
+    global autoStartTimerxplugin
     global _firstStartxxxplugin
     if reason == 0:
         if session is not None:
             _firstStartxxxplugin = True
-            autoStartTimerxxxplugin = AutoStartTimerxxxplugin(session)
+            autoStartTimerxplugin = AutoStartTimerxxxplugin(session)
     return
 
 

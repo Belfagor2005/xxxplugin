@@ -107,7 +107,7 @@ class main(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
@@ -264,7 +264,7 @@ class mylust2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0]
+        name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
         self.play_that_shit(url, name)
 

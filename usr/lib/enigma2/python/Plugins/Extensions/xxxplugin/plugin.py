@@ -746,6 +746,9 @@ class Main(Screen):
         self.names = []
         self.urls = []
         self.pics = []
+        # sort test
+        items = []
+        # sort test
         i = 0
         name = ""
         desc = ""
@@ -776,11 +779,21 @@ class Main(Screen):
                         url = THISPLUG + "Sites/%s.py" % name
                         pic = os.path.join(piccons, '%s.png' % name)
                         if name not in self.names:
-                            self.names.append(name)
-                            self.urls.append(url)
-                            self.pics.append(pic)
-                            i += 1
-                        print(name + '\n' + desc + '\n' + url + '\n' + pic)
+                            # sort test
+                            item = name + "###" + url + "###" + pic
+                            items.append(item)
+                items.sort()
+                for item in items:
+                    name = item.split('###')[0]
+                    url = item.split('###')[1]
+                    pic = item.split('###')[2]
+                    # sort test
+
+                    self.names.append(name)
+                    self.urls.append(url)
+                    self.pics.append(pic)
+                    i += 1
+                    print(name + '\n' + desc + '\n' + url + '\n' + pic)
         except Exception as e:
             print(e)
         title = name_plug
@@ -855,6 +868,7 @@ class GridMain(Screen):
 
         list = []
         list = names
+        # list.sort()
         self["menu"] = List(list)
         for x in list:
             print("x in list =", x)

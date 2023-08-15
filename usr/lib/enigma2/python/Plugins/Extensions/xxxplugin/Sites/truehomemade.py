@@ -108,7 +108,7 @@ class main(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
@@ -138,22 +138,22 @@ class main(Screen):
 
     def up(self):
         self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def down(self):
         self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def left(self):
         self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def right(self):
         self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def ok(self):
@@ -284,22 +284,22 @@ class truehomemade2(Screen):
 
     def up(self):
         self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def down(self):
         self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def left(self):
         self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def right(self):
         self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def cat(self):
@@ -319,7 +319,7 @@ class truehomemade2(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
@@ -413,7 +413,7 @@ class truehomemade3(Screen):
             else:
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0]
+                auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)

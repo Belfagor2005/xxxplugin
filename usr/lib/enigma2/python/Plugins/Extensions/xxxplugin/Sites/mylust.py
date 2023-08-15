@@ -137,22 +137,22 @@ class main(Screen):
 
     def up(self):
         self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def down(self):
         self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def left(self):
         self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def right(self):
         self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0]
+        auswahl = self['menulist'].getCurrent()[0][0]
         self['name'].setText(str(auswahl))
 
     def ok(self):

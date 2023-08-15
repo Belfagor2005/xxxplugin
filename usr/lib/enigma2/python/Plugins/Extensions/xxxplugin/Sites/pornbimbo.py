@@ -142,6 +142,7 @@ class main(Screen):
         sel = self.menu_list[idx]
         if sel == ("CATEGORY"):
             namex = "CATEGORY"
+            lnk = 'http://pornbimbo.com/categories/'
             self.session.open(pornbimbo, namex, lnk)
         elif sel == ("SEARCH"):
             namex = "Search"

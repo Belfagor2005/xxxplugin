@@ -49,7 +49,6 @@ from Screens.LocationBox import LocationBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.VirtualKeyBoard import VirtualKeyBoard
-from Tools.Directories import SCOPE_PLUGINS, resolveFilename
 from Tools.Downloader import downloadWithProgress
 from requests import get, exceptions
 from requests.exceptions import HTTPError
@@ -227,6 +226,7 @@ print('Path Cache: ', Path_Cache)
 
 
 def returnIMDB(text_clear):
+    from Tools.Directories import SCOPE_PLUGINS, resolveFilename
     TMDB = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('TMDB'))
     IMDb = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('IMDb'))
     if file_exists(TMDB):
@@ -253,7 +253,7 @@ def returnIMDB(text_clear):
 
 
 def threadGetPage(url=None, file=None, key=None, success=None, fail=None, *args, **kwargs):
-    print('[tivustream][threadGetPage] url, file, key, args, kwargs', url, "   ", file, "   ", key, "   ", args, "   ", kwargs)
+    print('[xxxplugin][threadGetPage] url, file, key, args, kwargs', url, "   ", file, "   ", key, "   ", args, "   ", kwargs)
     try:
         url = url.rstrip('\r\n')
         url = url.rstrip()
@@ -267,7 +267,7 @@ def threadGetPage(url=None, file=None, key=None, success=None, fail=None, *args,
         else:
             success(response.content, file)
     except HTTPError as httperror:
-        print('[tivustream][threadGetPage] Http error: ', httperror)
+        print('[xxxplugin][threadGetPage] Http error: ', httperror)
         # fail(error)  # E0602 undefined name 'error'
     except exceptions.RequestException as error:
         print(error)
@@ -461,52 +461,6 @@ def savePoster(dwn_poster, url_poster):
     with open(dwn_poster, 'wb') as f:
         f.write(requests.get(url_poster, stream=True, allow_redirects=True).content)
         f.close()
-
-
-# class xxxpluginmain(Screen):
-    # def __init__(self, session):
-        # Screen.__init__(self, session)
-        # self.list = []
-        # self["menu"] = List(self.list)
-        # self["menu"] = rvList([])
-        # title = _(name_plug)
-        # self["title"] = Button(title)
-        # self["info"] = Label()
-        # self["info"].setText(title_plug)
-        # self["pixmap"] = Pixmap()
-        # self["key_red"] = Button(_("Cancel"))
-        # self["key_green"] = Button(_("Select"))
-        # self["actions"] = ActionMap(["MenuActions", "DirectionActions", "ColorActions", "OkCancelActions"], {
-            # "ok": self.okClicked,
-            # "cancel": self.close,
-            # "red": self.close,
-            # "green": self.okClicked
-        # }, -1)
-
-        # self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
-        # self.onLayoutFinish.append(self.startSession)
-
-    # def startSession(self):
-        # self.names = []
-        # self.urls = []
-        # self.infos = []
-        # self.menu = [
-            # [_("About"), _("Information Us"), ""],
-            # [_("Config"), _("Setup Plugin"), ""],
-            # [_("Live TV"), _("Live TV Stream"), "https://tivustream.website/urls/e2live"],
-            # [_("Film"), _("Film and Movie"), "https://tivustream.website/urls/e2movie"],
-            # [_("Serie"), _("Series"), "https://tivustream.website/urls/e2series"],
-            # [_("Search"), _("Search your Movie"), "https://tivustream.website/php_filter/kodi19/kodi19.php?mode=movie&query="],
-        # ]
-
-        # self.session.open(AnimMain, name_plug, "Main", self.menu)
-
-    # def okClicked(self):
-        # pass
-
-    # def cancel(self):
-        # self.session.nav.playService(self.srefInit)
-        # self.close()
 
 
 class Abouttvr(Screen):

@@ -8,8 +8,8 @@
 *             26/03/2023               *
 *       Skin by MMark                  *
 ****************************************
-#--------------------#
-#Info http://t.me/tivustream
+# --------------------#
+# Info http://t.me/tivustream
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
@@ -28,6 +28,7 @@ from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
+from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
@@ -39,7 +40,7 @@ if sys.version_info >= (2, 7, 9):
     except:
         sslContext = None
 
-currversion = '1.1'
+currversion = '1.0'
 title_plug = 'Easyporn '
 desc_plugin = ('..:: Easyporn by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
@@ -57,11 +58,11 @@ search = False
 
 
 Panel_list = [
- ('Easyporn top rated'),
- ('Easyporn most popular'),
- ('Easyporn categories'),
- ('SEARCH'),
- ]
+    ('Easyporn top rated'),
+    ('Easyporn most popular'),
+    ('Easyporn categories'),
+    ('SEARCH'),
+    ]
 
 
 class main(Screen):
@@ -119,7 +120,10 @@ class main(Screen):
         from Screens.VirtualKeyBoard import VirtualKeyBoard
         self.namex = name
         self.urlx = url
-        self.session.openWithCallback(self.filterChannels, VirtualKeyBoard, title=_("Filter this category..."), text='')
+        self.session.openWithCallback(self.filterChannels,
+                                      VirtualKeyBoard, title=_(
+                                       "Filter this category..."
+                                      ), text='')
 
     def filterChannels(self, result):
         if result:
@@ -145,9 +149,14 @@ class main(Screen):
         global namex, lnk
         namex = ''
         sel = self.menu_list[idx]
+        if sel == 'SEARCH':
+            namex = sel.upper()
+            lnk = 'https://www.hd-easyporn.com/search/?k='
+            self.search_text(namex, lnk)
         if sel == ("Easyporn top rated"):
             namex = "top"
             lnk = 'https://www.hd-easyporn.com/top-rated-porn-movies/'
+
             self.session.open(easyporn2, namex, lnk)
         elif sel == ("Easyporn most popular"):
             namex = "popular"
@@ -157,11 +166,8 @@ class main(Screen):
             namex = "categories"
             lnk = 'https://www.hd-easyporn.com/categories/'
             self.session.open(categories, namex, lnk)
-
-        if sel == 'SEARCH':
-            namex = sel.upper()
-            lnk = 'https://www.hd-easyporn.com/search/?k='
-            self.search_text(namex, lnk)
+        else:
+            return
 
     def up(self):
         self[self.currentList].up()
@@ -280,7 +286,7 @@ class easyporn2(Screen):
                 if page == 1:
                     url1 = self.url
                 else:
-                    url1 = self.url + "?p=" + str(page)  # + "/"
+                    url1 = self.url + "?p=" + str(page)
                 name = "Page " + str(page)
                 self.urls.append(url1)
                 self.names.append(name)
@@ -334,7 +340,7 @@ class easyporn3(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -370,16 +376,18 @@ class easyporn3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            regexvideo = '<div class="grid_box.*?a href="(.*?)".*?alt="(.*?)"'  # .*?data-original="(.*?)"'
-            match = re.compile(regexvideo, re.DOTALL).findall(content)
+            regexcat = '<div class="grid_box.*?a href="(.*?)".*?alt="(.*?)"'  # .*?data-original="(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
-                url = "https://www.hd-easyporn.com" + url
+                name = html_conv.html_unescape(name)
+                url = "https://www.hd-easyporn.com" + str(url)
                 self.cat_list.append(show_(name, url))
-            self['menulist'].l.setList(self.cat_list)
-            self['menulist'].moveToIndex(0)
+
             if len(self.cat_list) < 0:
                 return
             else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
                 auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
@@ -429,7 +437,7 @@ class easyporn4(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -465,17 +473,18 @@ class easyporn4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            regexvideo = 'source src="(.*?)".*?data-label="(.*?)"'
-            match = re.compile(regexvideo, re.DOTALL).findall(content)
+            regexcat = 'source src="(.*?)".*?data-label="(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
                 name = name
                 url = "https://www.hd-easyporn.com" + url
                 self.cat_list.append(show_(name, url))
-            self['menulist'].l.setList(self.cat_list)
-            self['menulist'].moveToIndex(0)
+
             if len(self.cat_list) < 0:
                 return
             else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
                 auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
@@ -494,6 +503,8 @@ class easyporn4(Screen):
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
+        global search
+        search = False
         self.close()
 
 
@@ -525,7 +536,7 @@ class categories(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -566,11 +577,11 @@ class categories(Screen):
             for url, name in match2:
                 url1 = "https://www.hd-easyporn.com" + url
                 self.cat_list.append(show_(name, url1))
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
             if len(self.cat_list) < 0:
                 return
             else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
                 auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:

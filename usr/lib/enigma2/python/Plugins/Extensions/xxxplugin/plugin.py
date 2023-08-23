@@ -219,7 +219,7 @@ except:
 
 global Path_Movies, Path_Cache
 
-Path_Movies = str(cfg.movie.value)
+Path_Movies = str(cfg.movie.value) + '/'
 Path_Cache = str(cfg.cachefold.value)
 print('Path Movies: ', Path_Movies)
 print('Path Cache: ', Path_Cache)
@@ -1115,6 +1115,11 @@ class Playstream1(Screen):
         self.name1 = name
         self.url = url
         self.desc = ''
+        self.error_message = ""
+        self.last_recvbytes = 0
+        self.error_message = None
+        self.download = None
+        self.aborted = False
         print('In Playstream1 self.url =', url)
         self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
         self['list'] = rvList([])
@@ -1170,7 +1175,7 @@ class Playstream1(Screen):
                 self.downloading = True
                 self.download = downloadWithProgress(self.urlm3u, self.in_tmp)
                 self.download.addProgress(self.downloadProgress)
-                self.download.start().addCallback(self.check).addErrback(self.showError)
+                self.download.start().addCallback(self.check).addErrback(self.download_failed)
             else:
                 self.downloading = False
                 self.session.open(MessageBox, _('Download Failed!!!'), MessageBox.TYPE_INFO, timeout=5)
@@ -1178,9 +1183,10 @@ class Playstream1(Screen):
             self.downloading = False
 
     def downloadProgress(self, recvbytes, totalbytes):
+        self.last_recvbytes = recvbytes
         self["progress"].show()
-        self['progress'].value = int(100 * recvbytes / float(totalbytes))
-        self['progresstext'].text = '%d of %d kBytes (%.2f%%)' % (recvbytes / 1024, totalbytes / 1024, 100 * recvbytes / float(totalbytes))
+        self['progress'].value = int(100 * self.last_recvbytes // float(totalbytes))
+        self['progresstext'].text = '%d of %d kBytes (%.2f%%)' % (self.last_recvbytes // 1024, totalbytes // 1024, 100 * self.last_recvbytes // float(totalbytes))
 
     def check(self, fplug):
         checkfile = self.in_tmp
@@ -1194,6 +1200,23 @@ class Playstream1(Screen):
     def showError(self, error):
         self.downloading = False
         self.session.open(MessageBox, _('Download Failed!!!'), MessageBox.TYPE_INFO, timeout=5)
+
+    def download_failed(self, failure_instance=None, error_message=""):
+        self.error_message = error_message
+        if error_message == "" and failure_instance is not None:
+            self.error_message = failure_instance.getErrorMessage()
+        self.downloading = False
+        self.session.open(MessageBox, _('Download Failed!!!'), MessageBox.TYPE_INFO, timeout=5)
+
+    def abort(self):
+        print("aborting", self.url)
+        if self.download:
+            self.download.stop()
+        self.aborted = True
+
+    def download_finished(self, string=""):
+        if self.aborted:
+            self.finish(aborted=True)
 
     def openTest(self):
         url = self.url

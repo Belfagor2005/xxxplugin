@@ -1,10 +1,11 @@
-<screen name="FullHD1" position="center,center" size="1200,640" title="Player Choice" backgroundColor="#000000" flags="wfNoBorder">
-    <widget name="info" position="0,0" zPosition="4" size="1200,64" font="Regular;48" foregroundColor="#ffffff" backgroundColor="#000000" halign="center" valign="center"/>
-    <widget name="list" position="80,80" size="1040,360" foregroundColor="#ffffff" backgroundColor="#000000" zPosition="4" scrollbarMode="showOnDemand" itemHeight="72" backgroundColorSelected="#c10801"/>
-    <ePixmap pixmap="skin_default/buttons/red.png" position="80,560" size="40,40" alphatest="blend" zPosition="1"/>
-    <widget name="key_red" position="160,560" size="400,40" font="Regular;40" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
-    <widget name="key_green" position="760,560" size="400,40" font="Regular;40" halign="left" valign="center" backgroundColor="#4a5b6d" zPosition="1" transparent="1"/>
-    <ePixmap pixmap="skin_default/buttons/green.png" position="680,560" size="40,40" alphatest="blend" zPosition="1"/>
-    <widget name="progress" position="400,560" size="400,40" foregroundColor="#2a70a4" backgroundColor="#10000000" transparent="1" zPosition="5"/>
-    <widget source="progresstext" render="Label" font="Regular;28" position="400,560" size="400,40" backgroundColor="#202020" transparent="1" halign="center" zPosition="6"/>
+<screen name="FullHD1" position="640,360" size="1280,720" title="Player Choice" backgroundColor="#000000" flags="wfNoBorder">
+	<eLabel position="46,7" zPosition="-1" size="1181,708" backgroundColor="#00000000" />
+    <widget name="list" position="120,93" size="1040,491" foregroundColor="#ffffff" backgroundColor="#000000" zPosition="4" scrollbarMode="showOnDemand" itemHeight="72" backgroundColorSelected="#c10801" />
+ 	<widget name="info" position="63,14" zPosition="4" size="1150,60" font="Regular;38" foregroundColor="#ffffff" transparent="1" halign="center" valign="center" />
+	<ePixmap name="red" position="68,625" zPosition="2" size="210,60" pixmap="skin_default/buttons/red.png" transparent="1" alphatest="on" />
+	<widget name="key_red" position="67,625" size="210,60" valign="center" halign="center" zPosition="4" foregroundColor="#ffffff" font="Regular;30" transparent="1" shadowColor="#25062748" shadowOffset="-2,-2" />
+	<ePixmap name="green" position="1000,625" zPosition="2" size="210,60" pixmap="skin_default/buttons/green.png" transparent="1" alphatest="on" />
+	<widget name="key_green" position="997,625" size="210,60" valign="center" halign="center" zPosition="4" foregroundColor="#ffffff" font="Regular;30" transparent="1" shadowColor="#25062748" shadowOffset="-2,-2" />
+	<widget name="progress" position="290,595" size="696,60" foregroundColor="#2a70a4" backgroundColor="#10000000" transparent="1" zPosition="5" />
+	<widget source="progresstext" render="Label" font="Regular; 38" position="290,595" size="696,60" backgroundColor="#202020" transparent="1" halign="center" zPosition="6" foregroundColor="#ffffff" valign="center" />
 </screen>

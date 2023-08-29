@@ -114,7 +114,7 @@ if screenwidth.width() == 2560:
     dblank = THISPLUG + 'res/img/undefinided.png'
 
 elif screenwidth.width() == 1920:
-    defpic = THISPLUG + 'res/img/no_work.png'
+    defpic = THISPLUG + 'res/img/tvs2.png'
     dblank = THISPLUG + 'res/img/undefinided.png'
 else:
     defpic = THISPLUG + 'res/img/no_work.png'
@@ -376,7 +376,7 @@ def getpics(names, pics, tmpfold, picfold):
                 if screenwidth.width() == 2560:
                     size = [294, 440]
                 elif screenwidth.width() == 1920:
-                    size = [220, 330]
+                    size = [200, 200]
                 else:
                     size = [150, 220]
 
@@ -773,7 +773,7 @@ class GridMain(Screen):
 
         self.pos = []
 
-        if screenwidth.width() == 2560:
+        if screenwidth.width() > 1920:
             self.pos.append([180, 90])
             self.pos.append([658, 90])
             self.pos.append([1134, 90])
@@ -786,16 +786,16 @@ class GridMain(Screen):
             self.pos.append([2084, 750])
 
         elif screenwidth.width() == 1920:
-            self.pos.append([122, 42])
-            self.pos.append([478, 42])
-            self.pos.append([834, 42])
-            self.pos.append([1190, 42])
-            self.pos.append([1546, 42])
-            self.pos.append([122, 522])
-            self.pos.append([478, 522])
-            self.pos.append([834, 522])
-            self.pos.append([1190, 522])
-            self.pos.append([1546, 522])
+            self.pos.append([154, 165])
+            self.pos.append([513, 165])
+            self.pos.append([869, 165])
+            self.pos.append([1230, 165])
+            self.pos.append([1580, 165])
+            self.pos.append([154, 630])
+            self.pos.append([513, 630])
+            self.pos.append([869, 630])
+            self.pos.append([1230, 630])
+            self.pos.append([1580, 630])
         else:
             self.pos.append([81, 28])
             self.pos.append([319, 28])
@@ -1112,7 +1112,7 @@ class Playstream1(Screen):
         f.close()
         self.setup_title = ('Select Player Stream')
         self.list = []
-        self.name1 = name
+        self.name = name
         self.url = url
         self.desc = ''
         self.error_message = ""
@@ -1147,7 +1147,7 @@ class Playstream1(Screen):
         return
 
     def runRec(self):
-        self.namem3u = self.name1
+        self.namem3u = self.name
         self.urlm3u = self.url
         if self.downloading is True:
             self.session.open(MessageBox, _('You are already downloading!!!'), MessageBox.TYPE_INFO, timeout=5)
@@ -1244,22 +1244,22 @@ class Playstream1(Screen):
         idx = self['list'].getSelectionIndex()
         self.name = self.names[idx]
         self.url = self.urls[idx]
-        if "youtube" in str(self.url):
-            # desc = self.desc
-            try:
-                from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
-                '''
-                ydl_opts = {'format': 'best'}
-                ydl_opts = {'format': 'bestaudio/best'}
-                '''
-                ydl_opts = {'format': 'best'}
-                ydl = YoutubeDL(ydl_opts)
-                ydl.add_default_info_extractors()
-                result = ydl.extract_info(self.url, download=False)
-                self.url = result["url"]
-            except:
-                pass
-            self.session.open(Playstream2, self.name, self.url)
+        # if "youtube" in str(self.url):
+            # # desc = self.desc
+            # try:
+                # from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
+                # '''
+                # ydl_opts = {'format': 'best'}
+                # ydl_opts = {'format': 'bestaudio/best'}
+                # '''
+                # ydl_opts = {'format': 'best'}
+                # ydl = YoutubeDL(ydl_opts)
+                # ydl.add_default_info_extractors()
+                # result = ydl.extract_info(self.url, download=False)
+                # self.url = result["url"]
+            # except:
+                # pass
+            # self.session.open(Playstream2, self.name, self.url)
 
         if idx == 0:
             self.name = self.names[idx]
@@ -1338,12 +1338,12 @@ class Playstream1(Screen):
 
     def play(self):
         url = self.url
-        name = self.name1
+        name = self.name
         self.session.open(Playstream2, name, url)
 
     def play2(self):
         if Utils.isStreamlinkAvailable:
-            name = self.name1
+            name = self.name
             url = self.url
             url = url.replace(':', '%3a')
             print('In revolution url =', url)

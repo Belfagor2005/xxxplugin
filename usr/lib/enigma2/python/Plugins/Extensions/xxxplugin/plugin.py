@@ -1238,11 +1238,10 @@ class Playstream1(Screen):
 
     def okClicked(self):
         i = len(self.names)
-        print('iiiiii= ', i)
         if i < 0:
             return
         idx = self['list'].getSelectionIndex()
-        self.name = self.names[idx]
+        self.name = self.name  # self.names[idx]
         self.url = self.urls[idx]
         # if "youtube" in str(self.url):
             # # desc = self.desc
@@ -1262,7 +1261,7 @@ class Playstream1(Screen):
             # self.session.open(Playstream2, self.name, self.url)
 
         if idx == 0:
-            self.name = self.names[idx]
+            # self.name = self.names[idx]
             self.url = self.urls[idx]
             print('In playVideo url D=', self.url)
             self.play()
@@ -1274,7 +1273,7 @@ class Playstream1(Screen):
 
         elif idx == 2:
             print('In playVideo url B=', self.url)
-            self.name = self.names[idx]
+            # self.name = self.names[idx]
             self.url = self.urls[idx]
             try:
                 os.remove('/tmp/hls.avi')
@@ -1300,11 +1299,11 @@ class Playstream1(Screen):
             os.system(cmd)
             os.system('sleep 3')
             self.url = '/tmp/hls.avi'
-            self.name = self.names[idx]
+            # self.name = self.names[idx]
             self.play()
 
         elif idx == 4:
-            self.name = self.names[idx]
+            # self.name = self.names[idx]
             self.url = self.urls[idx]
             print('In playVideo url D=', self.url)
             self.play2()
@@ -1363,6 +1362,7 @@ class Playstream1(Screen):
             self.close()
         except:
             pass
+            self.close()
 
 
 class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAudioSelection, InfoBarSubtitleSupport):
@@ -1419,6 +1419,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
             self.onFirstExecBegin.append(self.slinkPlay)
         else:
             self.onFirstExecBegin.append(self.cicleStreamType)
+        return
 
     def getAspect(self):
         return eAVSwitch().getAspectRatioSetting()
@@ -1556,7 +1557,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
                 self.setAspect(self.init_aspect)
             except:
                 pass
-        self.close()
+        self.leavePlayer()
 
     def leavePlayer(self):
         self.close()

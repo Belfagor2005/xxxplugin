@@ -59,6 +59,7 @@ import re
 import requests
 import sys
 # import json
+import shutil
 import six
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 _session = None
@@ -107,6 +108,15 @@ pngx = os.path.join(res_plugin_path, 'pics/setting2.png')
 
 if not file_exists(folder_path):
     os.makedirs(folder_path)
+
+try:
+    folder_path = sum([sum(map(lambda fname: os.path.getsize(os.path.join(folder_path, fname)), files)) for folder_p, folders, files in os.walk(folder_path)])
+    posterpng = "%0.f" % (folder_path / (1024 * 1024.0))
+    if posterpng >= "5":
+        shutil.rmtree(folder_path)
+except:
+    pass
+
 
 # screenwidth = getDesktop(0).size()
 if screenwidth.width() == 2560:
@@ -1243,22 +1253,6 @@ class Playstream1(Screen):
         idx = self['list'].getSelectionIndex()
         self.name = self.name  # self.names[idx]
         self.url = self.urls[idx]
-        # if "youtube" in str(self.url):
-            # # desc = self.desc
-            # try:
-                # from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
-                # '''
-                # ydl_opts = {'format': 'best'}
-                # ydl_opts = {'format': 'bestaudio/best'}
-                # '''
-                # ydl_opts = {'format': 'best'}
-                # ydl = YoutubeDL(ydl_opts)
-                # ydl.add_default_info_extractors()
-                # result = ydl.extract_info(self.url, download=False)
-                # self.url = result["url"]
-            # except:
-                # pass
-            # self.session.open(Playstream2, self.name, self.url)
 
         if idx == 0:
             # self.name = self.names[idx]
@@ -1326,9 +1320,9 @@ class Playstream1(Screen):
                 ydl.add_default_info_extractors()
                 result = ydl.extract_info(content, download=False)
                 self.url = result["url"]
+                self.session.open(Playstream2, self.name, self.url)
             except:
                 pass
-            self.session.open(Playstream2, self.name, self.url)
 
         return
 
@@ -1379,7 +1373,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         self.session = session
         _session = session
         self.skinName = 'MoviePlayer'
-        title = name
+        # title = name
         streaml = False
         self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
         InfoBarBase.__init__(self, steal_current_service=True)

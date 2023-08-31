@@ -1413,7 +1413,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
                                                              'cancel': self.cancel,
                                                              'back': self.cancel}, -1)
 
-        if 'youtube' in self.url.lower():
+        if 'youtube' in self.url:
             self.onFirstExecBegin.append(self.slinkPlay)
             
         elif '8088' in str(self.url):

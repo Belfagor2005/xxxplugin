@@ -1257,12 +1257,12 @@ class Playstream1(Screen):
         if idx == 0:
             # self.name = self.names[idx]
             self.url = self.urls[idx]
-            print('In playVideo url D=', self.url)
+            print('In playVideo url 0=', self.url)
             self.play()
 
         if idx == 1:
             self.url = self.urls[idx]
-            print('In playVideo url D=', self.url)
+            print('In playVideo url 1=', self.url)
             self.runRec()
 
         elif idx == 2:
@@ -1289,7 +1289,7 @@ class Playstream1(Screen):
             except:
                 pass
             cmd = 'python "/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/lib/tsclient.py" "' + url + '" "1" + &'
-            print('hls cmd = ', cmd)
+            print('hls cmd 3= ', cmd)
             os.system(cmd)
             os.system('sleep 3')
             self.url = '/tmp/hls.avi'
@@ -1299,12 +1299,15 @@ class Playstream1(Screen):
         elif idx == 4:
             # self.name = self.names[idx]
             self.url = self.urls[idx]
-            print('In playVideo url D=', self.url)
+            print('In playVideo url 4=', self.url)
             self.play2()
 
         elif idx == 5:
             try:
                 url = self.url
+                if 'embed' in url:
+                    url = url.replace('embed/', 'watch?v=').replace('?autoplay=1', '').replace('?autoplay=0', '') 
+                    
                 content = Utils.getUrlresp(url)
                 if six.PY3:
                     content = six.ensure_str(content)
@@ -1320,6 +1323,7 @@ class Playstream1(Screen):
                 ydl.add_default_info_extractors()
                 result = ydl.extract_info(content, download=False)
                 self.url = result["url"]
+                print('In playVideo url 5=', self.url)
                 self.session.open(Playstream2, self.name, self.url)
             except:
                 pass
@@ -1409,7 +1413,10 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
                                                              'cancel': self.cancel,
                                                              'back': self.cancel}, -1)
 
-        if '8088' in str(self.url):
+        if 'youtube' in self.url.lower():
+            self.onFirstExecBegin.append(self.slinkPlay)
+            
+        elif '8088' in str(self.url):
             self.onFirstExecBegin.append(self.slinkPlay)
         else:
             self.onFirstExecBegin.append(self.cicleStreamType)

@@ -61,11 +61,11 @@ search = False
 
 
 Panel_list = [
-    ("SEARCH"),
     ("LATEST"),
     ("PORNSTARS"),
     ("CHANNELS"),
     ("CATEGORIES"),
+    ("SEARCH"),
     ]
 
 
@@ -337,9 +337,8 @@ class fullpornerX(Screen):
             pages = 100
             i = 1
             while i < pages:
-                page = i
-                url1 = url + '/' + str(page)
-                name = "Page " + str(page)
+                url1 = url + '/' + str(i)
+                name = "Page " + str(i)
                 i += 1
                 self.urls.append(url1)
                 self.names.append(name)

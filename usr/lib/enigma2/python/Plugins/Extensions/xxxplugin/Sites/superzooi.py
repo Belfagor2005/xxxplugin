@@ -305,21 +305,38 @@ class superzooi2(Screen):
         self.names = []
         self.urls = []
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
-            for page in pages:
+            pages = 100
+            i = 1
+            while i < pages:
                 if 'superzooi.com/search/video' in self.url:
-                    if page == 1:
-                        page = ''
-                        url1 = self.url + str(page)  # + "/"
+                    if i == 1:
+                        i = ''
+                        url1 = self.url + str(i)  # + "/"
                     else:
-                        url1 = self.url + '/' + str(page) + "/"
+                        url1 = self.url + '/' + str(i) + "/"
                     print('is search url', url1)
-
                 else:
-                    url1 = self.url + '/recent/' + str(page) + "/"
-                name = "Page " + str(page)
+                    url1 = self.url + '/recent/' + str(i) + "/"
+
+                name = "Page " + str(i)
+                i += 1
                 self.urls.append(url1)
                 self.names.append(name)
+        
+            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+            # for page in pages:
+                # if 'superzooi.com/search/video' in self.url:
+                    # if page == 1:
+                        # page = ''
+                        # url1 = self.url + str(page)  # + "/"
+                    # else:
+                        # url1 = self.url + '/' + str(page) + "/"
+                    # print('is search url', url1)
+                # else:
+                    # url1 = self.url + '/recent/' + str(page) + "/"
+                # name = "Page " + str(page)
+                # self.urls.append(url1)
+                # self.names.append(name)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:

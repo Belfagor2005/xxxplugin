@@ -184,13 +184,22 @@ class heavyr2(Screen):
         self.urls = []
         url = self.url
         try:
-            pages = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            for page in pages:
-                p = page - 1
-                url1 = url + "/" + str(p) + "/"
-                name = "Heavyr-Page " + str(p)
+            pages = 100
+            i = 1
+            while i < pages:
+                page = i - 1
+                url1 = url + "/" + str(page) + "/"
+                name = "Page " + str(page)
+                i += 1
                 self.urls.append(url1)
                 self.names.append(name)
+            # pages = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            # for page in pages:
+                # p = page - 1
+                # url1 = url + "" + str(p) + "/"
+                # name = "Heavyr-Page " + str(p)
+                # self.urls.append(url1)
+                # self.names.append(name)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:

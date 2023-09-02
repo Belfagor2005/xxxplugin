@@ -121,8 +121,6 @@ class main(Screen):
         if result:
             global search
             name = str(result)
-            # url = self.urlx + "/" + str(page) + "/?sort=re"
-            # https://milfzr.com/page/2/?s=anal
             url = self.urlx + '/page/npage/?s=' + str(result)
             try:
                 search = True
@@ -333,13 +331,16 @@ class milfzrx(Screen):
         self.cat_list = []
         name = self.name
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # https://milfzr.com/page/2/?s=
-            # self.urlx + '/page/npage/?s=' + str(result)
-            for page in pages:
-                url1 = self.url.replace('npage', str(page))  # + "page/" + str(page) + "/"
-                name = "milfzr-Page " + str(page)
-                name = name.upper()
+            pages = 100
+            i = 1
+            while i < pages:
+                url1 = self.url.replace('npage', str(i))  # + "i/" + str(i) + "/"
+                name = "Page " + str(i)
+                i += 1
+            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            # for page in pages:
+                # url1 = self.url.replace('npage', str(page))  # + "page/" + str(page) + "/"
+                # name = "milfzr-Page " + str(page)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -515,13 +516,16 @@ class milfzrx2(Screen):
         self.cat_list = []
         name = self.name
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # https://milfzr.com/page/2/?s=
-            # self.urlx + '/page/npage/?s=' + str(result)
-            for page in pages:
-                url1 = self.url.replace('npage', str(page))
-                name = "milfzr-Page " + str(page)
-                # name = name.upper()
+            pages = 100
+            i = 1
+            while i < pages:
+                url1 = self.url.replace('npage', str(i))
+                name = "Page " + str(i)
+                i += 1
+            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            # for page in pages:
+                # url1 = self.url.replace('npage', str(page))
+                # name = "milfzr-Page " + str(page)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return

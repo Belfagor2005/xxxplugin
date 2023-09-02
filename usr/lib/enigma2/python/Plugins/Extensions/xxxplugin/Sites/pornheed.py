@@ -220,15 +220,26 @@ class pornheed(Screen):
         self.urls = []
         url = self.url
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            for page in pages:
-                if page == 1:
+            pages = 100
+            i = 1
+            while i < pages:
+                if i == 1:
                     url1 = url
                 else:
-                    url1 = url + "/" + str(page) + "/"
-                name = "pornheed-Page " + str(page)
+                    url1 = url + "/" + str(i) + "/"
+                name = "Page " + str(i)
+                i += 1
                 self.urls.append(url1)
                 self.names.append(name)
+            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            # for page in pages:
+                # if page == 1:
+                    # url1 = url
+                # else:
+                    # url1 = url + "/" + str(page) + "/"
+                # name = "pornheed-Page " + str(page)
+                # self.urls.append(url1)
+                # self.names.append(name)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:
@@ -382,12 +393,20 @@ class pornheed22(Screen):
         self.urls = []
         url = self.url
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            for page in pages:
-                url1 = url + "/" + str(page)
-                name = "pornheed22-Page " + str(page)
+            pages = 100
+            i = 1
+            while i < pages:
+                url1 = url + "/" + str(i)
+                name = "Page " + str(i)
+                i += 1
                 self.urls.append(url1)
                 self.names.append(name)
+            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            # for page in pages:
+                # url1 = url + "/" + str(page)
+                # name = "pornheed22-Page " + str(page)
+                # self.urls.append(url1)
+                # self.names.append(name)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:

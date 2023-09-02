@@ -58,9 +58,9 @@ search = False
 
 
 Panel_list = [
-        ("SEARCH"),
         ("TAGS"),
         ("HITS"),
+        ("SEARCH"),
         ]
 
 

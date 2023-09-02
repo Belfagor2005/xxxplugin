@@ -26,9 +26,11 @@ import ssl
 import sys
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
+from Plugins.Extensions.xxxplugin.plugin import showlist
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin import _, skin_path
+
 PY3 = sys.version_info.major >= 3
 
 if sys.version_info >= (2, 7, 9):
@@ -319,18 +321,27 @@ class glavmaturesx(Screen):
         name = self.name
         url = self.url
         try:
-            pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            print('url12: ', url)
-            for page in pages:
+            pages = 100
+            i = 1
+            while i < pages:
                 if 'tags' in url:
-                    p = str(page) # - 1  #https://glavmatures.com/3/
-                    url1 = str(url) + str(p) + '/'
+                    url1 = str(url) + str(i) + '/'
                 else:
-                    p = str(page) # - 1  #https://glavmatures.com/3/?sort_by=rating
-                    url1 = str(url).replace('npage', str(page))
-                print('url1: ', url1)
-                name = "glavmatures-Page " + str(p)
-                name = name.upper()
+                    url1 = str(url).replace('npage', str(i)) 
+                name = "Page " + str(i)
+                i += 1
+            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            # print('url12: ', url)
+            # for page in pages:
+                # if 'tags' in url:
+                    # p = str(page) # - 1  #https://glavmatures.com/3/
+                    # url1 = str(url) + str(p) + '/'
+                # else:
+                    # p = str(page) # - 1  #https://glavmatures.com/3/?sort_by=rating
+                    # url1 = str(url).replace('npage', str(page))
+                # print('url1: ', url1)
+                # name = "glavmatures-Page " + str(p)
+                # name = name.upper()
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -527,7 +538,6 @@ class glavmatures3(Screen):
                 name = self.name + "Video Url " + str(i)
                 url = url.replace('function', '').replace('/0/', '')
                 url1 = url + '.mp4'
-
                 # url = url.replace('/?', '')
                 # url1 = 'https://glavmatures.com/get_file/' + url
                 i += 1

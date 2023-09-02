@@ -63,12 +63,12 @@ search = False
 
 
 Panel_list = [
-    ("SEARCH"),
     ("TOP RATED"),
     ("MOST POPULAR"),
     ("LONGEST"),
     ("CHANNELS"),
     ("CATEGORIES"),
+    ("SEARCH"),
     ]
 
 
@@ -250,9 +250,8 @@ class alphapornoX(Screen):
             pages = 100
             i = 1
             while i < pages:
-                page = i
-                url1 = url + '/' + str(page)
-                name = "Page " + str(page)
+                url1 = url + '/' + str(i)
+                name = "Page " + str(i)
                 i += 1
                 self.urls.append(url1)
                 self.names.append(name)

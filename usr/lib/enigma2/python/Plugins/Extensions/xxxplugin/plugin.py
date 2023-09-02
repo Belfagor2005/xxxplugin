@@ -1306,19 +1306,19 @@ class Playstream1(Screen):
             try:
                 url = self.url
                 if 'embed' in url:
-                    url = url.replace('embed/', 'watch?v=').replace('?autoplay=1', '').replace('?autoplay=0', '') 
-                    
+                    url = url.replace('embed/', 'watch?v=').replace('?autoplay=1', '').replace('?autoplay=0', '')
                 content = Utils.getUrlresp(url)
                 if six.PY3:
                     content = six.ensure_str(content)
                 print("content A =", content)
-
                 from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
                 '''
                 ydl_opts = {'format': 'best'}
                 ydl_opts = {'format': 'bestaudio/best'}
                 '''
-                ydl_opts = {'format': 'best'}
+                ydl_opts = {'format': 'best',
+                            'no_check_certificate': True,
+                            }
                 ydl = YoutubeDL(ydl_opts)
                 ydl.add_default_info_extractors()
                 result = ydl.extract_info(content, download=False)
@@ -1415,7 +1415,6 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
 
         if 'youtube' in self.url:
             self.onFirstExecBegin.append(self.slinkPlay)
-            
         elif '8088' in str(self.url):
             self.onFirstExecBegin.append(self.slinkPlay)
         else:

@@ -212,17 +212,26 @@ class truehomemadeplus2(Screen):
         self.urls = []
         url = self.url
         try:
-            pages = []
-            page = 1
-            while page < 30:
-                pages.append(page)
-                page = page + 1
-            for page in pages:
-                p1 = page - 1
-                url1 = url + "/" + str(p1)
-                name = "Page " + str(page)
+            pages = 100
+            i = 1
+            while i < pages:
+                url1 = url + "/" + str(i)
+                name = "Page " + str(i)
+                i += 1
                 self.urls.append(url1)
                 self.names.append(name)
+       
+            # pages = []
+            # page = 1
+            # while page < 30:
+                # pages.append(page)
+                # page = page + 1
+            # for page in pages:
+                # p1 = page - 1
+                # url1 = url + "/" + str(p1)
+                # name = "Page " + str(page)
+                # self.urls.append(url1)
+                # self.names.append(name)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:

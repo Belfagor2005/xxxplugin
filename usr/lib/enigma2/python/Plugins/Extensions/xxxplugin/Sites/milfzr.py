@@ -261,7 +261,7 @@ class milfzr(Screen):
                 match = re.compile(regexcat, re.DOTALL).findall(content)
                 for url, name in match:
                     url1 = 'https://milfzr.com/tag/' + str(url)
-                    name = html_conv.html_unescape(name)
+                    name = str(name)  # html_conv.html_unescape(name)
                     print('tag 0 url= ', url1)
                     self.cat_list.append(show_(name, url1))
             elif 'category' in self.name.lower():
@@ -271,7 +271,7 @@ class milfzr(Screen):
                 match = re.compile(regexcat, re.DOTALL).findall(content)
                 for url, name in match:
                     url1 = "https://milfzr.com/category/" + url  # name + "/"
-                    name = html_conv.html_unescape(name)
+                    name = str(name)  # html_conv.html_unescape(name)
                     print('category 0 url= ', url1)
                     self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
@@ -434,20 +434,20 @@ class milfzr2(Screen):
                 match = re.compile(regexcat, re.DOTALL).findall(content)
                 for url, name in match:
                     # /page/2/
-                    url1 = 'https://milfzr.com/tag/' + str(url) + '/page/npage/'
+                    url1 = 'https://milfzr.com/tag/' + str(url) + 'page/npage/'
                     print('tag name= ', name)
                     print('tag url= ', url1)
-                    name = html_conv.html_unescape(name)
+                    name = str(name)  # html_conv.html_unescape(name)
                     self.cat_list.append(show_(name, url1))
 
             elif 'category' in self.url.lower():
                 regexcat = 'item cat.*?<a href="https://milfzr.com/category/(.*?)">(.*?)<'
                 match = re.compile(regexcat, re.DOTALL).findall(content)
                 for url, name in match:
-                    url1 = 'https://milfzr.com/category/' + str(url) + '/page/npage/'
+                    url1 = 'https://milfzr.com/category/' + str(url) + 'page/npage/'
                     print('category name= ', name)
                     print('category url= ', url1)
-                    name = html_conv.html_unescape(name)
+                    name = str(name)  # html_conv.html_unescape(name)
                     self.cat_list.append(show_(name, url1))
             else:
                 print('??????????--------------------------?????????')
@@ -621,7 +621,7 @@ class milfzr3(Screen):
                 url1 = str(url)
                 print('name= ', name)
                 print('url= ', url1)
-                name = html_conv.html_unescape(name)
+                name = str(name)  # html_conv.html_unescape(name)
                 self.cat_list.append(show_(name, url1))
             '''
             # if 'tag' in self.url.lower():

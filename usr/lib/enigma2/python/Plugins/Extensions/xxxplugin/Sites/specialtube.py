@@ -578,10 +578,17 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating"'
+            #href="https://specialtube.com/categories/">Top Categories<
+            # regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating"'
+            regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating">(.*?)</'
             match2 = re.compile(regexcat2, re.DOTALL).findall(content)
-            for url, name in match2:
+            for url, name, rating in match2:
+                if 'id="item' in name:
+                    continue
+                if '<div class=' in name:
+                    continue
                 url1 = 'https://specialtube.com/categories/' + url
+                name = str(name) + ' rat. ' + str(rating)
                 self.cat_list.append(show_(name, url1))
                 self['menulist'].l.setList(self.cat_list)
                 self['menulist'].moveToIndex(0)

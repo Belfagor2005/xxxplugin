@@ -268,8 +268,8 @@ class fullporner1(Screen):
             regexcat = 'div class="channels-card-image.*?<a class="popout" href="(.*?)".*?data-src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
-                name = name.replace('"', '')
-                name = html_conv.html_unescape(name)
+                name = str(name).replace('"', '')
+                # name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com" + str(url)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
@@ -379,7 +379,7 @@ class fullpornerX2(Screen):
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
         self['poster'] = Pixmap()
-        self.name = html_conv.html_unescape(name)
+        self.name = str(name)  # html_conv.html_unescape(name)
         self.url = url
         self.currentList = 'menulist'
         self.loading_ok = False
@@ -432,8 +432,8 @@ class fullpornerX2(Screen):
             regexcat = '<div class="video-card-body".*?href="/watch/(.*?)".*?data-src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
-                name = name.replace('"', '')
-                name = html_conv.html_unescape(name)
+                name = str(name).replace('"', '')
+                # name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com/watch/" + str(url)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
@@ -527,7 +527,7 @@ class fullporner2(Screen):
             regexcat = 'div class="channels-card-image.*?<a class="popout" href="(.*?)".*?data-src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
-                name = name.replace('"', '')
+                name = str(name).replace('"', '')
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com" + str(url)
                 self.cat_list.append(show_(name, url1))
@@ -623,7 +623,7 @@ class fullporner3(Screen):
             regexcat = 'popout" href="/watch/(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
-                name = name.replace('"', '')
+                name = str(name).replace('"', '')
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com/watch/" + str(url)
                 self.cat_list.append(show_(name, url1))

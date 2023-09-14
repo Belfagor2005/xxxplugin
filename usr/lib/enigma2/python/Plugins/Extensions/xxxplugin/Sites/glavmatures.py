@@ -19,6 +19,7 @@ from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
 from enigma import eTimer
+import codecs
 import os
 import re
 import six
@@ -70,7 +71,7 @@ class main(Screen):
         self.session = session
         Screen.__init__(self, session)
         skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.menulist = []
         self['menulist'] = rvList([])
@@ -194,7 +195,7 @@ class glavmatures(Screen):
         self.session = session
         Screen.__init__(self, session)
         skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.menulist = []
         self['menulist'] = rvList([])
@@ -290,7 +291,7 @@ class glavmaturesx(Screen):
         self.session = session
         Screen.__init__(self, session)
         skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.menulist = []
         self['menulist'] = rvList([])
@@ -369,7 +370,7 @@ class glavmatures2(Screen):
         self.session = session
         Screen.__init__(self, session)
         skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.menulist = []
         self['menulist'] = rvList([])
@@ -468,7 +469,7 @@ class glavmatures3(Screen):
         self.session = session
         Screen.__init__(self, session)
         skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.menulist = []
         self['menulist'] = rvList([])

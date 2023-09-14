@@ -14,10 +14,12 @@ from __future__ import print_function
 from . import _, skin_path, screenwidth
 from .lib import Utils
 from .lib import html_conv
+import codecs
+from Components.AVSwitch import AVSwitch
 try:
-    from Components.AVSwitch import eAVSwitch
-except Exception:
-    from Components.AVSwitch import iAVSwitch as eAVSwitch
+    from Components.AVSwitch import iAVSwitch
+except:
+    from enigma import eAVSwitch
 from Components.ActionMap import ActionMap
 from Components.Button import Button
 from Components.config import config, ConfigSubsection
@@ -478,7 +480,7 @@ class Abouttvr(Screen):
         Screen.__init__(self, session)
         self.session = session
         skin = os.path.join(skin_path, 'Abouttvr.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         title = _(name_plug)
         self["title"] = Button(title)
@@ -534,7 +536,7 @@ class ConfigEx(ConfigListScreen, Screen):
         skin = os.path.join(skin_path, 'Config.xml')
         if file_exists('/var/lib/dpkg/status'):
             skin = os.path.join(skin_path, 'ConfigOs.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.setup_title = _("SETUP PLUGIN")
         self.onChangedEntry = []
@@ -775,7 +777,7 @@ class GridMain(Screen):
         global _session
         _session = session
         skin = os.path.join(skin_path, 'GridMain.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         title = menuTitle
         self.name = menuTitle
@@ -1117,7 +1119,7 @@ class Playstream1(Screen):
         Screen.__init__(self, session)
         self.session = session
         skin = os.path.join(skin_path, 'Playstream1.xml')
-        with open(skin, 'r') as f:
+        with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         f.close()
         self.setup_title = ('Select Player Stream')
@@ -1347,7 +1349,7 @@ class Playstream1(Screen):
             ref = '5002:0:1:0:0:0:0:0:0:0:' + 'http%3a//127.0.0.1%3a8088/' + str(url)
             sref = eServiceReference(ref)
             print('SREF: ', sref)
-            sref.setName(name)
+            sref.setName(str(name))
             self.session.open(Playstream2, name, sref)
             self.close()
         else:
@@ -1422,7 +1424,11 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         return
 
     def getAspect(self):
-        return eAVSwitch().getAspectRatioSetting()
+        try:
+            aspect = iAVSwitch.getAspectRatioSetting()
+        except:
+            aspect = eAVSwitch.getAspectRatioSetting()
+        return aspect
 
     def getAspectString(self, aspectnum):
         return {0: '4:3 Letterbox',
@@ -1443,9 +1449,9 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
                6: '16_9_letterbox'}
         config.av.aspectratio.setValue(map[aspect])
         try:
-            eAVSwitch().setAspectRatio(aspect)
+            iAVSwitch.setAspectRatio(aspect)
         except:
-            pass
+            eAVSwitch.setAspectRatio(aspect)
 
     def av(self):
         temp = int(self.getAspect())
@@ -1471,7 +1477,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         print('final reference:   ', ref)
         sref = eServiceReference(ref)
         self.sref = sref
-        sref.setName(name)
+        sref.setName(str(name))
         self.session.nav.stopService()
         self.session.nav.playService(sref)
 
@@ -1486,7 +1492,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         print('final reference:   ', ref)
         sref = eServiceReference(ref)
         self.sref = sref
-        sref.setName(name)
+        sref.setName(str(name))
         self.session.nav.stopService()
         self.session.nav.playService(sref)
 

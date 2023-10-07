@@ -25,6 +25,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
@@ -57,6 +58,24 @@ Path_Movies = '/tmp/'
 global search
 search = False
 
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 Panel_list = [
     ('TAGS'),
@@ -109,7 +128,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -253,7 +271,6 @@ class milfzr(Screen):
     def updateMenuList(self):
         self.cat_list = []
         try:
-            # content = Utils.ReadUrl2(self.url, referer)
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
@@ -266,8 +283,6 @@ class milfzr(Screen):
                     print('tag 0 url= ', url1)
                     self.cat_list.append(show_(name, url1))
             elif 'category' in self.name.lower():
-                # https://milfzr.com/category/all-in-family/
-                # <a href="https://milfzr.com/category/asian-milf/" title="
                 regexcat = 'https://milfzr.com/category/(.*?)".*?title="(.*?)"'
                 match = re.compile(regexcat, re.DOTALL).findall(content)
                 for url, name in match:
@@ -286,9 +301,12 @@ class milfzr(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(milfzrx, name, url)
@@ -335,13 +353,9 @@ class milfzrx(Screen):
             pages = 100
             i = 1
             while i < pages:
-                url1 = self.url.replace('npage', str(i))  # + "i/" + str(i) + "/"
+                url1 = self.url.replace('npage', str(i))
                 name = "Page " + str(i)
                 i += 1
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # url1 = self.url.replace('npage', str(page))  # + "page/" + str(page) + "/"
-                # name = "milfzr-Page " + str(page)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -426,7 +440,6 @@ class milfzr2(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            # content = Utils.ReadUrl2(self.url, referer)
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
@@ -464,13 +477,9 @@ class milfzr2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
-            # fpage = Utils.getUrl(url)
-            # regexvideo = 'source type=".*?src="(.*?)"'
-            # match = re.compile(regexvideo, re.DOTALL).findall(fpage)
-            # url = match[0]
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -479,6 +488,8 @@ class milfzr2(Screen):
         self.session.open(milfzrx2, str(name), str(url))
 
     def exit(self):
+        global search
+        search = False
         self.close()
 
 
@@ -656,9 +667,9 @@ class milfzr3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             fpage = Utils.getUrl(url)
             regexvideo = 'source src="(.*?)"'
             match = re.compile(regexvideo, re.DOTALL).findall(fpage)
@@ -671,4 +682,6 @@ class milfzr3(Screen):
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
+        global search
+        search = False
         self.close()

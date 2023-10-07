@@ -25,11 +25,13 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import showlist
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
+from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path
 
 PY3 = sys.version_info.major >= 3
@@ -41,8 +43,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'glavmatures '
-desc_plugin = ('..:: glavmatures by Lululla %s ::.. ' % currversion)
+title_plug = 'Glavmatures '
+desc_plugin = ('..:: Glavmatures by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -58,6 +60,23 @@ global search
 search = False
 
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 Panel_list = [
     ('NEW'),
     ('TOP RATED'),
@@ -110,7 +129,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -221,7 +239,7 @@ class glavmatures(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -275,9 +293,12 @@ class glavmatures(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e
 
     def play_that_shit(self, url, name):
         self.session.open(glavmaturesx, name, url)
@@ -328,21 +349,9 @@ class glavmaturesx(Screen):
                 if 'tags' in url:
                     url1 = str(url) + str(i) + '/'
                 else:
-                    url1 = str(url).replace('npage', str(i)) 
+                    url1 = str(url).replace('npage', str(i))
                 name = "Page " + str(i)
                 i += 1
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # print('url12: ', url)
-            # for page in pages:
-                # if 'tags' in url:
-                    # p = str(page) # - 1  #https://glavmatures.com/3/
-                    # url1 = str(url) + str(p) + '/'
-                # else:
-                    # p = str(page) # - 1  #https://glavmatures.com/3/?sort_by=rating
-                    # url1 = str(url).replace('npage', str(page))
-                # print('url1: ', url1)
-                # name = "glavmatures-Page " + str(p)
-                # name = name.upper()
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -358,7 +367,6 @@ class glavmaturesx(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
-        print('pages url: ', url)
         self.session.open(glavmatures2, name, url)
 
     def exit(self):
@@ -432,7 +440,6 @@ class glavmatures2(Screen):
                 content = six.ensure_str(content)
             regexcat = 'class="thumb item.*?href="(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            print("match =", match)
             for url, name in match:
                 url1 = url
                 name = name.replace('"', '')
@@ -449,15 +456,14 @@ class glavmatures2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
 
     def play_that_shit(self, url, name):
-        print('url: ', url)
         self.session.open(glavmatures3, str(name), str(url))
 
     def exit(self):
@@ -530,8 +536,6 @@ class glavmatures3(Screen):
             if six.PY3:
                 content = six.ensure_str(content)
             regexvideo = ": 'function(.*?).mp4"
-            # regexvideo = 'a href="https://glavmatures.com/get_file/(.*?)download.*?'
-
             match = re.compile(regexvideo, re.DOTALL).findall(content)
             print("match =", match)
             i = 0
@@ -555,9 +559,9 @@ class glavmatures3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)

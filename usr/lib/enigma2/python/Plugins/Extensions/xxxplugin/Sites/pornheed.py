@@ -25,10 +25,12 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
+from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 
@@ -57,10 +59,28 @@ global search
 search = False
 
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
+
 Panel_list = [
-    ("Recently-added categories"),
-    ("Featured categories"),
-    ("Most-viewed categories"),
+    ("Recently Added Categories"),
+    ("Featured Categories"),
+    ("Most Viewed Categories"),
     ("SEARCH"),
     ]
 
@@ -142,11 +162,11 @@ class main(Screen):
         global namex, lnk
         namex = ''
         sel = self.menu_list[idx]
-        if sel == ("Recently-added categories"):
+        if sel == ("Recently Added Categories"):
             lnk = ("http://www.pornheed.com/categories/recently-added/")
-        elif sel == ("Featured categories"):
+        elif sel == ("Featured Categories"):
             lnk = ("http://www.pornheed.com/categories/featured/")
-        elif sel == ("Most-viewed categories"):
+        elif sel == ("Most Viewed Categories"):
             lnk = ("http://www.pornheed.com/categories/most-viewed/")
         namex = sel.upper()
         if sel == 'SEARCH':
@@ -345,12 +365,14 @@ class pornheed1(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
-        print('pornheed1 url: ', url)
         self.session.open(pornheed2, name, url)
 
     def exit(self):
@@ -456,7 +478,7 @@ class pornheed2(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -511,9 +533,13 @@ class pornheed2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            print("url1 B =", url)
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         print('pornheed2 url: ', url)
@@ -552,7 +578,7 @@ class pornheed3(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -592,7 +618,6 @@ class pornheed3(Screen):
             match = re.compile(regexcat, re.DOTALL).findall(content)
             url3 = match[0]
             if url3.startswith('http'):
-                pass
                 print('url3 init http')
             else:
                 url3 = 'https://www.pornheed.com' + url3
@@ -610,12 +635,15 @@ class pornheed3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            print("url1 B =", url)
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
-        print('pornheed3 url: ', url)
         self.session.open(pornheed4, str(name), str(url))
 
     def exit(self):
@@ -653,7 +681,7 @@ class pornheed4(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -706,12 +734,15 @@ class pornheed4(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            print("url1 B =", url)
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
-        print('pornheed4 url: ', url)
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):

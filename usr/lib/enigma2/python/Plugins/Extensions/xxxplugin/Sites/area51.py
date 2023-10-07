@@ -25,6 +25,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
@@ -41,8 +42,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'area51 '
-desc_plugin = ('..:: area51 by Lululla %s ::.. ' % currversion)
+title_plug = 'Area51 '
+desc_plugin = ('..:: Area51 by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 
 current = os.path.dirname(os.path.realpath(__file__))
@@ -64,6 +65,24 @@ Path_Movies = '/tmp/'
 global search
 search = False
 
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 Panel_list = [
     ("TOP RATED"),
@@ -339,6 +358,7 @@ class area511(Screen):
             regexcat = 'a class="item_cat" href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
@@ -353,9 +373,12 @@ class area511(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(area513, name, url)
@@ -432,6 +455,7 @@ class area51X2(Screen):
             regexcat = '<div class="item.*?a href="(.*?)" title="(.*?)".*?src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name, pic in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
@@ -446,9 +470,12 @@ class area51X2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(area513, name, url)
@@ -529,6 +556,7 @@ class area512(Screen):
             regexcat = 'a href="(.*?)">(.*?)<'
             match = re.compile(regexcat, re.DOTALL).findall(content2)
             for url, name in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
@@ -543,9 +571,12 @@ class area512(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(area51X, name, url)
@@ -640,9 +671,12 @@ class area513(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))

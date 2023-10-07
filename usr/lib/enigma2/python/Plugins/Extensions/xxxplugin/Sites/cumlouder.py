@@ -25,6 +25,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
@@ -56,6 +57,25 @@ _session = None
 Path_Movies = '/tmp/'
 global search
 search = False
+
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 
 Panel_list = [
@@ -171,7 +191,7 @@ class main(Screen):
             self.session.open(cumlouder2, namex, lnk)
         elif sel == ("Cumlouder More Videos"):
             namex = "videos"
-            lnk = 'https://www.cumlouder.com/porn/' 
+            lnk = 'https://www.cumlouder.com/porn/'
             self.session.open(cumlouder2, namex, lnk)
 
         else:
@@ -348,6 +368,7 @@ class cumlouder(Screen):
 
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for name, url, pic in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url = "https://www.cumlouder.com" + str(url)
                 pic = pic
@@ -530,7 +551,6 @@ class cumlouder3(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -634,7 +654,6 @@ class cumlouder4(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)

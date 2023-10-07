@@ -24,6 +24,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
@@ -39,8 +40,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'born2tease '
-desc_plugin = ('..:: born2tease by Lululla %s ::.. ' % currversion)
+title_plug = 'Born2tease '
+desc_plugin = ('..:: Born2tease by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -52,6 +53,23 @@ stripurl = 'aHR0cHM6Ly9ib3JuMnRlYXNlLm5ldC9tb2RlbHMuaHRtbA=='
 _session = None
 Path_Movies = '/tmp/'
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 class main(Screen):
     def __init__(self, session):
@@ -120,6 +138,7 @@ class main(Screen):
             regexcat = 'div id="videothumbs2">(.*?)<.*?<a href="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for name, url in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = url.replace("videos", "allvideos")
                 self.cat_list.append(show_(name, url1))
@@ -134,9 +153,12 @@ class main(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, name, url):
         self.session.open(born2tease3, url, name)
@@ -234,9 +256,9 @@ class born2tease3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -336,9 +358,12 @@ class born2tease4(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))

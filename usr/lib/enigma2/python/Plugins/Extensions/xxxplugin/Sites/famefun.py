@@ -56,6 +56,11 @@ global search
 search = False
 
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
 Panel_list = [
  ('ALL VIDEOS'),
  ('SEARCH'),
@@ -222,14 +227,6 @@ class famefunx(Screen):
                 url1 = url + "/" + str(i) + "/"
                 name = "Page " + str(i)
                 i += 1
-                # self.urls.append(url1)
-                # self.names.append(name)
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # p = page - 1
-                # url1 = url + "/" + str(p) + "/"
-                # name = "famefun-Page " + str(p)
-                # name = name.upper()
                 self.cat_list.append(show_(name, url1))
 
             if len(self.cat_list) < 0:
@@ -334,9 +331,12 @@ class fameall(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))
@@ -430,9 +430,12 @@ class fameallsrc(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))

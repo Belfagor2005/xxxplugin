@@ -55,6 +55,24 @@ global search
 search = False
 
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
+
 class main(Screen):
     def __init__(self, session):
         self.session = session
@@ -281,7 +299,7 @@ class truehomemade2(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
 
@@ -375,7 +393,7 @@ class truehomemade3(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -471,7 +489,7 @@ class truehomemade4(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()

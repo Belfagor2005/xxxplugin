@@ -25,6 +25,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
@@ -34,6 +35,7 @@ from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
+
 if sys.version_info >= (2, 7, 9):
     try:
         sslContext = ssl._create_unverified_context()
@@ -41,8 +43,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'alphaporno '
-desc_plugin = ('..:: alphaporno by Lululla %s ::.. ' % currversion)
+title_plug = 'Alphaporno '
+desc_plugin = ('..:: Alphaporno by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 
 current = os.path.dirname(os.path.realpath(__file__))
@@ -61,6 +63,25 @@ _session = None
 Path_Movies = '/tmp/'
 global search
 search = False
+
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 
 Panel_list = [
@@ -117,7 +138,6 @@ class main(Screen):
             idx += 1
         self['menulist'].setList(list)
         auswahl = self['menulist'].getCurrent()[0]
-        print('auswahl: ', auswahl)
         self['name'].setText(str(auswahl))
 
     def search_text(self, name, url):
@@ -349,6 +369,7 @@ class alphapornoX2(Screen):
             regexcat = '<a itemprop="url" href="(.*?)".*?src="(.*?)" alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
@@ -363,9 +384,12 @@ class alphapornoX2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(alphaporno3, name, url)
@@ -442,6 +466,7 @@ class alphaporno1(Screen):
             regexcat = '<li class="thumb channel-thumb">.*?a href="(.*?)" title="(.*?)".*?img src="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name, pic in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
@@ -464,6 +489,8 @@ class alphaporno1(Screen):
         self.session.open(alphapornoX2, name, url)
 
     def exit(self):
+        global search
+        search = False
         self.close()
 
 
@@ -539,6 +566,7 @@ class alphaporno2(Screen):
             regexcat = '<a href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content2)
             for url, name in match:
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = str(url)
                 self.cat_list.append(show_(name, url1))
@@ -553,9 +581,12 @@ class alphaporno2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(alphapornoX, name, url)
@@ -647,9 +678,12 @@ class alphaporno3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(Playstream1, str(name), str(url))

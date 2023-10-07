@@ -8,8 +8,8 @@
 *             26/03/2023               *
 *       Skin by MMark                  *
 ****************************************
-#--------------------#
-#Info http://t.me/tivustream
+# --------------------#
+# Info http://t.me/tivustream
 '''
 from __future__ import print_function
 from Components.ActionMap import ActionMap
@@ -25,10 +25,12 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
+from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
@@ -39,8 +41,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'madnessporn '
-desc_plugin = ('..:: madnessporn by Lululla %s ::.. ' % currversion)
+title_plug = 'Madnessporn '
+desc_plugin = ('..:: Madnessporn by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -53,6 +55,24 @@ Path_Movies = '/tmp/'
 global search
 search = False
 
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 Panel_list = [
  ('madnessporn Top Rated'),
@@ -240,12 +260,6 @@ class madnessporn2(Screen):
                 i += 1
                 self.urls.append(url1)
                 self.names.append(name)
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # url1 = self.url + "page" + page + ".html"
-                # name = "Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:
@@ -296,7 +310,7 @@ class madnessporn3(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -397,7 +411,7 @@ class categories(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()

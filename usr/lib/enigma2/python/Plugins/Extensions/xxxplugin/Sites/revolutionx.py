@@ -26,6 +26,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
@@ -41,8 +42,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'revolutionx '
-desc_plugin = ('..:: revolutionx by Lululla %s ::.. ' % currversion)
+title_plug = 'Revolutionx '
+desc_plugin = ('..:: Revolutionx by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -60,6 +61,23 @@ if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 global search
 search = False
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
+
 
 REGEX = re.compile(
         r'([\(\[]).*?([\)\]])|'
@@ -283,6 +301,7 @@ class revolutionx(Screen):
             for channel in y["channels"]:
                 name = str(i) + "_" + str(channel["name"])
                 name = re.sub('\[.*?\]', "", name)
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 i += 1
                 self.cat_list.append(show_(name, url2))
@@ -380,6 +399,7 @@ class revolutionx2(Screen):
             for item in y["channels"][n]["items"]:
                 name = str(item["title"])
                 name = re.sub('\[.*?\]', "", name)
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url = item["link"]
                 url = url.replace("\\", "").replace('https', 'http')
@@ -480,6 +500,7 @@ class revolutionx5(Screen):
             for item in y["items"]:
                 name = str(y["items"][i]["title"])
                 name = re.sub('\[.*?\]', "", name)
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url = str(y["items"][i]["externallink"])
                 i += 1
@@ -582,6 +603,7 @@ class revolutionx6(Screen):
             for item in y["items"]:
                 name = str(y["items"][i]["title"])
                 name = re.sub('\[.*?\]', "", name)
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url = str(y["items"][i]["link"])
                 i += 1

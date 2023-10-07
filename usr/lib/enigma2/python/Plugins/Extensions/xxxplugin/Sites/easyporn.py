@@ -58,6 +58,12 @@ global search
 search = False
 
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
 Panel_list = [
     ('Easyporn top rated'),
     ('Easyporn most popular'),
@@ -224,7 +230,7 @@ class easyporn(Screen):
                                      'ColorActions',
                                      'DirectionActions',
                                      'MovieSelectionActions'], {'cancel': self.exit,
-                                                                # 'ok': self.ok,
+                                                                'ok': self.ok,
                                                                 'red': self.exit}, -1)
         self.onLayoutFinish.append(self.cat)
 
@@ -236,9 +242,12 @@ class easyporn(Screen):
         return
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, name, url):
         self.session.open(categories, name, url)
@@ -289,24 +298,13 @@ class easyporn2(Screen):
                 if page == 1:
                     url1 = self.url
                 else:
-                    url1 = self.url + "?p=" + str(page)      
+                    url1 = self.url + "?p=" + str(page)
                 name = "Page " + page
                 i += 1
                 self.names.append(name)
                 self.urls.append(url1)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # if page == 1:
-                    # url1 = self.url
-                # else:
-                    # url1 = self.url + "?p=" + str(page)
-                # name = "Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
-            # self['name'].setText(_('Please select ...'))
-            # showlist(self.names, self['menulist'])
         except Exception as e:
             print(e)
             self['name'].setText(_('Nothing ... Retry'))
@@ -509,7 +507,6 @@ class easyporn4(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)

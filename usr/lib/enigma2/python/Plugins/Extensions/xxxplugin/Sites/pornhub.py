@@ -43,26 +43,29 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'Specialtube '
-desc_plugin = ('..:: Specialtube by Lululla %s ::.. ' % currversion)
+title_plug = 'Pornhub '
+desc_plugin = ('..:: Pornhub by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 print(current)
 print(parent)
-pluglogo = os.path.join(PLUGIN_PATH, 'pic/specialtube.png')
-stripurl = 'aHR0cDovL3NwZWNpYWx0dWJlLmNvbS8='
+pluglogo = os.path.join(PLUGIN_PATH, 'pic/pornhub.png')
+stripurl = 'aHR0cHM6Ly9wb3JuaHViLmNvbS8'
 _session = None
 Path_Movies = '/tmp/'
 global search
 search = False
+
 
 if PY3:
     PY3 = True
     unicode = str
 else:
     str = str
+
+
 def normalize(title):
     try:
         try:
@@ -73,11 +76,17 @@ def normalize(title):
         return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
     except:
         return html_conv.html_unescape(title)
+
+
 Panel_list = [
-    ('Specialtube latest'),
-    ('Specialtube top rated'),
-    ('Specialtube most popular'),
-    ('Specialtube categories'),
+    ('Pornhub Recommended'),
+    ('Pornhub Hottest'),
+    ('Pornhub Top Rated'),
+    ('Pornhub Popular Homemade'),
+    ('Pornhub Popular With Women'),
+    ('Pornhub Playlists'),
+    ('Pornhub Channels'),
+    # ('Pornhub Categories'),
     ('SEARCH'),
     ]
 
@@ -112,7 +121,12 @@ class main(Screen):
                                                                 'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
-        self.onLayoutFinish.append(self.updateMenuList)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.updateMenuList)
+        else:
+            self.timer.callback.append(self.updateMenuList)
+        self.timer.start(500, True)
 
     def updateMenuList(self):
         self.menu_list = []
@@ -132,16 +146,19 @@ class main(Screen):
         from Screens.VirtualKeyBoard import VirtualKeyBoard
         self.namex = name
         self.urlx = url
-        self.session.openWithCallback(self.filterChannels, VirtualKeyBoard, title=_("Filter this category..."), text='')
+        self.session.openWithCallback(self.filterChannels,
+                                      VirtualKeyBoard, title=_(
+                                       "Filter this category..."
+                                      ), text='')
 
     def filterChannels(self, result):
         if result:
             global search
             name = str(result)
-            url = self.urlx + str(result) + '/'
+            url = self.urlx + str(result) + '&page=1'
             try:
                 search = True
-                self.session.open(specialtube5, name, url)
+                self.session.open(pornhub, name, url)
             except:
                 return
         else:
@@ -157,29 +174,47 @@ class main(Screen):
     def keyNumberGlobalCB(self, idx):
         global namex, lnk
         namex = ''
-        lnk = Utils.b64decoder(stripurl)
         sel = self.menu_list[idx]
-        if sel == ("Specialtube latest"):
-            namex = "latest"
-            lnk = 'http://specialtube.com/latest-updates/'
-            self.session.open(specialtube2, namex, lnk)
-        elif sel == ("Specialtube top rated"):
-            namex = "top"
-            lnk = 'http://specialtube.com/top-rated/'
-            self.session.open(specialtube2, namex, lnk)
-        elif sel == ("Specialtube most popular"):
-            namex = "popular"
-            lnk = 'http://specialtube.com/most-popular/'
-            self.session.open(specialtube2, namex, lnk)
-        elif sel == ("Specialtube categories"):
-            namex = "categories"
-            lnk = 'http://specialtube.com/categories/'
-            self.session.open(categories, namex, lnk)
-
         if sel == 'SEARCH':
             namex = sel.upper()
-            lnk = 'https://specialtube.com/search/'
+            lnk = 'https://pornhub.com/video/search?search='
             self.search_text(namex, lnk)
+        elif sel == ("Pornhub Hottest"):
+            namex = "hottest"
+            lnk = 'https://www.pornhub.com/video?o=ht&cc=gb&page='
+            self.session.open(pornhubpage, namex, lnk)
+        elif sel == ("Pornhub Top Rated"):
+            namex = "top"
+            lnk = 'https://www.pornhub.com/video?o=tr&page='
+            self.session.open(pornhubpage, namex, lnk)
+        elif sel == ("Pornhub Popular Homemade"):
+            namex = "homemade"
+            lnk = 'https://www.pornhub.com/video?p=homemade&o=tr&page='
+            self.session.open(pornhubpage, namex, lnk)
+
+        elif sel == ("Pornhub Recommended"):
+            namex = "recommended"
+            lnk = 'https://www.pornhub.com/recommended/?page='
+            self.session.open(pornhubpage, namex, lnk)
+        elif sel == ("Pornhub Popular With Women"):
+            namex = "women"
+            lnk = 'https://www.pornhub.com/popularwithwomen/?page='
+            self.session.open(pornhubpage, namex, lnk)
+        elif sel == ("Pornhub Playlists"):
+            namex = "playlists"
+            lnk = 'https://www.pornhub.com/playlists/?page='
+            self.session.open(pornhubpage, namex, lnk)
+
+        elif sel == ("Pornhub Channels"):
+            namex = "channels"
+            lnk = 'https://www.pornhub.com/channels'
+            self.session.open(pornhub5, namex, lnk)
+        # elif sel == ("Pornhub Categories"):
+            # namex = "categories"
+            # lnk = 'https://www.pornhub.com/categories'
+            # self.session.open(pornhub3, namex, lnk)
+        else:
+            return
 
     def up(self):
         self[self.currentList].up()
@@ -210,7 +245,312 @@ class main(Screen):
             self.close()
 
 
-class specialtube(Screen):
+class pornhub(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with codecs.open(skin, "r", encoding="utf-8") as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                'green': self.ok,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(600, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        try:
+            content = Utils.getUrl(self.url)
+            if six.PY3:
+                content = six.ensure_str(content)
+
+            regexcat = '<div class="preloadLine".*?href="(.*?)" title="(.*?)".*?src="(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            for url, name, pic in match:
+                name = normalize(name)
+                name = Utils.decodeHtml(name)
+                url = "https://www.pornhub.com" + str(url)
+                pic = pic
+                self.cat_list.append(show_(name, url))
+
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
+
+    def play_that_shit(self, url, name):
+        self.session.open(pornhub4, str(name), str(url))
+
+    def exit(self):
+        self.close()
+
+
+class pornhub2(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with codecs.open(skin, "r", encoding="utf-8") as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                'green': self.ok,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(600, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        try:
+            content = Utils.getUrl(self.url)
+            if six.PY3:
+                content = six.ensure_str(content)
+            # regexcat = '<a class="title.*?title="(.*?)".*?href="(.*?)">'
+            regexcat = 'viewPlaylistLink.*?href="(.*?)".*?alt="(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            for name, url in match:
+                name = normalize(name)
+                name = Utils.decodeHtml(name)
+                url = "https://www.pornhub.com" + url
+                self.cat_list.append(show_(name, url))
+
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            print("url1 B =", url)
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
+
+    def play_that_shit(self, url, name):
+        self.session.open(pornhub, str(name), str(url))
+
+    def exit(self):
+        global search
+        search = False
+        self.close()
+
+
+'''
+class pornhub3(Screen):
+    def __init__(self, session, name, url):
+        self.session = session
+        Screen.__init__(self, session)
+        skin = os.path.join(skin_path, 'defaultListScreen.xml')
+        with codecs.open(skin, "r", encoding="utf-8") as f:
+            self.skin = f.read()
+        self.menulist = []
+        self['menulist'] = rvList([])
+        self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
+        self['title'] = Label('+18')
+        self['name'] = Label('')
+        self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
+        self.currentList = 'menulist'
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions',
+                                     'MovieSelectionActions'], {'up': self.up,
+                                                                'down': self.down,
+                                                                'left': self.left,
+                                                                'right': self.right,
+                                                                'ok': self.ok,
+                                                                'green': self.ok,
+                                                                'cancel': self.exit,
+                                                                'red': self.exit}, -1)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.cat)
+        else:
+            self.timer.callback.append(self.cat)
+        self.timer.start(600, True)
+
+    def up(self):
+        self[self.currentList].up()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def down(self):
+        self[self.currentList].down()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def left(self):
+        self[self.currentList].pageUp()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def right(self):
+        self[self.currentList].pageDown()
+        auswahl = self['menulist'].getCurrent()[0][0]
+        self['name'].setText(str(auswahl))
+
+    def cat(self):
+        self.cat_list = []
+        try:
+            content = Utils.getUrl(self.url)
+            if six.PY3:
+                content = six.ensure_str(content)
+            # <a href="/video?c=9" alt="Bionde" class="js-mxp" data-mxptype="Category" data-mxptext="Bionde">
+            regexcat = 'class="category-wrapper">.*?href="(.*?)".*?alt="(.*?)".*?class="js-mxp".*?data-mxptext=.*?">'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            for url, name in match:
+                if "popular with women" in name.lower():
+                    continue
+                name = normalize(name)
+                name = Utils.decodeHtml(name)
+                url = "https://www.pornhub.com" + str(url)
+                self.cat_list.append(show_(name, url))
+
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
+        except Exception as e:
+            print(e)
+
+    def ok(self):
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
+
+    def play_that_shit(self, url, name):
+        print('category url=', url)
+        self.session.open(pornhub6, str(name), str(url))
+
+    def exit(self):
+        self.close()
+
+
+class pornhub6(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -235,53 +575,8 @@ class specialtube(Screen):
                                      'ColorActions',
                                      'DirectionActions',
                                      'MovieSelectionActions'], {'cancel': self.exit,
-                                                                # 'ok': self.ok,
+                                                                'ok': self.ok,
                                                                 'red': self.exit}, -1)
-        self.onLayoutFinish.append(self.cat)
-
-    def cat(self):
-        if "categories" in self.name.lower():
-            self.session.open(categories, self.name, self.url)
-        else:
-            self.session.open(specialtube2, self.name, self.url)
-        return
-
-    def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
-
-    def play_that_shit(self, name, url):
-        self.session.open(categories, name, url)
-
-    def exit(self):
-        self.close()
-
-
-class specialtube2(Screen):
-    def __init__(self, session, name, url):
-        self.session = session
-        Screen.__init__(self, session)
-        skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with codecs.open(skin, "r", encoding="utf-8") as f:
-            self.skin = f.read()
-        self.menulist = []
-        self.loading_ok = False
-        self.count = 0
-        self.loading = 0
-        self.name = name
-        self.url = url
-        self['menulist'] = rvList([])
-        self['red'] = Label(_('Back'))
-        self['title'] = Label('+18')
-        self['name'] = Label('')
-        self['poster'] = Pixmap()
-        self['text'] = Label('Only for Adult by Lululla')
-        self.currentList = 'menulist'
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions'], {'ok': self.ok,
-                                                       'cancel': self.exit,
-                                                       'red': self.exit}, -1)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
@@ -296,24 +591,17 @@ class specialtube2(Screen):
             pages = 100
             i = 1
             while i < pages:
-                if i == 1:
-                    url1 = self.url
-                else:
-                    url1 = self.url + str(i)          
+                page = str(i)
+                pp = str(page)
+                url1 = self.url + "?page=" + str(pp)
 
-                name = "Page " + str(i)
+                 # https://it.pornhub.com/categories/teen?page=2
+                 # https://www.pornhub.com/categories/teen&page=5
+                print('category url 2=', url1)
+                name = "Page " + page
                 i += 1
-                self.urls.append(url1)
                 self.names.append(name)
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # if page == 1:
-                    # url1 = self.url
-                # else:
-                    # url1 = self.url + str(page)  # + "/"
-                # name = "Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
+                self.urls.append(url1)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:
@@ -321,21 +609,19 @@ class specialtube2(Screen):
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        i = len(self.names)
-        if i < 0:
-            return
-        idx = self["menulist"].getSelectionIndex()
-        name = self.names[idx]
-        url = self.urls[idx]
-        self.session.open(specialtube3, name, url)
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
+
+    def play_that_shit(self, name, url):
+        self.session.open(pornhub, name, url)
 
     def exit(self):
-        global search
-        search = False
         self.close()
+'''
 
 
-class specialtube3(Screen):
+class pornhub4(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -400,15 +686,22 @@ class specialtube3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            regexvideo = '<div class="item  ">.*?href="(.*?)" title="(.*?)"'  # .*?data-original="(.*?)"'
-            match = re.compile(regexvideo, re.DOTALL).findall(content)
-            for url, name in match:
-                self.cat_list.append(show_(name, url))
-            self['menulist'].l.setList(self.cat_list)
-            self['menulist'].moveToIndex(0)
+            regexcat = 'defaultQuality.*?http(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+
+            url = "http" + match[0].replace("\\", "")
+            url = url.replace("&amp;", "&")
+            name = self.name
+            # for url, name in match:
+                # name = name
+                # url = "https://www.hd-easyporn.com" + url
+            self.cat_list.append(show_(name, url))
+
             if len(self.cat_list) < 0:
                 return
             else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
                 auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
@@ -418,109 +711,7 @@ class specialtube3(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            content = Utils.getUrl(url)
-            if six.PY3:
-                content = six.ensure_str(content)
-            fpage = Utils.getUrl(url)
-            regexvideo = '<iframe width=".*?src="(.*?)".*?</iframe'
-            match = re.compile(regexvideo, re.DOTALL).findall(fpage)
-            url1 = match[0]
-            self.play_that_shit(url1, name)
-        except Exception as e:
-            print(e)
-
-    def play_that_shit(self, url, name):
-        self.session.open(specialtube4, str(name), str(url))
-
-    def exit(self):
-        self.close()
-
-
-class specialtube4(Screen):
-    def __init__(self, session, name, url):
-        self.session = session
-        Screen.__init__(self, session)
-        skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with codecs.open(skin, "r", encoding="utf-8") as f:
-            self.skin = f.read()
-        self.menulist = []
-        self['menulist'] = rvList([])
-        self['red'] = Label(_('Back'))
-        # self['green'] = Label(_('Export'))
-        self['title'] = Label('+18')
-        self['name'] = Label('')
-        self['text'] = Label('Only for Adult by Lululla')
-        self['poster'] = Pixmap()
-        self.name = name
-        self.url = url
-        self.currentList = 'menulist'
-        self.loading_ok = False
-        self.count = 0
-        self.loading = 0
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions',
-                                     'DirectionActions',
-                                     'MovieSelectionActions'], {'up': self.up,
-                                                                'down': self.down,
-                                                                'left': self.left,
-                                                                'right': self.right,
-                                                                'ok': self.ok,
-                                                                'green': self.ok,
-                                                                'cancel': self.exit,
-                                                                'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.cat)
-        else:
-            self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
-
-    def up(self):
-        self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def down(self):
-        self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def left(self):
-        self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def right(self):
-        self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def cat(self):
-        self.cat_list = []
-        try:
-            content = Utils.getUrl(self.url)
-            if six.PY3:
-                content = six.ensure_str(content)
-            regexvideo = "rnd: '(.*?)'.*?https://specialtube.com/get_file(.*?).mp4"
-            match = re.compile(regexvideo, re.DOTALL).findall(content)
-            for rnd, url in match:  # , name, pic in match:
-                name = self.name
-                url = 'https://specialtube.com/get_file' + url + '.mp4/?embed=true&rnd=' + str(rnd)
-                self.cat_list.append(show_(name, url))
-            self['menulist'].l.setList(self.cat_list)
-            self['menulist'].moveToIndex(0)
-            if len(self.cat_list) < 0:
-                return
-            else:
-                auswahl = self['menulist'].getCurrent()[0][0]
-                self['name'].setText(str(auswahl))
-        except Exception as e:
-            print(e)
-
-    def ok(self):
-        try:
-            name = self['menulist'].getCurrent()[0][0]
-            url = self['menulist'].getCurrent()[0][1]
+            print("url1 B =", url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -529,10 +720,12 @@ class specialtube4(Screen):
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
+        global search
+        search = False
         self.close()
 
 
-class categories(Screen):
+class pornhub5(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -542,16 +735,17 @@ class categories(Screen):
         self.menulist = []
         self['menulist'] = rvList([])
         self['red'] = Label(_('Back'))
+        # self['green'] = Label(_('Export'))
         self['title'] = Label('+18')
         self['name'] = Label('')
-        self['poster'] = Pixmap()
         self['text'] = Label('Only for Adult by Lululla')
+        self['poster'] = Pixmap()
+        self.name = name
+        self.url = url
         self.currentList = 'menulist'
         self.loading_ok = False
         self.count = 0
         self.loading = 0
-        self.name = name
-        self.url = url
         self['actions'] = ActionMap(['OkCancelActions',
                                      'ColorActions',
                                      'DirectionActions',
@@ -568,7 +762,7 @@ class categories(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(500, True)
+        self.timer.start(600, True)
 
     def up(self):
         self[self.currentList].up()
@@ -596,23 +790,21 @@ class categories(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            #href="https://specialtube.com/categories/">Top Categories<
-            # regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating"'
-            regexcat2 = 'href="https://specialtube.com/categories/(.*?)">(.*?)<span class="rating">(.*?)</'
-            match2 = re.compile(regexcat2, re.DOTALL).findall(content)
-            for url, name, rating in match2:
-                if 'id="item' in name:
-                    continue
-                if '<div class=' in name:
-                    continue
-                url1 = 'https://specialtube.com/categories/' + url
-                name = str(name) + ' rat. ' + str(rating)
-                self.cat_list.append(show_(name, url1))
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
+
+            regexcat = 'div class="channelsWrapper.*?a href="(.*?)".*?alt="(.*?)".*?src="(.*?)"'
+            match = re.compile(regexcat, re.DOTALL).findall(content)
+            for url, name, pic in match:
+                name = normalize(name)
+                name = Utils.decodeHtml(name)
+                url = "https://www.pornhub.com" + str(url)
+                pic = pic
+                self.cat_list.append(show_(name, url))
+
             if len(self.cat_list) < 0:
                 return
             else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
                 auswahl = self['menulist'].getCurrent()[0][0]
                 self['name'].setText(str(auswahl))
         except Exception as e:
@@ -627,13 +819,13 @@ class categories(Screen):
             print(e)
 
     def play_that_shit(self, url, name):
-        self.session.open(specialtube5, name, url)
+        self.session.open(pornhub, str(name), str(url))
 
     def exit(self):
         self.close()
 
 
-class specialtube5(Screen):
+class pornhubpage(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -641,18 +833,18 @@ class specialtube5(Screen):
         with codecs.open(skin, "r", encoding="utf-8") as f:
             self.skin = f.read()
         self.menulist = []
+        self.loading_ok = False
+        self.count = 0
+        self.loading = 0
+        self.name = name
+        self.url = url
         self['menulist'] = rvList([])
         self['red'] = Label(_('Back'))
         self['title'] = Label('+18')
         self['name'] = Label('')
-        self['text'] = Label('Only for Adult by Lululla')
         self['poster'] = Pixmap()
-        self.name = name
-        self.url = url
+        self['text'] = Label('Only for Adult by Lululla')
         self.currentList = 'menulist'
-        self.loading_ok = False
-        self.count = 0
-        self.loading = 0
         self['actions'] = ActionMap(['OkCancelActions',
                                      'ColorActions'], {'ok': self.ok,
                                                        'cancel': self.exit,
@@ -663,27 +855,20 @@ class specialtube5(Screen):
         else:
             self.timer.callback.append(self._gotPageLoad)
         self.timer.start(500, True)
-        return
 
     def _gotPageLoad(self):
         self.names = []
         self.urls = []
-        url = self.url
         try:
             pages = 100
             i = 1
             while i < pages:
-                url1 = url + str(i) + "/"
-                name = "Page " + str(i)
+                page = str(i)
+                url1 = self.url + page
+                name = "Page " + page
                 i += 1
-                self.urls.append(url1)
                 self.names.append(name)
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # url1 = url + str(page) + "/"
-                # name = "Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
+                self.urls.append(url1)
             self['name'].setText(_('Please select ...'))
             showlist(self.names, self['menulist'])
         except Exception as e:
@@ -697,7 +882,7 @@ class specialtube5(Screen):
         idx = self["menulist"].getSelectionIndex()
         name = self.names[idx]
         url = self.urls[idx]
-        self.session.open(specialtube3, name, url)
+        self.session.open(pornhub, name, url)
 
     def exit(self):
         global search

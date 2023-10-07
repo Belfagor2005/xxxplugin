@@ -54,6 +54,11 @@ _session = None
 Path_Movies = '/tmp/'
 
 
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
 class main(Screen):
     def __init__(self, session):
         self.session = session
@@ -227,9 +232,9 @@ class empflix3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -392,9 +397,9 @@ class empflix5(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
         try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)

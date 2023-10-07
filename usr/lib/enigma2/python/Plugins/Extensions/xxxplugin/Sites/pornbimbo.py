@@ -25,10 +25,12 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
+from Plugins.Extensions.xxxplugin.lib import html_conv
 from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 
@@ -55,6 +57,24 @@ Path_Movies = '/tmp/'
 global search
 search = False
 
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 Panel_list = [
     ('TOP RATED'),
@@ -214,7 +234,7 @@ class pornbimbo(Screen):
                                                                 'left': self.left,
                                                                 'right': self.right,
                                                                 'ok': self.ok,
-                                                                # 'green': self.message2,
+                                                                'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
         self.timer = eTimer()
@@ -270,9 +290,12 @@ class pornbimbo(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(pornbimbox, name, url)
@@ -344,12 +367,16 @@ class pornbimbox(Screen):
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        print('pages url: ', url)
-        self.session.open(pornbimbo2, name, url)
-
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            print('pages url: ', url)
+            self.session.open(pornbimbo2, name, url)
+        except Exception as e:
+            print(e)
     def exit(self):
+        global search
+        search = False
         self.close()
 
 
@@ -452,4 +479,6 @@ class pornbimbo2(Screen):
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
+        global search
+        search = False
         self.close()

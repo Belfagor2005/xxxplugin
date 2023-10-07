@@ -25,6 +25,7 @@ import re
 import six
 import ssl
 import sys
+import unicodedata
 from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
@@ -34,6 +35,7 @@ from Plugins.Extensions.xxxplugin import _, skin_path
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
+
 if sys.version_info >= (2, 7, 9):
     try:
         sslContext = ssl._create_unverified_context()
@@ -41,8 +43,8 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'fullporner '
-desc_plugin = ('..:: fullporner by Lululla %s ::.. ' % currversion)
+title_plug = 'Fullporner '
+desc_plugin = ('..:: Fullporner by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -59,6 +61,25 @@ _session = None
 Path_Movies = '/tmp/'
 global search
 search = False
+
+
+if PY3:
+    PY3 = True
+    unicode = str
+else:
+    str = str
+
+
+def normalize(title):
+    try:
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
+
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    except:
+        return html_conv.html_unescape(title)
 
 
 Panel_list = [
@@ -270,6 +291,7 @@ class fullporner1(Screen):
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
                 name = str(name).replace('"', '')
+                name = normalize(name)
                 # name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com" + str(url)
                 self.cat_list.append(show_(name, url1))
@@ -380,7 +402,7 @@ class fullpornerX2(Screen):
         self['name'] = Label('')
         self['text'] = Label('Only for Adult by Lululla')
         self['poster'] = Pixmap()
-        self.name = str(name)  # html_conv.html_unescape(name)
+        self.name = str(name)
         self.url = url
         self.currentList = 'menulist'
         self.loading_ok = False
@@ -434,6 +456,7 @@ class fullpornerX2(Screen):
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
                 name = str(name).replace('"', '')
+                name = normalize(name)
                 # name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com/watch/" + str(url)
                 self.cat_list.append(show_(name, url1))
@@ -529,6 +552,7 @@ class fullporner2(Screen):
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
                 name = str(name).replace('"', '')
+                name = normalize(name)
                 name = html_conv.html_unescape(name)
                 url1 = "https://fullporner.com" + str(url)
                 self.cat_list.append(show_(name, url1))
@@ -639,9 +663,11 @@ class fullporner3(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Except
 
     def play_that_shit(self, url, name):
         self.session.open(fullporner4, str(name), str(url))
@@ -736,9 +762,11 @@ class fullporner4(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Except
 
     def play_that_shit(self, url, name):
         print('play_that_shit fullporner4 url= ', url)

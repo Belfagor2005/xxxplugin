@@ -1,11 +1,6 @@
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_xpath,
-)
 from ..utils import (
     int_or_none,
     parse_duration,
@@ -55,7 +50,7 @@ class MicrosoftVirtualAcademyIE(MicrosoftVirtualAcademyBaseIE):
     def _real_extract(self, url):
         url, smuggled_data = unsmuggle_url(url, {})
 
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         course_id = mobj.group('course_id')
         video_id = mobj.group('id')
 
@@ -70,9 +65,9 @@ class MicrosoftVirtualAcademyIE(MicrosoftVirtualAcademyBaseIE):
 
         formats = []
 
-        for sources in settings.findall(compat_xpath('.//MediaSources')):
+        for sources in settings.findall('.//MediaSources'):
             sources_type = sources.get('videoType')
-            for source in sources.findall(compat_xpath('./MediaSource')):
+            for source in sources.findall('./MediaSource'):
                 video_url = source.text
                 if not video_url or not video_url.startswith('http'):
                     continue
@@ -98,10 +93,9 @@ class MicrosoftVirtualAcademyIE(MicrosoftVirtualAcademyBaseIE):
                     'acodec': acodec,
                     'vcodec': vcodec,
                 })
-        self._sort_formats(formats)
 
         subtitles = {}
-        for source in settings.findall(compat_xpath('.//MarkerResourceSource')):
+        for source in settings.findall('.//MarkerResourceSource'):
             subtitle_url = source.text
             if not subtitle_url:
                 continue
@@ -152,7 +146,7 @@ class MicrosoftVirtualAcademyCourseIE(MicrosoftVirtualAcademyBaseIE):
             MicrosoftVirtualAcademyCourseIE, cls).suitable(url)
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         course_id = mobj.group('id')
         display_id = mobj.group('display_id')
 

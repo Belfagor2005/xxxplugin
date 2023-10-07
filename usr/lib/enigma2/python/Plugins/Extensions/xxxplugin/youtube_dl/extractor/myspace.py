@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -46,18 +43,6 @@ class MySpaceIE(InfoExtractor):
             'uploader_id': 'killsorrow',
         },
     }, {
-        'add_ie': ['Youtube'],
-        'url': 'https://myspace.com/threedaysgrace/music/song/animal-i-have-become-28400208-28218041',
-        'info_dict': {
-            'id': 'xqds0B_meys',
-            'ext': 'webm',
-            'title': 'Three Days Grace - Animal I Have Become',
-            'description': 'md5:8bd86b3693e72a077cf863a8530c54bb',
-            'uploader': 'ThreeDaysGraceVEVO',
-            'uploader_id': 'ThreeDaysGraceVEVO',
-            'upload_date': '20091002',
-        },
-    }, {
         'url': 'https://myspace.com/starset2/music/song/first-light-95799905-106964426',
         'only_matching': True,
     }, {
@@ -66,7 +51,7 @@ class MySpaceIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         video_id = mobj.group('video_id') or mobj.group('song_id')
         is_song = mobj.group('mediatype').startswith('music/song')
         webpage = self._download_webpage(url, video_id)
@@ -137,7 +122,6 @@ class MySpaceIE(InfoExtractor):
                 else:
                     raise ExtractorError(
                         'Found song but don\'t know how to download it')
-            self._sort_formats(formats)
             return {
                 'id': video_id,
                 'title': self._og_search_title(webpage),
@@ -155,7 +139,6 @@ class MySpaceIE(InfoExtractor):
                 video.get('streamUrl'), video.get('hlsStreamUrl'),
                 video.get('mp4StreamUrl'), int_or_none(video.get('width')),
                 int_or_none(video.get('height')))
-            self._sort_formats(formats)
             return {
                 'id': video_id,
                 'title': video['title'],
@@ -191,7 +174,7 @@ class MySpaceAlbumIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         playlist_id = mobj.group('id')
         display_id = mobj.group('title') + playlist_id
         webpage = self._download_webpage(url, display_id)

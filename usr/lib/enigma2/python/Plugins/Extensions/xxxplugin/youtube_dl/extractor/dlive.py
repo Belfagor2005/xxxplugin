@@ -1,7 +1,4 @@
-from __future__ import unicode_literals
-
 import json
-import re
 
 from .common import InfoExtractor
 from ..utils import int_or_none
@@ -26,7 +23,7 @@ class DLiveVODIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        uploader_id, vod_id = re.match(self._VALID_URL, url).groups()
+        uploader_id, vod_id = self._match_valid_url(url).groups()
         broadcast = self._download_json(
             'https://graphigo.prd.dlive.tv/', vod_id,
             data=json.dumps({'query': '''query {
@@ -43,7 +40,6 @@ class DLiveVODIE(InfoExtractor):
         title = broadcast['title']
         formats = self._extract_m3u8_formats(
             broadcast['playbackUrl'], vod_id, 'mp4', 'm3u8_native')
-        self._sort_formats(formats)
         return {
             'id': vod_id,
             'title': title,
@@ -82,10 +78,9 @@ class DLiveStreamIE(InfoExtractor):
         formats = self._extract_m3u8_formats(
             'https://live.prd.dlive.tv/hls/live/%s.m3u8' % username,
             display_name, 'mp4')
-        self._sort_formats(formats)
         return {
             'id': display_name,
-            'title': self._live_title(title),
+            'title': title,
             'uploader': display_name,
             'uploader_id': username,
             'formats': formats,

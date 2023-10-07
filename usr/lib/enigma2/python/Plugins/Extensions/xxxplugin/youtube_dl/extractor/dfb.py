@@ -1,7 +1,3 @@
-from __future__ import unicode_literals
-
-import re
-
 from .common import InfoExtractor
 from ..utils import unified_strdate
 
@@ -23,7 +19,7 @@ class DFBIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        display_id, video_id = re.match(self._VALID_URL, url).groups()
+        display_id, video_id = self._match_valid_url(url).groups()
 
         player_info = self._download_xml(
             'http://tv.dfb.de/server/hd_video.php?play=%s' % video_id,
@@ -45,7 +41,6 @@ class DFBIE(InfoExtractor):
                 formats.extend(self._extract_m3u8_formats(
                     manifest_url, display_id, 'mp4',
                     'm3u8_native', m3u8_id='hls', fatal=False))
-        self._sort_formats(formats)
 
         return {
             'id': video_id,

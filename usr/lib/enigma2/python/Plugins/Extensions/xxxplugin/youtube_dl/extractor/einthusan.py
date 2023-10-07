@@ -1,8 +1,4 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import json
-import re
 
 from .common import InfoExtractor
 from ..compat import (
@@ -48,7 +44,7 @@ class EinthusanIE(InfoExtractor):
         )).decode('utf-8'), video_id)
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         host = mobj.group('host')
         video_id = mobj.group('id')
 
@@ -92,8 +88,6 @@ class EinthusanIE(InfoExtractor):
             formats.append({
                 'url': mp4_url,
             })
-
-        self._sort_formats(formats)
 
         description = get_elements_by_class('synopsis', webpage)[0]
         thumbnail = self._html_search_regex(

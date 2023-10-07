@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 from .common import InfoExtractor
 from ..compat import (
     compat_str,
@@ -104,7 +101,7 @@ class FirstTVIE(InfoExtractor):
                     'tbr': tbr,
                     'source_preference': quality(f.get('name')),
                     # quality metadata of http formats may be incorrect
-                    'preference': -1,
+                    'preference': -10,
                 })
             # m3u8 URL format is reverse engineered from [1] (search for
             # master.m3u8). dashEdges (that is currently balancer-vod.1tv.ru)
@@ -126,7 +123,6 @@ class FirstTVIE(InfoExtractor):
                     % (path, m3u8_path),
                     display_id, 'mp4',
                     entry_protocol='m3u8_native', m3u8_id='hls', fatal=False))
-            self._sort_formats(formats)
 
             thumbnail = item.get('poster') or self._og_search_thumbnail(webpage)
             duration = int_or_none(item.get('duration') or self._html_search_meta(

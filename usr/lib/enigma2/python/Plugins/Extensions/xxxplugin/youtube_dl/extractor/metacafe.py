@@ -1,25 +1,20 @@
-from __future__ import unicode_literals
-
 import json
 import re
+import urllib.parse
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_parse_qs,
-    compat_urllib_parse,
-    compat_urllib_parse_unquote,
-)
+from ..compat import compat_parse_qs, compat_urllib_parse_unquote
 from ..utils import (
-    determine_ext,
     ExtractorError,
-    int_or_none,
+    determine_ext,
     get_element_by_attribute,
+    int_or_none,
     mimetype2ext,
 )
 
 
 class MetacafeIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:www\.)?metacafe\.com/watch/(?P<video_id>[^/]+)/(?P<display_id>[^/?#]+)'
+    _VALID_URL = r'https?://(?:www\.)?metacafe\.com/watch/(?P<id>[^/]+)/(?P<display_id>[^/?#]+)'
     _DISCLAIMER = 'http://www.metacafe.com/family_filter/'
     _FILTER_POST = 'http://www.metacafe.com/f/index.php?inputType=filter&controllerGroup=user'
     IE_NAME = 'metacafe'
@@ -130,7 +125,7 @@ class MetacafeIE(InfoExtractor):
 
     def _real_extract(self, url):
         # Extract id and simplified title from URL
-        video_id, display_id = re.match(self._VALID_URL, url).groups()
+        video_id, display_id = self._match_valid_url(url).groups()
 
         # the video may come from an external site
         m_external = re.match(r'^(\w{2})-(.*)$', video_id)
@@ -145,7 +140,7 @@ class MetacafeIE(InfoExtractor):
 
         headers = {
             # Disable family filter
-            'Cookie': 'user=%s; ' % compat_urllib_parse.quote(json.dumps({'ffilter': False}))
+            'Cookie': 'user=%s; ' % urllib.parse.quote(json.dumps({'ffilter': False}))
         }
 
         # AnyClip videos require the flashversion cookie so that we get the link
@@ -272,7 +267,6 @@ class MetacafeIE(InfoExtractor):
                 'url': video_url,
                 'ext': video_ext,
             }]
-        self._sort_formats(formats)
 
         return {
             'id': video_id,

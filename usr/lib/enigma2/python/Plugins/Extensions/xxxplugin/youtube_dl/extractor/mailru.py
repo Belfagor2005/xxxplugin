@@ -1,9 +1,7 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import itertools
 import json
 import re
+import urllib.parse
 
 from .common import InfoExtractor
 from ..compat import compat_urllib_parse_unquote
@@ -12,6 +10,7 @@ from ..utils import (
     parse_duration,
     remove_end,
     try_get,
+    urljoin,
 )
 
 
@@ -20,10 +19,10 @@ class MailRuIE(InfoExtractor):
     IE_DESC = 'Видео@Mail.Ru'
     _VALID_URL = r'''(?x)
                     https?://
-                        (?:(?:www|m)\.)?my\.mail\.ru/+
+                        (?:(?:www|m|videoapi)\.)?my\.mail\.ru/+
                         (?:
                             video/.*\#video=/?(?P<idv1>(?:[^/]+/){3}\d+)|
-                            (?:(?P<idv2prefix>(?:[^/]+/+){2})video/(?P<idv2suffix>[^/]+/\d+))\.html|
+                            (?:videos/embed/)?(?:(?P<idv2prefix>(?:[^/]+/+){2})(?:video/(?:embed/)?)?(?P<idv2suffix>[^/]+/\d+))(?:\.html)?|
                             (?:video/embed|\+/video/meta)/(?P<metaid>\d+)
                         )
                     '''
@@ -93,11 +92,19 @@ class MailRuIE(InfoExtractor):
         {
             'url': 'https://my.mail.ru//list//sinyutin10/video/_myvideo/4.html',
             'only_matching': True,
+        },
+        {
+            'url': 'https://my.mail.ru/mail/cloud-strife/video/embed/Games/2009',
+            'only_matching': True,
+        },
+        {
+            'url': 'https://videoapi.my.mail.ru/videos/embed/mail/cloud-strife/Games/2009.html',
+            'only_matching': True,
         }
     ]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         meta_id = mobj.group('metaid')
 
         video_id = None
@@ -108,15 +115,21 @@ class MailRuIE(InfoExtractor):
             if not video_id:
                 video_id = mobj.group('idv2prefix') + mobj.group('idv2suffix')
             webpage = self._download_webpage(url, video_id)
-            page_config = self._parse_json(self._search_regex(
+            page_config = self._parse_json(self._search_regex([
                 r'(?s)<script[^>]+class="sp-video__page-config"[^>]*>(.+?)</script>',
+                r'(?s)"video":\s*({.+?}),'],
                 webpage, 'page config', default='{}'), video_id, fatal=False)
             if page_config:
-                meta_url = page_config.get('metaUrl') or page_config.get('video', {}).get('metaUrl')
+                meta_url = page_config.get('metaUrl') or page_config.get('video', {}).get('metaUrl') or page_config.get('metadataUrl')
             else:
                 meta_url = None
 
         video_data = None
+
+        # fix meta_url if missing the host address
+        if re.match(r'^\/\+\/', meta_url):
+            meta_url = urljoin('https://my.mail.ru', meta_url)
+
         if meta_url:
             video_data = self._download_json(
                 meta_url, video_id or meta_id, 'Downloading video meta JSON',
@@ -128,17 +141,15 @@ class MailRuIE(InfoExtractor):
                 'http://api.video.mail.ru/videos/%s.json?new=1' % video_id,
                 video_id, 'Downloading video JSON')
 
-        headers = {}
-
         video_key = self._get_cookies('https://my.mail.ru').get('video_key')
-        if video_key:
-            headers['Cookie'] = 'video_key=%s' % video_key.value
 
         formats = []
         for f in video_data['videos']:
             video_url = f.get('url')
             if not video_url:
                 continue
+            if video_key:
+                self._set_cookie(urllib.parse.urlparse(video_url).hostname, 'video_key', video_key.value)
             format_id = f.get('key')
             height = int_or_none(self._search_regex(
                 r'^(\d+)[pP]$', format_id, 'height', default=None)) if format_id else None
@@ -146,9 +157,7 @@ class MailRuIE(InfoExtractor):
                 'url': video_url,
                 'format_id': format_id,
                 'height': height,
-                'http_headers': headers,
             })
-        self._sort_formats(formats)
 
         meta_data = video_data['meta']
         title = remove_end(meta_data['title'], '.mp4')

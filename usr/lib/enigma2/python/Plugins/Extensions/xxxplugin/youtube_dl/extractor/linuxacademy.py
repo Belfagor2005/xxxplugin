@@ -1,15 +1,9 @@
-from __future__ import unicode_literals
-
 import json
 import random
-import re
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_b64decode,
-    compat_HTTPError,
-    compat_str,
-)
+from ..compat import compat_b64decode, compat_str
+from ..networking.exceptions import HTTPError
 from ..utils import (
     clean_html,
     ExtractorError,
@@ -38,8 +32,8 @@ class LinuxAcademyIE(InfoExtractor):
             'ext': 'mp4',
             'title': 'What Is Data Science',
             'description': 'md5:c574a3c20607144fb36cb65bdde76c99',
-            'timestamp': 1607387907,
-            'upload_date': '20201208',
+            'timestamp': int,  # The timestamp and upload date changes
+            'upload_date': r're:\d+',
             'duration': 304,
         },
         'params': {
@@ -59,6 +53,16 @@ class LinuxAcademyIE(InfoExtractor):
         },
         'playlist_count': 41,
         'skip': 'Requires Linux Academy account credentials',
+    }, {
+        'url': 'https://linuxacademy.com/cp/modules/view/id/39',
+        'info_dict': {
+            'id': '39',
+            'title': 'Red Hat Certified Systems Administrator - RHCSA (EX200) Exam Prep  (legacy)',
+            'description': 'md5:0f1d3369e90c3fb14a79813b863c902f',
+            'duration': 89280,
+        },
+        'playlist_count': 73,
+        'skip': 'Requires Linux Academy account credentials',
     }]
 
     _AUTHORIZE_URL = 'https://login.linuxacademy.com/authorize'
@@ -66,18 +70,10 @@ class LinuxAcademyIE(InfoExtractor):
     _CLIENT_ID = 'KaWxNn1C2Gc7n83W9OFeXltd8Utb5vvx'
     _NETRC_MACHINE = 'linuxacademy'
 
-    def _real_initialize(self):
-        self._login()
-
-    def _login(self):
-        username, password = self._get_login_info()
-        if username is None:
-            return
-
+    def _perform_login(self, username, password):
         def random_string():
-            return ''.join([
-                random.choice('0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~')
-                for _ in range(32)])
+            return ''.join(random.choices(
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~', k=32))
 
         webpage, urlh = self._download_webpage_handle(
             self._AUTHORIZE_URL, None, 'Downloading authorize page', query={
@@ -102,13 +98,13 @@ class LinuxAcademyIE(InfoExtractor):
             'client_id': self._CLIENT_ID,
             'redirect_uri': self._ORIGIN_URL,
             'tenant': 'lacausers',
-            'connection': 'Username-Password-Authentication',
+            'connection': 'Username-Password-ACG-Proxy',
             'username': username,
             'password': password,
             'sso': 'true',
         })
 
-        login_state_url = urlh.geturl()
+        login_state_url = urlh.url
 
         try:
             login_page = self._download_webpage(
@@ -120,8 +116,8 @@ class LinuxAcademyIE(InfoExtractor):
                     'Referer': login_state_url,
                 })
         except ExtractorError as e:
-            if isinstance(e.cause, compat_HTTPError) and e.cause.code == 401:
-                error = self._parse_json(e.cause.read(), None)
+            if isinstance(e.cause, HTTPError) and e.cause.status == 401:
+                error = self._parse_json(e.cause.response.read(), None)
                 message = error.get('description') or error['code']
                 raise ExtractorError(
                     '%s said: %s' % (self.IE_NAME, message), expected=True)
@@ -138,7 +134,7 @@ class LinuxAcademyIE(InfoExtractor):
             })
 
         access_token = self._search_regex(
-            r'access_token=([^=&]+)', urlh.geturl(),
+            r'access_token=([^=&]+)', urlh.url,
             'access token', default=None)
         if not access_token:
             access_token = self._parse_json(
@@ -152,7 +148,7 @@ class LinuxAcademyIE(InfoExtractor):
             % access_token, None, 'Downloading token validation page')
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         chapter_id, lecture_id, course_id = mobj.group('chapter_id', 'lesson_id', 'course_id')
         item_id = course_id if course_id else '%s-%s' % (chapter_id, lecture_id)
 
@@ -162,7 +158,7 @@ class LinuxAcademyIE(InfoExtractor):
         if course_id:
             module = self._parse_json(
                 self._search_regex(
-                    r'window\.module\s*=\s*({.+?})\s*;', webpage, 'module'),
+                    r'window\.module\s*=\s*({(?:(?!};)[^"]|"([^"]|\\")*")+})\s*;', webpage, 'module'),
                 item_id)
             entries = []
             chapter_number = None
@@ -218,7 +214,6 @@ class LinuxAcademyIE(InfoExtractor):
         formats = self._extract_m3u8_formats(
             m3u8_url, item_id, 'mp4', entry_protocol='m3u8_native',
             m3u8_id='hls')
-        self._sort_formats(formats)
         info = {
             'id': item_id,
             'formats': formats,

@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 from .common import InfoExtractor
 from ..utils import update_url
 
@@ -27,7 +24,6 @@ class KommunetvIE(InfoExtractor):
         file = data['playlist'][0]['playlist'][0]['file']
         url = update_url(file, query=None, fragment=None)
         formats = self._extract_m3u8_formats(url, video_id, ext='mp4', entry_protocol='m3u8_native', m3u8_id='hls', fatal=False)
-        self._sort_formats(formats)
         return {
             'id': video_id,
             'formats': formats,

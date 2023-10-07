@@ -1,10 +1,5 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
-import re
-
 from .common import InfoExtractor
-from ..compat import compat_HTTPError
+from ..networking.exceptions import HTTPError
 from ..utils import (
     ExtractorError,
     int_or_none,
@@ -25,9 +20,6 @@ class AtresPlayerIE(InfoExtractor):
                 'description': 'md5:7634cdcb4d50d5381bedf93efb537fbc',
                 'duration': 3413,
             },
-            'params': {
-                'format': 'bestvideo',
-            },
             'skip': 'This video is only available for registered users'
         },
         {
@@ -41,22 +33,15 @@ class AtresPlayerIE(InfoExtractor):
     ]
     _API_BASE = 'https://api.atresplayer.com/'
 
-    def _real_initialize(self):
-        self._login()
-
     def _handle_error(self, e, code):
-        if isinstance(e.cause, compat_HTTPError) and e.cause.code == code:
-            error = self._parse_json(e.cause.read(), None)
+        if isinstance(e.cause, HTTPError) and e.cause.status == code:
+            error = self._parse_json(e.cause.response.read(), None)
             if error.get('error') == 'required_registered':
                 self.raise_login_required()
             raise ExtractorError(error['error_description'], expected=True)
         raise
 
-    def _login(self):
-        username, password = self._get_login_info()
-        if username is None:
-            return
-
+    def _perform_login(self, username, password):
         self._request_webpage(
             self._API_BASE + 'login', None, 'Downloading login page')
 
@@ -75,7 +60,7 @@ class AtresPlayerIE(InfoExtractor):
         self._request_webpage(target_url, None, 'Following Target URL')
 
     def _real_extract(self, url):
-        display_id, video_id = re.match(self._VALID_URL, url).groups()
+        display_id, video_id = self._match_valid_url(url).groups()
 
         try:
             episode = self._download_json(
@@ -86,19 +71,19 @@ class AtresPlayerIE(InfoExtractor):
         title = episode['titulo']
 
         formats = []
+        subtitles = {}
         for source in episode.get('sources', []):
             src = source.get('src')
             if not src:
                 continue
             src_type = source.get('type')
             if src_type == 'application/vnd.apple.mpegurl':
-                formats.extend(self._extract_m3u8_formats(
+                formats, subtitles = self._extract_m3u8_formats(
                     src, video_id, 'mp4', 'm3u8_native',
-                    m3u8_id='hls', fatal=False))
+                    m3u8_id='hls', fatal=False)
             elif src_type == 'application/dash+xml':
-                formats.extend(self._extract_mpd_formats(
-                    src, video_id, mpd_id='dash', fatal=False))
-        self._sort_formats(formats)
+                formats, subtitles = self._extract_mpd_formats(
+                    src, video_id, mpd_id='dash', fatal=False)
 
         heartbeat = episode.get('heartbeat') or {}
         omniture = episode.get('omniture') or {}
@@ -115,4 +100,5 @@ class AtresPlayerIE(InfoExtractor):
             'channel': get_meta('channel'),
             'season': get_meta('season'),
             'episode_number': int_or_none(get_meta('episodeNumber')),
+            'subtitles': subtitles,
         }

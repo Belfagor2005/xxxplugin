@@ -1,8 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
-import re
-
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
@@ -38,7 +33,7 @@ class BongaCamsIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         host = mobj.group('host')
         channel_id = mobj.group('id')
 
@@ -62,11 +57,10 @@ class BongaCamsIE(InfoExtractor):
         formats = self._extract_m3u8_formats(
             '%s/hls/stream_%s/playlist.m3u8' % (server_url, uploader_id),
             channel_id, 'mp4', m3u8_id='hls', live=True)
-        self._sort_formats(formats)
 
         return {
             'id': channel_id,
-            'title': self._live_title(uploader or uploader_id),
+            'title': uploader or uploader_id,
             'uploader': uploader,
             'uploader_id': uploader_id,
             'like_count': like_count,

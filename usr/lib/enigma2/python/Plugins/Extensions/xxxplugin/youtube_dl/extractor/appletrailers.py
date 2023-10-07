@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import re
 import json
 
@@ -94,7 +92,7 @@ class AppleTrailersIE(InfoExtractor):
     _JSON_RE = r'iTunes.playURL\((.*?)\);'
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         movie = mobj.group('movie')
         uploader_id = mobj.group('company')
 
@@ -122,7 +120,6 @@ class AppleTrailersIE(InfoExtractor):
                             'height': int_or_none(size_data.get('height')),
                             'language': version[:2],
                         })
-                self._sort_formats(formats)
 
                 entries.append({
                     'id': movie + '-' + re.sub(r'[^a-zA-Z0-9]', '', clip_title).lower(),
@@ -187,8 +184,6 @@ class AppleTrailersIE(InfoExtractor):
                     'height': int_or_none(format['height']),
                 })
 
-            self._sort_formats(formats)
-
             playlist.append({
                 '_type': 'video',
                 'id': video_id,
@@ -199,7 +194,7 @@ class AppleTrailersIE(InfoExtractor):
                 'upload_date': upload_date,
                 'uploader_id': uploader_id,
                 'http_headers': {
-                    'User-Agent': 'QuickTime compatible (youtube-dl)',
+                    'User-Agent': 'QuickTime compatible (yt-dlp)',
                 },
             })
 

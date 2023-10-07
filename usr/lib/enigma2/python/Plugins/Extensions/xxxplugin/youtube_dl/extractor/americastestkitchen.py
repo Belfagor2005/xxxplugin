@@ -1,8 +1,4 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import json
-import re
 
 from .common import InfoExtractor
 from ..utils import (
@@ -28,10 +24,10 @@ class AmericasTestKitchenIE(InfoExtractor):
             'timestamp': 1523304000,
             'upload_date': '20180409',
             'release_date': '20180409',
-            'series': "America's Test Kitchen",
+            'series': 'America\'s Test Kitchen',
             'season': 'Season 18',
-            'season_number': 18,
             'episode': 'Japanese Suppers',
+            'season_number': 18,
             'episode_number': 15,
             'duration': 1376,
             'thumbnail': r're:^https?://',
@@ -54,10 +50,10 @@ class AmericasTestKitchenIE(InfoExtractor):
             'timestamp': 1610737200,
             'upload_date': '20210115',
             'release_date': '20210115',
-            'series': "America's Test Kitchen",
+            'series': 'America\'s Test Kitchen',
             'season': 'Season 21',
-            'season_number': 21,
             'episode': 'Simple Chicken Dinner',
+            'season_number': 21,
             'episode_number': 3,
             'duration': 1397,
             'thumbnail': r're:^https?://',
@@ -85,7 +81,7 @@ class AmericasTestKitchenIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        resource_type, video_id = re.match(self._VALID_URL, url).groups()
+        resource_type, video_id = self._match_valid_url(url).groups()
         is_episode = resource_type == 'episode'
         if is_episode:
             resource_type = 'episodes'
@@ -161,11 +157,10 @@ class AmericasTestKitchenSeasonIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        match = re.match(self._VALID_URL, url).groupdict()
-        show = match.get('show2')
+        season_number, show1, show = self._match_valid_url(url).group('season', 'show', 'show2')
         show_path = ('/' + show) if show else ''
-        show = show or match['show']
-        season_number = int_or_none(match.get('season'))
+        show = show or show1
+        season_number = int_or_none(season_number)
 
         slug, title = {
             'americastestkitchen': ('atk', 'America\'s Test Kitchen'),
@@ -206,8 +201,8 @@ class AmericasTestKitchenSeasonIE(InfoExtractor):
                     continue
                 yield {
                     '_type': 'url',
-                    'url': 'https://www.americastestkitchen.com%s%s' % (show_path, search_url),
-                    'id': try_get(episode, lambda e: e['objectID'].rsplit('_', 1)[-1]),
+                    'url': f'https://www.americastestkitchen.com{show_path or ""}{search_url}',
+                    'id': try_get(episode, lambda e: e['objectID'].split('_')[-1]),
                     'title': episode.get('title'),
                     'description': episode.get('description'),
                     'timestamp': unified_timestamp(episode.get('search_document_date')),

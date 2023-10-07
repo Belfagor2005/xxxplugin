@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 from .common import InfoExtractor
 from ..compat import compat_urlparse
@@ -55,9 +52,8 @@ class OraTVIE(InfoExtractor):
                 formats.append({
                     'url': http_template % q,
                     'format_id': q,
-                    'preference': preference(q),
+                    'quality': preference(q),
                 })
-            self._sort_formats(formats)
         else:
             return self.url_result(self._search_regex(
                 r'"youtube_id"\s*:\s*"([^"]+)', webpage, 'youtube id'), 'Youtube')

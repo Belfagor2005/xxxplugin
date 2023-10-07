@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -14,6 +11,7 @@ from ..utils import (
     orderedSet,
     strip_jsonp,
     strip_or_none,
+    traverse_obj,
     unified_strdate,
     url_or_none,
     US_RATINGS,
@@ -193,7 +191,7 @@ class PBSIE(InfoExtractor):
            # Article with embedded player (or direct video)
            (?:www\.)?pbs\.org/(?:[^/]+/){1,5}(?P<presumptive_id>[^/]+?)(?:\.html)?/?(?:$|[?\#]) |
            # Player
-           (?:video|player)\.pbs\.org/(?:widget/)?partnerplayer/(?P<player_id>[^/]+)/
+           (?:video|player)\.pbs\.org/(?:widget/)?partnerplayer/(?P<player_id>[^/]+)
         )
     ''' % '|'.join(list(zip(*_STATIONS))[0])
 
@@ -436,7 +434,7 @@ class PBSIE(InfoExtractor):
                 self._set_cookie('.pbs.org', 'pbsol.station', station)
 
     def _extract_webpage(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
 
         description = None
 
@@ -545,7 +543,7 @@ class PBSIE(InfoExtractor):
                 for vid_id in video_id]
             return self.playlist_result(entries, display_id)
 
-        info = None
+        info = {}
         redirects = []
         redirect_urls = set()
 
@@ -600,6 +598,7 @@ class PBSIE(InfoExtractor):
 
         formats = []
         http_url = None
+        hls_subs = {}
         for num, redirect in enumerate(redirects):
             redirect_id = redirect.get('eeid')
 
@@ -622,8 +621,9 @@ class PBSIE(InfoExtractor):
                 continue
 
             if determine_ext(format_url) == 'm3u8':
-                formats.extend(self._extract_m3u8_formats(
-                    format_url, display_id, 'mp4', m3u8_id='hls', fatal=False))
+                hls_formats, hls_subs = self._extract_m3u8_formats_and_subtitles(
+                    format_url, display_id, 'mp4', m3u8_id='hls', fatal=False)
+                formats.extend(hls_formats)
             else:
                 formats.append({
                     'url': format_url,
@@ -658,7 +658,9 @@ class PBSIE(InfoExtractor):
                     'protocol': 'http',
                 })
                 formats.append(f)
-        self._sort_formats(formats)
+        for f in formats:
+            if (f.get('format_note') or '').endswith(' AD'):  # Audio description
+                f['language_preference'] = -10
 
         rating_str = info.get('rating')
         if rating_str is not None:
@@ -666,25 +668,12 @@ class PBSIE(InfoExtractor):
         age_limit = US_RATINGS.get(rating_str)
 
         subtitles = {}
-        closed_captions_url = info.get('closed_captions_url')
-        if closed_captions_url:
-            subtitles['en'] = [{
-                'ext': 'ttml',
-                'url': closed_captions_url,
-            }]
-            mobj = re.search(r'/(\d+)_Encoded\.dfxp', closed_captions_url)
-            if mobj:
-                ttml_caption_suffix, ttml_caption_id = mobj.group(0, 1)
-                ttml_caption_id = int(ttml_caption_id)
-                subtitles['en'].extend([{
-                    'url': closed_captions_url.replace(
-                        ttml_caption_suffix, '/%d_Encoded.srt' % (ttml_caption_id + 1)),
-                    'ext': 'srt',
-                }, {
-                    'url': closed_captions_url.replace(
-                        ttml_caption_suffix, '/%d_Encoded.vtt' % (ttml_caption_id + 2)),
-                    'ext': 'vtt',
-                }])
+        captions = info.get('cc') or {}
+        for caption_url in captions.values():
+            subtitles.setdefault('en', []).append({
+                'url': caption_url
+            })
+        subtitles = self._merge_subtitles(subtitles, hls_subs)
 
         # info['title'] is often incomplete (e.g. 'Full Episode', 'Episode 5', etc)
         # Try turning it to 'program - title' naming scheme if possible
@@ -707,4 +696,62 @@ class PBSIE(InfoExtractor):
             'formats': formats,
             'subtitles': subtitles,
             'chapters': chapters,
+        }
+
+
+class PBSKidsIE(InfoExtractor):
+    _VALID_URL = r'https?://(?:www\.)?pbskids\.org/video/[\w-]+/(?P<id>\d+)'
+    _TESTS = [
+        {
+            'url': 'https://pbskids.org/video/molly-of-denali/3030407927',
+            'md5': '1ded20a017cc6b53446238f1804ce4c7',
+            'info_dict': {
+                'id': '3030407927',
+                'title': 'Bird in the Hand/Bye-Bye Birdie',
+                'channel': 'molly-of-denali',
+                'duration': 1540,
+                'ext': 'mp4',
+                'series': 'Molly of Denali',
+                'description': 'md5:d006b2211633685d8ebc8d03b6d5611e',
+                'categories': ['Episode'],
+                'upload_date': '20190718',
+            }
+        },
+        {
+            'url': 'https://pbskids.org/video/plum-landing/2365205059',
+            'md5': '92e5d189851a64ae1d0237a965be71f5',
+            'info_dict': {
+                'id': '2365205059',
+                'title': 'Cooper\'s Favorite Place in Nature',
+                'channel': 'plum-landing',
+                'duration': 67,
+                'ext': 'mp4',
+                'series': 'Plum Landing',
+                'description': 'md5:657e5fc4356a84ead1c061eb280ff05d',
+                'categories': ['Episode'],
+                'upload_date': '20140302',
+            }
+        }
+    ]
+
+    def _real_extract(self, url):
+        video_id = self._match_id(url)
+        webpage = self._download_webpage(url, video_id)
+        meta = self._search_json(r'window\._PBS_KIDS_DEEPLINK\s*=', webpage, 'video info', video_id)
+        formats, subtitles = self._extract_m3u8_formats_and_subtitles(
+            traverse_obj(meta, ('video_obj', 'URI', {url_or_none})), video_id, ext='mp4')
+
+        return {
+            'id': video_id,
+            'formats': formats,
+            'subtitles': subtitles,
+            **traverse_obj(meta, {
+                'categories': ('video_obj', 'video_type', {str}, {lambda x: [x] if x else None}),
+                'channel': ('show_slug', {str}),
+                'description': ('video_obj', 'description', {str}),
+                'duration': ('video_obj', 'duration', {int_or_none}),
+                'series': ('video_obj', 'program_title', {str}),
+                'title': ('video_obj', 'title', {str}),
+                'upload_date': ('video_obj', 'air_date', {unified_strdate}),
+            })
         }

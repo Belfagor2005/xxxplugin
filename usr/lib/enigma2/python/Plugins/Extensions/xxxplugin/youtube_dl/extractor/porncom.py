@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -35,7 +33,7 @@ class PornComIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id') or video_id
 
@@ -74,8 +72,6 @@ class PornComIE(InfoExtractor):
                 webpage)]
             thumbnail = None
             duration = None
-
-        self._sort_formats(formats)
 
         view_count = str_to_int(self._search_regex(
             (r'Views:\s*</span>\s*<span>\s*([\d,.]+)',

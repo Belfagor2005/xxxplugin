@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -62,8 +59,7 @@ class NTVDeIE(InfoExtractor):
             m3u8_url = compat_urlparse.urljoin('http://video.n-tv.de', vdata['videoM3u8'])
             formats.extend(self._extract_m3u8_formats(
                 m3u8_url, video_id, ext='mp4', entry_protocol='m3u8_native',
-                preference=0, m3u8_id='hls', fatal=False))
-        self._sort_formats(formats)
+                quality=1, m3u8_id='hls', fatal=False))
 
         return {
             'id': video_id,

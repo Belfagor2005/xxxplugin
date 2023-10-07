@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import collections
 import json
 import os
@@ -17,6 +15,7 @@ from ..utils import (
     float_or_none,
     int_or_none,
     parse_duration,
+    parse_qs,
     qualities,
     srt_subtitles_timecode,
     try_get,
@@ -161,14 +160,7 @@ query viewClip {
   }
 }'''
 
-    def _real_initialize(self):
-        self._login()
-
-    def _login(self):
-        username, password = self._get_login_info()
-        if username is None:
-            return
-
+    def _perform_login(self, username, password):
         login_page = self._download_webpage(
             self._LOGIN_URL, None, 'Downloading login page')
 
@@ -273,7 +265,7 @@ query viewClip {
         return srt
 
     def _real_extract(self, url):
-        qs = compat_urlparse.parse_qs(compat_urlparse.urlparse(url).query)
+        qs = parse_qs(url)
 
         author = qs.get('author', [None])[0]
         name = qs.get('name', [None])[0]
@@ -337,11 +329,11 @@ query viewClip {
         # In order to minimize the number of calls to ViewClip API and reduce
         # the probability of being throttled or banned by Pluralsight we will request
         # only single format until formats listing was explicitly requested.
-        if self._downloader.params.get('listformats', False):
+        if self.get_param('listformats', False):
             allowed_qualities = ALLOWED_QUALITIES
         else:
             def guess_allowed_qualities():
-                req_format = self._downloader.params.get('format') or 'best'
+                req_format = self.get_param('format') or 'best'
                 req_format_split = req_format.split('-', 1)
                 if len(req_format_split) > 1:
                     req_ext, req_quality = req_format_split
@@ -349,7 +341,7 @@ query viewClip {
                     for allowed_quality in ALLOWED_QUALITIES:
                         if req_ext == allowed_quality.ext and req_quality in allowed_quality.qualities:
                             return (AllowedQuality(req_ext, (req_quality, )), )
-                req_ext = 'webm' if self._downloader.params.get('prefer_free_formats') else 'mp4'
+                req_ext = 'webm' if self.get_param('prefer_free_formats') else 'mp4'
                 return (AllowedQuality(req_ext, (best_quality, )), )
             allowed_qualities = guess_allowed_qualities()
 
@@ -417,8 +409,6 @@ query viewClip {
                         'source_preference': int_or_none(clip_url_data.get('rank')),
                     })
                     formats.append(clip_f)
-
-        self._sort_formats(formats)
 
         duration = int_or_none(
             clip.get('duration')) or parse_duration(clip.get('formattedDuration'))

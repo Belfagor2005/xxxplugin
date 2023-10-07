@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import base64
 import re
 
@@ -10,9 +8,9 @@ from ..compat import (
 )
 from ..utils import (
     determine_ext,
-    ExtractorError,
     float_or_none,
     int_or_none,
+    smuggle_url,
     try_get,
     unsmuggle_url,
 )
@@ -85,9 +83,8 @@ class OoyalaBaseIE(InfoExtractor):
                     'fps': float_or_none(stream.get('framerate')),
                 })
         if not formats and not auth_data.get('authorized'):
-            raise ExtractorError('%s said: %s' % (
+            self.raise_no_formats('%s said: %s' % (
                 self.IE_NAME, auth_data['message']), expected=True)
-        self._sort_formats(formats)
 
         subtitles = {}
         for lang, sub in metadata.get('closed_captions_vtt', {}).get('captions', {}).items():
@@ -154,6 +151,29 @@ class OoyalaIE(OoyalaBaseIE):
         }
     ]
 
+    def _extract_from_webpage(self, url, webpage):
+        mobj = (re.search(r'player\.ooyala\.com/[^"?]+[?#][^"]*?(?:embedCode|ec)=(?P<ec>[^"&]+)', webpage)
+                or re.search(r'OO\.Player\.create\([\'"].*?[\'"],\s*[\'"](?P<ec>.{32})[\'"]', webpage)
+                or re.search(r'OO\.Player\.create\.apply\(\s*OO\.Player\s*,\s*op\(\s*\[\s*[\'"][^\'"]*[\'"]\s*,\s*[\'"](?P<ec>.{32})[\'"]', webpage)
+                or re.search(r'SBN\.VideoLinkset\.ooyala\([\'"](?P<ec>.{32})[\'"]\)', webpage)
+                or re.search(r'data-ooyala-video-id\s*=\s*[\'"](?P<ec>.{32})[\'"]', webpage))
+        if mobj is not None:
+            embed_token = self._search_regex(
+                r'embedToken[\'"]?\s*:\s*[\'"]([^\'"]+)',
+                webpage, 'ooyala embed token', default=None)
+            yield self._build_url_result(smuggle_url(
+                mobj.group('ec'), {
+                    'domain': url,
+                    'embed_token': embed_token,
+                }))
+            return
+
+        # Look for multiple Ooyala embeds on SBN network websites
+        mobj = re.search(r'SBN\.VideoLinkset\.entryGroup\((\[.*?\])', webpage)
+        if mobj is not None:
+            for v in self._parse_json(mobj.group(1), self._generic_id(url), fatal=False) or []:
+                yield self._build_url_result(smuggle_url(v['provider_video_id'], {'domain': url}))
+
     @staticmethod
     def _url_for_embed_code(embed_code):
         return 'http://player.ooyala.com/player.js?embedCode=%s' % embed_code
@@ -205,6 +225,6 @@ class OoyalaExternalIE(OoyalaBaseIE):
     }
 
     def _real_extract(self, url):
-        partner_id, video_id, pcode = re.match(self._VALID_URL, url).groups()
+        partner_id, video_id, pcode = self._match_valid_url(url).groups()
         content_tree_url = self._CONTENT_TREE_BASE + 'external_id/%s/%s:%s' % (pcode, partner_id, video_id)
         return self._extract(content_tree_url, video_id)

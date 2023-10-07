@@ -1,13 +1,8 @@
-from __future__ import unicode_literals
-
-import re
 import time
 
 from .common import InfoExtractor
-from ..utils import (
-    int_or_none,
-    HEADRequest,
-)
+from ..networking import HEADRequest
+from ..utils import int_or_none
 
 
 class CultureUnpluggedIE(InfoExtractor):
@@ -32,7 +27,7 @@ class CultureUnpluggedIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id') or video_id
 

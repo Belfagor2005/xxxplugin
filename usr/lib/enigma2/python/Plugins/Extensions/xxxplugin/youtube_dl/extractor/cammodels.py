@@ -1,11 +1,5 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 from .common import InfoExtractor
-from ..utils import (
-    int_or_none,
-    url_or_none,
-)
+from ..utils import int_or_none, url_or_none
 
 
 class CamModelsIE(InfoExtractor):
@@ -60,7 +54,7 @@ class CamModelsIE(InfoExtractor):
                     f.update({
                         'ext': 'mp4',
                         # hls skips fragments, preferring rtmp
-                        'preference': -1,
+                        'quality': -10,
                     })
                 else:
                     if format_id == 'jpeg':
@@ -72,11 +66,10 @@ class CamModelsIE(InfoExtractor):
                         })
                     continue
                 formats.append(f)
-        self._sort_formats(formats)
 
         return {
             'id': user_id,
-            'title': self._live_title(user_id),
+            'title': user_id,
             'thumbnails': thumbnails,
             'is_live': True,
             'formats': formats,

@@ -1,8 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
-import re
-
 from .common import InfoExtractor
 from ..utils import smuggle_url
 
@@ -24,6 +19,7 @@ class CNBCIE(InfoExtractor):
             # m3u8 download
             'skip_download': True,
         },
+        'skip': 'Dead link',
     }
 
     def _real_extract(self, url):
@@ -54,10 +50,11 @@ class CNBCVideoIE(InfoExtractor):
         'params': {
             'skip_download': True,
         },
+        'skip': 'Dead link',
     }
 
     def _real_extract(self, url):
-        path, display_id = re.match(self._VALID_URL, url).groups()
+        path, display_id = self._match_valid_url(url).groups()
         video_id = self._download_json(
             'https://webql-redesign.cnbcfm.com/graphql', display_id, query={
                 'query': '''{

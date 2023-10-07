@@ -1,15 +1,10 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
-
 import itertools
 
 from .common import InfoExtractor
 from ..compat import (
-    compat_parse_qs,
     compat_urllib_parse_unquote,
-    compat_urlparse,
 )
+from ..utils import parse_qs
 
 
 class DaumBaseIE(InfoExtractor):
@@ -130,7 +125,7 @@ class DaumClipIE(DaumBaseIE):
             self._KAKAO_EMBED_BASE + video_id, 'Kakao', video_id)
 
 
-class DaumListIE(InfoExtractor):
+class DaumListIE(InfoExtractor):  # XXX: Conventionally, base classes should end with BaseIE/InfoExtractor
     def _get_entries(self, list_id, list_id_type):
         name = None
         entries = []
@@ -155,14 +150,11 @@ class DaumListIE(InfoExtractor):
         return name, entries
 
     def _check_clip(self, url, list_id):
-        query_dict = compat_parse_qs(compat_urlparse.urlparse(url).query)
+        query_dict = parse_qs(url)
         if 'clipid' in query_dict:
             clip_id = query_dict['clipid'][0]
-            if self._downloader.params.get('noplaylist'):
-                self.to_screen('Downloading just video %s because of --no-playlist' % clip_id)
+            if not self._yes_playlist(list_id, clip_id):
                 return self.url_result(DaumClipIE._URL_TEMPLATE % clip_id, 'DaumClip')
-            else:
-                self.to_screen('Downloading playlist %s - add --no-playlist to just download video' % list_id)
 
 
 class DaumPlaylistIE(DaumListIE):
@@ -256,7 +248,7 @@ class DaumUserIE(DaumListIE):
         if clip_result:
             return clip_result
 
-        query_dict = compat_parse_qs(compat_urlparse.urlparse(url).query)
+        query_dict = parse_qs(url)
         if 'playlistid' in query_dict:
             playlist_id = query_dict['playlistid'][0]
             return self.url_result(DaumPlaylistIE._URL_TEMPLATE % playlist_id, 'DaumPlaylist')

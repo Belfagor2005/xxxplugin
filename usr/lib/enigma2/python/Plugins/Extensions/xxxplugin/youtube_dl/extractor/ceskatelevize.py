@@ -1,22 +1,19 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_urllib_parse_unquote,
-    compat_urllib_parse_urlparse,
-)
+from ..compat import compat_urllib_parse_unquote, compat_urllib_parse_urlparse
+from ..networking import Request
 from ..utils import (
     ExtractorError,
     float_or_none,
-    sanitized_Request,
     str_or_none,
     traverse_obj,
     urlencode_postdata,
-    USER_AGENTS,
 )
+
+USER_AGENTS = {
+    'Safari': 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
+}
 
 
 class CeskaTelevizeIE(InfoExtractor):
@@ -97,17 +94,10 @@ class CeskaTelevizeIE(InfoExtractor):
         'only_matching': True,
     }]
 
-    def _search_nextjs_data(self, webpage, video_id, **kw):
-        return self._parse_json(
-            self._search_regex(
-                r'(?s)<script[^>]+id=[\'"]__NEXT_DATA__[\'"][^>]*>([^<]+)</script>',
-                webpage, 'next.js data', **kw),
-            video_id, **kw)
-
     def _real_extract(self, url):
         playlist_id = self._match_id(url)
         webpage, urlh = self._download_webpage_handle(url, playlist_id)
-        parsed_url = compat_urllib_parse_urlparse(urlh.geturl())
+        parsed_url = compat_urllib_parse_urlparse(urlh.url)
         site_name = self._og_search_property('site_name', webpage, fatal=False, default='Česká televize')
         playlist_title = self._og_search_title(webpage, default=None)
         if site_name and playlist_title:
@@ -173,16 +163,16 @@ class CeskaTelevizeIE(InfoExtractor):
         entries = []
 
         for user_agent in (None, USER_AGENTS['Safari']):
-            req = sanitized_Request(
+            req = Request(
                 'https://www.ceskatelevize.cz/ivysilani/ajax/get-client-playlist/',
                 data=urlencode_postdata(data))
 
-            req.add_header('Content-type', 'application/x-www-form-urlencoded')
-            req.add_header('x-addr', '127.0.0.1')
-            req.add_header('X-Requested-With', 'XMLHttpRequest')
+            req.headers['Content-type'] = 'application/x-www-form-urlencoded'
+            req.headers['x-addr'] = '127.0.0.1'
+            req.headers['X-Requested-With'] = 'XMLHttpRequest'
             if user_agent:
-                req.add_header('User-Agent', user_agent)
-            req.add_header('Referer', url)
+                req.headers['User-Agent'] = user_agent
+            req.headers['Referer'] = url
 
             playlistpage = self._download_json(req, playlist_id, fatal=False)
 
@@ -193,8 +183,8 @@ class CeskaTelevizeIE(InfoExtractor):
             if playlist_url == 'error_region':
                 raise ExtractorError(NOT_AVAILABLE_STRING, expected=True)
 
-            req = sanitized_Request(compat_urllib_parse_unquote(playlist_url))
-            req.add_header('Referer', url)
+            req = Request(compat_urllib_parse_unquote(playlist_url))
+            req.headers['Referer'] = url
 
             playlist = self._download_json(req, playlist_id, fatal=False)
             if not playlist:
@@ -210,8 +200,6 @@ class CeskaTelevizeIE(InfoExtractor):
                 is_live = item.get('type') == 'LIVE'
                 formats = []
                 for format_id, stream_url in item.get('streamUrls', {}).items():
-                    if 'drmOnly=true' in stream_url:
-                        continue
                     if 'playerType=flash' in stream_url:
                         stream_formats = self._extract_m3u8_formats(
                             stream_url, playlist_id, 'mp4', 'm3u8_native',
@@ -220,6 +208,9 @@ class CeskaTelevizeIE(InfoExtractor):
                         stream_formats = self._extract_mpd_formats(
                             stream_url, playlist_id,
                             mpd_id='dash-%s' % format_id, fatal=False)
+                    if 'drmOnly=true' in stream_url:
+                        for f in stream_formats:
+                            f['has_drm'] = True
                     # See https://github.com/ytdl-org/youtube-dl/issues/12119#issuecomment-280037031
                     if format_id == 'audioDescription':
                         for f in stream_formats:
@@ -257,9 +248,6 @@ class CeskaTelevizeIE(InfoExtractor):
                     'subtitles': subtitles,
                     'is_live': is_live,
                 })
-
-        for e in entries:
-            self._sort_formats(e['formats'])
 
         if len(entries) == 1:
             return entries[0]

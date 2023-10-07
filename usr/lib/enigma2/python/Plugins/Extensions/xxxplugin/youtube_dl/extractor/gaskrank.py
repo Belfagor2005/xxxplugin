@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 from .common import InfoExtractor
 from ..utils import (
@@ -51,7 +48,7 @@ class GaskrankIE(InfoExtractor):
             webpage, default=None) or self._html_search_meta(
             'title', webpage, fatal=True)
 
-        categories = [re.match(self._VALID_URL, url).group('categories')]
+        categories = [self._match_valid_url(url).group('categories')]
 
         mobj = re.search(
             r'Video von:\s*(?P<uploader_id>[^|]*?)\s*\|\s*vom:\s*(?P<upload_date>[0-9][0-9]\.[0-9][0-9]\.[0-9][0-9][0-9][0-9])',
@@ -96,6 +93,5 @@ class GaskrankIE(InfoExtractor):
             'view_count': view_count,
             'average_rating': average_rating,
         })
-        self._sort_formats(entry['formats'])
 
         return entry

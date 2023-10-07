@@ -1,24 +1,16 @@
-# coding: utf-8
-
-from __future__ import unicode_literals
-
 import re
+import urllib.parse
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_filter as filter,
-    compat_HTTPError,
-    compat_parse_qs,
-    compat_urlparse,
-)
+from ..compat import compat_parse_qs
+from ..networking.exceptions import HTTPError
 from ..utils import (
+    ExtractorError,
     determine_ext,
     error_to_compat_str,
     extract_attributes,
-    ExtractorError,
     int_or_none,
     merge_dicts,
-    orderedSet,
     parse_iso8601,
     strip_or_none,
     traverse_obj,
@@ -36,9 +28,9 @@ class IGNBaseIE(InfoExtractor):
         try:
             return self._call_api(slug)
         except ExtractorError as e:
-            if isinstance(e.cause, compat_HTTPError) and e.cause.code == 404:
+            if isinstance(e.cause, HTTPError) and e.cause.status == 404:
                 e.cause.args = e.cause.args or [
-                    e.cause.geturl(), e.cause.getcode(), e.cause.reason]
+                    e.cause.response.url, e.cause.status, e.cause.reason]
                 raise ExtractorError(
                     'Content not found: expired?', cause=e.cause,
                     expected=True)
@@ -79,19 +71,14 @@ class IGNBaseIE(InfoExtractor):
             formats.append({
                 'ext': determine_ext(mezzanine_url, 'mp4'),
                 'format_id': 'mezzanine',
-                'preference': 1,
+                'quality': 1,
                 'url': mezzanine_url,
             })
 
-        if formats or fatal:
-            self._sort_formats(formats)
-        else:
-            return
-
         thumbnails = traverse_obj(
-            video, ('thumbnails', Ellipsis, {'url': 'url'}), expected_type=url_or_none)
+            video, ('thumbnails', ..., {'url': 'url'}), expected_type=url_or_none)
         tags = traverse_obj(
-            video, ('tags', Ellipsis, 'displayName'),
+            video, ('tags', ..., 'displayName'),
             expected_type=lambda x: x.strip() or None)
 
         metadata = traverse_obj(video, 'metadata', expected_type=dict) or {}
@@ -109,13 +96,6 @@ class IGNBaseIE(InfoExtractor):
             'formats': formats,
             'tags': tags,
         }
-
-    # yt-dlp shim
-    @classmethod
-    def _extract_from_webpage(cls, url, webpage):
-        for embed_url in orderedSet(
-                cls._extract_embed_urls(url, webpage) or [], lazy=True):
-            yield cls.url_result(embed_url, None if cls._VALID_URL is False else cls)
 
 
 class IGNIE(IGNBaseIE):
@@ -142,6 +122,9 @@ class IGNIE(IGNBaseIE):
             'timestamp': 1370440800,
             'upload_date': '20130605',
             'tags': 'count:9',
+            'display_id': 'the-last-of-us-review',
+            'thumbnail': 'https://assets1.ignimgs.com/vid/thumbnails/user/2014/03/26/lastofusreviewmimig2.jpg',
+            'duration': 440,
         },
         'params': {
             'nocheckcertificate': True,
@@ -175,23 +158,20 @@ class IGNIE(IGNBaseIE):
                           % cls._VIDEO_PATH_RE, grids[0] if grids else '')))
 
     def _real_extract(self, url):
-        m = re.match(self._VALID_URL, url)
-        display_id = m.group('id')
+        display_id, filt = self._match_valid_url(url).group('id', 'filt')
         if display_id:
             return self._extract_video(url, display_id)
-        display_id = m.group('filt') or 'all'
-        return self._extract_playlist(url, display_id)
+        return self._extract_playlist(url, filt or 'all')
 
     def _extract_playlist(self, url, display_id):
         webpage = self._download_webpage(url, display_id)
 
         return self.playlist_result(
-            (self.url_result(u, ie=self.ie_key())
+            (self.url_result(u, self.ie_key())
              for u in self._extract_embed_urls(url, webpage)),
             playlist_id=display_id)
 
     def _extract_video(self, url, display_id):
-        display_id = self._match_id(url)
         video = self._checked_call_api(display_id)
 
         info = self._extract_video_info(video)
@@ -213,6 +193,10 @@ class IGNVideoIE(IGNBaseIE):
             'description': 'Taking out assassination targets in Hitman has never been more stylish.',
             'timestamp': 1444665600,
             'upload_date': '20151012',
+            'display_id': '112203',
+            'thumbnail': 'https://sm.ign.com/ign_me/video/h/how-hitman/how-hitman-aims-to-be-different-than-every-other-s_8z14.jpg',
+            'duration': 298,
+            'tags': 'count:13',
         },
         'expected_warnings': ['HTTP Error 400: Bad Request'],
     }, {
@@ -234,14 +218,14 @@ class IGNVideoIE(IGNBaseIE):
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
-        parsed_url = compat_urlparse.urlparse(url)
-        embed_url = compat_urlparse.urlunparse(
+        parsed_url = urllib.parse.urlparse(url)
+        embed_url = urllib.parse.urlunparse(
             parsed_url._replace(path=parsed_url.path.rsplit('/', 1)[0] + '/embed'))
 
         webpage, urlh = self._download_webpage_handle(embed_url, video_id)
-        new_url = urlh.geturl()
+        new_url = urlh.url
         ign_url = compat_parse_qs(
-            compat_urlparse.urlparse(new_url).query).get('url', [None])[-1]
+            urllib.parse.urlparse(new_url).query).get('url', [None])[-1]
         if ign_url:
             return self.url_result(ign_url, IGNIE.ie_key())
         video = self._search_regex(r'(<div\b[^>]+\bdata-video-id\s*=\s*[^>]+>)', webpage, 'video element', fatal=False)
@@ -277,6 +261,10 @@ class IGNArticleIE(IGNBaseIE):
                     'description': 'Rockstar drops the mic on this generation of games. Watch our review of the masterly Grand Theft Auto V.',
                     'timestamp': 1379339880,
                     'upload_date': '20130916',
+                    'tags': 'count:12',
+                    'thumbnail': 'https://assets1.ignimgs.com/thumbs/userUploaded/2021/8/16/gta-v-heistsjpg-e94705-1629138553533.jpeg',
+                    'display_id': 'grand-theft-auto-v-video-review',
+                    'duration': 501,
                 },
             },
             {
@@ -287,6 +275,10 @@ class IGNArticleIE(IGNBaseIE):
                     'description': 'The twisted beauty of GTA 5 in stunning slow motion.',
                     'timestamp': 1386878820,
                     'upload_date': '20131212',
+                    'duration': 202,
+                    'tags': 'count:25',
+                    'display_id': 'gta-5-in-slow-motion',
+                    'thumbnail': 'https://assets1.ignimgs.com/vid/thumbnails/user/2013/11/03/GTA-SLO-MO-1.jpg',
                 },
             },
         ],
@@ -328,24 +320,17 @@ class IGNArticleIE(IGNBaseIE):
         try:
             return self._call_api(slug)
         except ExtractorError as e:
-            if isinstance(e.cause, compat_HTTPError):
+            if isinstance(e.cause, HTTPError):
                 e.cause.args = e.cause.args or [
-                    e.cause.geturl(), e.cause.getcode(), e.cause.reason]
-                if e.cause.code == 404:
+                    e.cause.response.url, e.cause.status, e.cause.reason]
+                if e.cause.status == 404:
                     raise ExtractorError(
                         'Content not found: expired?', cause=e.cause,
                         expected=True)
-                elif e.cause.code == 503:
+                elif e.cause.status == 503:
                     self.report_warning(error_to_compat_str(e.cause))
                     return
             raise
-
-    def _search_nextjs_data(self, webpage, video_id, **kw):
-        return self._parse_json(
-            self._search_regex(
-                r'(?s)<script[^>]+id=[\'"]__NEXT_DATA__[\'"][^>]*>([^<]+)</script>',
-                webpage, 'next.js data', **kw),
-            video_id, **kw)
 
     def _real_extract(self, url):
         display_id = self._match_id(url)

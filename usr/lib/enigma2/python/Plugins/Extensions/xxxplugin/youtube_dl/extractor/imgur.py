@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -60,7 +58,7 @@ class ImgurIE(InfoExtractor):
                 'width': width,
                 'height': height,
                 'http_headers': {
-                    'User-Agent': 'youtube-dl (like wget)',
+                    'User-Agent': 'yt-dlp (like wget)',
                 },
             })
 
@@ -72,7 +70,7 @@ class ImgurIE(InfoExtractor):
                 gif_json, video_id, transform_source=js_to_json)
             formats.append({
                 'format_id': 'gif',
-                'preference': -10,
+                'preference': -10,  # gifs are worse than videos
                 'width': width,
                 'height': height,
                 'ext': 'gif',
@@ -82,11 +80,9 @@ class ImgurIE(InfoExtractor):
                 'url': self._proto_relative_url(gifd['gifUrl']),
                 'filesize': gifd.get('size'),
                 'http_headers': {
-                    'User-Agent': 'youtube-dl (like wget)',
+                    'User-Agent': 'yt-dlp (like wget)',
                 },
             })
-
-        self._sort_formats(formats)
 
         return {
             'id': video_id,
@@ -140,7 +136,7 @@ class ImgurGalleryIE(InfoExtractor):
         return self.url_result('http://imgur.com/%s' % gallery_id, ImgurIE.ie_key(), gallery_id)
 
 
-class ImgurAlbumIE(ImgurGalleryIE):
+class ImgurAlbumIE(ImgurGalleryIE):  # XXX: Do not subclass from concrete IE
     IE_NAME = 'imgur:album'
     _VALID_URL = r'https?://(?:i\.)?imgur\.com/a/(?P<id>[a-zA-Z0-9]+)'
 

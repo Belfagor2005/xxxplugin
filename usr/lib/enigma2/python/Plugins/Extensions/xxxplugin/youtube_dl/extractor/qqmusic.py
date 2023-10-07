@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import random
 import re
 import time
@@ -121,11 +118,10 @@ class QQMusicIE(InfoExtractor):
                        % (details['prefix'], mid, details['ext'], vkey, guid),
                 'format': format_id,
                 'format_id': format_id,
-                'preference': details['preference'],
+                'quality': details['preference'],
                 'abr': details.get('abr'),
             })
         self._check_formats(formats, mid)
-        self._sort_formats(formats)
 
         actual_lrc_lyrics = ''.join(
             line + '\n' for line in re.findall(

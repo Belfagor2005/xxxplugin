@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from hashlib import sha1
@@ -34,8 +31,8 @@ class ProSiebenSat1BaseIE(InfoExtractor):
                 'ids': clip_id,
             })[0]
 
-        if video.get('is_protected') is True:
-            raise ExtractorError('This video is DRM protected.', expected=True)
+        if not self.get_param('allow_unplayable_formats') and video.get('is_protected') is True:
+            self.report_drm(clip_id)
 
         formats = []
         if self._ACCESS_ID:
@@ -159,7 +156,6 @@ class ProSiebenSat1BaseIE(InfoExtractor):
                                 'tbr': tbr,
                                 'format_id': 'http%s' % ('-%d' % tbr if tbr else ''),
                             })
-        self._sort_formats(formats)
 
         return {
             'duration': float_or_none(video.get('duration')),

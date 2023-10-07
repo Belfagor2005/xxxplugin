@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -63,7 +60,7 @@ class SapoIE(InfoExtractor):
     ]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         video_id = mobj.group('id')
 
         item = self._download_xml(
@@ -100,8 +97,6 @@ class SapoIE(InfoExtractor):
                 'width': 1280,
                 'height': 720,
             })
-
-        self._sort_formats(formats)
 
         return {
             'id': video_id,

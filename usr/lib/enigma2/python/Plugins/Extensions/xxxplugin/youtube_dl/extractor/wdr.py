@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -24,7 +21,11 @@ from ..utils import (
 
 class WDRIE(InfoExtractor):
     __API_URL_TPL = '//deviceids-medp.wdr.de/ondemand/%s/%s'
-    _VALID_URL = (r'(?:https?:' + __API_URL_TPL) % (r'\d+', r'(?=\d+\.js)|wdr:)(?P<id>\d{6,})')
+    _VALID_URL = r'''(?x)https?://
+        (?:deviceids-medp\.wdr\.de/ondemand/\d+/|
+           kinder\.wdr\.de/(?!mediathek/)[^#?]+-)
+        (?P<id>\d+)\.(?:js|assetjsonp)
+    '''
     _GEO_COUNTRIES = ['DE']
     _TESTS = [{
         'url': 'http://deviceids-medp.wdr.de/ondemand/155/1557833.js',
@@ -34,8 +35,7 @@ class WDRIE(InfoExtractor):
             'title': 'Biathlon-Staffel verpasst Podest bei Olympia-Generalprobe',
             'upload_date': '20180112',
         },
-    },
-    ]
+    }]
 
     def _asset_url(self, wdr_id):
         id_len = max(len(wdr_id), 5)
@@ -55,16 +55,24 @@ class WDRIE(InfoExtractor):
 
         tracker_data = metadata['trackerData']
         title = tracker_data['trackerClipTitle']
-
         media_resource = metadata['mediaResource']
 
         formats = []
+        subtitles = {}
 
         # check if the metadata contains a direct URL to a file
         for kind, media in media_resource.items():
-            if not isinstance(media, dict):
+            if kind == 'captionsHash':
+                for ext, url in media.items():
+                    subtitles.setdefault('de', []).append({
+                        'url': url,
+                        'ext': ext,
+                    })
                 continue
+
             if kind not in ('dflt', 'alt'):
+                continue
+            if not isinstance(media, dict):
                 continue
 
             for tag_name, medium_url in media.items():
@@ -95,9 +103,6 @@ class WDRIE(InfoExtractor):
                         a_format['ext'] = ext
                     formats.append(a_format)
 
-        self._sort_formats(formats)
-
-        subtitles = {}
         caption_url = media_resource.get('captionURL')
         if caption_url:
             subtitles['de'] = [{
@@ -117,7 +122,7 @@ class WDRIE(InfoExtractor):
 
         return {
             'id': tracker_data.get('trackerClipId', video_id),
-            'title': self._live_title(title) if is_live else title,
+            'title': title,
             'alt_title': tracker_data.get('trackerClipSubcategory'),
             'formats': formats,
             'subtitles': subtitles,
@@ -126,7 +131,7 @@ class WDRIE(InfoExtractor):
         }
 
 
-class WDRPageIE(WDRIE):
+class WDRPageIE(WDRIE):  # XXX: Do not subclass from concrete IE
     _MAUS_REGEX = r'https?://(?:www\.)wdrmaus.de/(?:[^/]+/)*?(?P<maus_id>[^/?#.]+)(?:/?|/index\.php5|\.php5)$'
     _PAGE_REGEX = r'/(?:mediathek/)?(?:[^/]+/)*(?P<display_id>[^/]+)\.html'
     _VALID_URL = r'https?://(?:www\d?\.)?(?:(?:kinder\.)?wdr\d?|sportschau)\.de' + _PAGE_REGEX + '|' + _MAUS_REGEX
@@ -168,6 +173,7 @@ class WDRPageIE(WDRIE):
             'skip': 'HTTP Error 404: Not Found',
         },
         {
+            # FIXME: Asset JSON is directly embedded in webpage
             'url': 'http://www1.wdr.de/mediathek/video/live/index.html',
             'info_dict': {
                 'id': 'mdb-2296252',
@@ -216,6 +222,8 @@ class WDRPageIE(WDRIE):
                 'id': 'mdb-869971',
                 'ext': 'mp4',
                 'title': r're:^COSMO Livestream [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$',
+                'alt_title': 'COSMO Livestream',
+                'live_status': 'is_live',
                 'upload_date': '20160101',
             },
             'params': {
@@ -243,10 +251,20 @@ class WDRPageIE(WDRIE):
             'url': 'https://kinder.wdr.de/tv/die-sendung-mit-dem-elefanten/av/video-folge---astronaut-100.html',
             'only_matching': True,
         },
+        {
+            'url': 'https://www1.wdr.de/mediathek/video/sendungen/rockpalast/video-baroness---freak-valley-festival--100.html',
+            'info_dict': {
+                'id': 'mdb-2741028',
+                'ext': 'mp4',
+                'title': 'Baroness - Freak Valley Festival 2022',
+                'alt_title': 'Rockpalast',
+                'upload_date': '20220725',
+            },
+        }
     ]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         display_id = dict_get(mobj.groupdict(), ('display_id', 'maus_id'), 'wdrmaus')
         webpage = self._download_webpage(url, display_id)
 
@@ -254,7 +272,7 @@ class WDRPageIE(WDRIE):
 
         # Article with several videos
 
-        # for wdr.de the data-extension is in a tag with the class "mediaLink"
+        # for wdr.de the data-extension-ard is in a tag with the class "mediaLink"
         # for wdr.de radio players, in a tag with the class "wdrrPlayerPlayBtn"
         # for wdrmaus, in a tag with the class "videoButton" (previously a link
         # to the page in a multiline "videoLink"-tag)
@@ -263,7 +281,7 @@ class WDRPageIE(WDRIE):
                     (?:
                         (["\'])(?:mediaLink|wdrrPlayerPlayBtn|videoButton)\b.*?\1[^>]+|
                         (["\'])videoLink\b.*?\2[\s]*>\n[^\n]*
-                    )data-extension=(["\'])(?P<data>(?:(?!\3).)+)\3
+                    )data-extension(?:-ard)?=(["\'])(?P<data>(?:(?!\3).)+)\3
                     ''', webpage):
             media_link_obj = self._parse_json(
                 mobj.group('data'), display_id, transform_source=js_to_json,
@@ -290,7 +308,7 @@ class WDRPageIE(WDRIE):
                     compat_urlparse.urljoin(url, mobj.group('href')),
                     ie=WDRPageIE.ie_key())
                 for mobj in re.finditer(
-                    r'<a[^>]+\bhref=(["\'])(?P<href>(?:(?!\1).)+)\1[^>]+\bdata-extension=',
+                    r'<a[^>]+\bhref=(["\'])(?P<href>(?:(?!\1).)+)\1[^>]+\bdata-extension(?:-ard)?=',
                     webpage) if re.match(self._PAGE_REGEX, mobj.group('href'))
             ]
 
@@ -355,7 +373,7 @@ class WDRMobileIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         return {
             'id': mobj.group('id'),
             'title': mobj.group('title'),

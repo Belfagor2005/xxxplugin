@@ -1,8 +1,4 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import json
-import re
 
 from .common import InfoExtractor
 from ..utils import (
@@ -57,7 +53,7 @@ class YandexDiskIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        domain, video_id = re.match(self._VALID_URL, url).groups()
+        domain, video_id = self._match_valid_url(url).groups()
 
         webpage = self._download_webpage(url, video_id)
         store = self._parse_json(self._search_regex(
@@ -131,7 +127,6 @@ class YandexDiskIE(InfoExtractor):
                     'url': format_url,
                     'width': int_or_none(size.get('width')),
                 })
-        self._sort_formats(formats)
 
         uid = resource.get('uid')
         display_name = try_get(store, lambda x: x['users'][uid]['displayName'])

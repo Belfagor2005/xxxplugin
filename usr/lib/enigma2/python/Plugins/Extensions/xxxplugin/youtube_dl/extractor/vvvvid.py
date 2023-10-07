@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -110,7 +107,7 @@ class VVVVIDIE(InfoExtractor):
         }
 
     def _real_extract(self, url):
-        show_id, season_id, video_id = re.match(self._VALID_URL, url).groups()
+        show_id, season_id, video_id = self._match_valid_url(url).groups()
 
         response = self._download_info(
             show_id, 'season/%s' % season_id,
@@ -226,7 +223,6 @@ class VVVVIDIE(InfoExtractor):
             metadata_from_url(embed_code)
 
         if not is_youtube:
-            self._sort_formats(formats)
             info['formats'] = formats
 
         metadata_from_url(video_data.get('thumbnail'))
@@ -245,7 +241,7 @@ class VVVVIDIE(InfoExtractor):
         return info
 
 
-class VVVVIDShowIE(VVVVIDIE):
+class VVVVIDShowIE(VVVVIDIE):  # XXX: Do not subclass from concrete IE
     _VALID_URL = r'(?P<base_url>%s(?P<id>\d+)(?:/(?P<show_title>[^/?&#]+))?)/?(?:[?#&]|$)' % VVVVIDIE._VALID_URL_BASE
     _TESTS = [{
         'url': 'https://www.vvvvid.it/show/156/psyco-pass',
@@ -261,7 +257,7 @@ class VVVVIDShowIE(VVVVIDIE):
     }]
 
     def _real_extract(self, url):
-        base_url, show_id, show_title = re.match(self._VALID_URL, url).groups()
+        base_url, show_id, show_title = self._match_valid_url(url).groups()
 
         seasons = self._download_info(
             show_id, 'seasons/', show_title)

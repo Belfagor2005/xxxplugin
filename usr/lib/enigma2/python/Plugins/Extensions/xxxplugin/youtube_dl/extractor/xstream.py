@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -85,7 +82,6 @@ class XstreamIE(InfoExtractor):
                     'url': media_url,
                     'tbr': tbr,
                 })
-        self._sort_formats(formats)
 
         link = find_xpath_attr(
             entry, xpath_with_ns('./atom:link', NS_MAP), 'rel', 'original')
@@ -93,7 +89,7 @@ class XstreamIE(InfoExtractor):
             formats.append({
                 'url': link.get('href'),
                 'format_id': link.get('rel'),
-                'preference': 1,
+                'quality': 1,
             })
 
         thumbnails = [{
@@ -112,7 +108,7 @@ class XstreamIE(InfoExtractor):
         }
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         partner_id = mobj.group('partner_id')
         video_id = mobj.group('id')
 

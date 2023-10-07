@@ -1,17 +1,11 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_parse_qs,
-    compat_urllib_parse_urlparse,
-)
 from ..utils import (
     int_or_none,
     month_by_abbreviation,
     parse_filesize,
+    parse_qs,
 )
 
 
@@ -37,7 +31,7 @@ class XboxClipsIE(InfoExtractor):
         video_id = self._match_id(url)
 
         if '/video.php' in url:
-            qs = compat_parse_qs(compat_urllib_parse_urlparse(url).query)
+            qs = parse_qs(url)
             url = 'https://gameclips.io/%s/%s' % (qs['gamertag'][0], qs['vid'][0])
 
         webpage = self._download_webpage(url, video_id)

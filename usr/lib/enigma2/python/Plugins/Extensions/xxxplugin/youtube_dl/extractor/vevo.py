@@ -1,18 +1,14 @@
-from __future__ import unicode_literals
-
 import re
 import json
 
 from .common import InfoExtractor
-from ..compat import (
-    compat_str,
-    compat_urlparse,
-    compat_HTTPError,
-)
+from ..compat import compat_str
+from ..networking.exceptions import HTTPError
 from ..utils import (
     ExtractorError,
     int_or_none,
     parse_iso8601,
+    parse_qs,
 )
 
 
@@ -35,8 +31,10 @@ class VevoIE(VevoBaseIE):
            https?://cache\.vevo\.com/m/html/embed\.html\?video=|
            https?://videoplayer\.vevo\.com/embed/embedded\?videoId=|
            https?://embed\.vevo\.com/.*?[?&]isrc=|
+           https?://tv\.vevo\.com/watch/artist/(?:[^/]+)/|
            vevo:)
         (?P<id>[^&?#]+)'''
+    _EMBED_REGEX = [r'<iframe[^>]+?src=(["\'])(?P<url>(?:https?:)?//(?:cache\.)?vevo\.com/.+?)\1']
 
     _TESTS = [{
         'url': 'http://www.vevo.com/watch/hurts/somebody-to-die-for/GB1101300280',
@@ -148,6 +146,9 @@ class VevoIE(VevoBaseIE):
     }, {
         'url': 'https://embed.vevo.com/?isrc=USH5V1923499&partnerId=4d61b777-8023-4191-9ede-497ed6c24647&partnerAdCode=',
         'only_matching': True,
+    }, {
+        'url': 'https://tv.vevo.com/watch/artist/janet-jackson/US0450100550',
+        'only_matching': True,
     }]
     _VERSIONS = {
         0: 'youtube',  # only in AuthenticateVideo videoVersions
@@ -181,8 +182,8 @@ class VevoIE(VevoBaseIE):
         try:
             data = self._download_json(self._api_url_template % path, *args, **kwargs)
         except ExtractorError as e:
-            if isinstance(e.cause, compat_HTTPError):
-                errors = self._parse_json(e.cause.read().decode(), None)['errors']
+            if isinstance(e.cause, HTTPError):
+                errors = self._parse_json(e.cause.response.read().decode(), None)['errors']
                 error_message = ', '.join([error['message'] for error in errors])
                 raise ExtractorError('%s said: %s' % (self.IE_NAME, error_message), expected=True)
             raise
@@ -250,6 +251,7 @@ class VevoIE(VevoBaseIE):
                     fatal=False))
             else:
                 m = re.search(r'''(?xi)
+                    _(?P<quality>[a-z0-9]+)
                     _(?P<width>[0-9]+)x(?P<height>[0-9]+)
                     _(?P<vcodec>[a-z0-9]+)
                     _(?P<vbr>[0-9]+)
@@ -261,7 +263,7 @@ class VevoIE(VevoBaseIE):
 
                 formats.append({
                     'url': version_url,
-                    'format_id': 'http-%s-%s' % (version, video_version['quality']),
+                    'format_id': f'http-{version}-{video_version.get("quality") or m.group("quality")}',
                     'vcodec': m.group('vcodec'),
                     'acodec': m.group('acodec'),
                     'vbr': int(m.group('vbr')),
@@ -270,7 +272,6 @@ class VevoIE(VevoBaseIE):
                     'width': int(m.group('width')),
                     'height': int(m.group('height')),
                 })
-        self._sort_formats(formats)
 
         track = video_info['title']
         if featured_artist:
@@ -310,13 +311,6 @@ class VevoPlaylistIE(VevoBaseIE):
     _VALID_URL = r'https?://(?:www\.)?vevo\.com/watch/(?P<kind>playlist|genre)/(?P<id>[^/?#&]+)'
 
     _TESTS = [{
-        'url': 'http://www.vevo.com/watch/playlist/dadbf4e7-b99f-4184-9670-6f0e547b6a29',
-        'info_dict': {
-            'id': 'dadbf4e7-b99f-4184-9670-6f0e547b6a29',
-            'title': 'Best-Of: Birdman',
-        },
-        'playlist_count': 10,
-    }, {
         'url': 'http://www.vevo.com/watch/genre/rock',
         'info_dict': {
             'id': 'rock',
@@ -324,33 +318,18 @@ class VevoPlaylistIE(VevoBaseIE):
         },
         'playlist_count': 20,
     }, {
-        'url': 'http://www.vevo.com/watch/playlist/dadbf4e7-b99f-4184-9670-6f0e547b6a29?index=0',
-        'md5': '32dcdfddddf9ec6917fc88ca26d36282',
-        'info_dict': {
-            'id': 'USCMV1100073',
-            'ext': 'mp4',
-            'title': 'Birdman - Y.U. MAD',
-            'timestamp': 1323417600,
-            'upload_date': '20111209',
-            'uploader': 'Birdman',
-            'track': 'Y.U. MAD',
-            'artist': 'Birdman',
-            'genre': 'Rap/Hip-Hop',
-        },
-        'expected_warnings': ['Unable to download SMIL file'],
-    }, {
         'url': 'http://www.vevo.com/watch/genre/rock?index=0',
         'only_matching': True,
     }]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         playlist_id = mobj.group('id')
         playlist_kind = mobj.group('kind')
 
         webpage = self._download_webpage(url, playlist_id)
 
-        qs = compat_urlparse.parse_qs(compat_urlparse.urlparse(url).query)
+        qs = parse_qs(url)
         index = qs.get('index', [None])[0]
 
         if index:

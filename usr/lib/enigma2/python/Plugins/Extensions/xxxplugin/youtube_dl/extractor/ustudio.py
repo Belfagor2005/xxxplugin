@@ -1,7 +1,3 @@
-from __future__ import unicode_literals
-
-import re
-
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -29,7 +25,7 @@ class UstudioIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        video_id, display_id = re.match(self._VALID_URL, url).groups()
+        video_id, display_id = self._match_valid_url(url).groups()
 
         config = self._download_xml(
             'http://v1.ustudio.com/embed/%s/ustudio/config.xml' % video_id,
@@ -43,7 +39,6 @@ class UstudioIE(InfoExtractor):
             } for item in config.findall('./qualities/quality/%s' % kind) if item.get('url')]
 
         formats = extract('video')
-        self._sort_formats(formats)
 
         webpage = self._download_webpage(url, display_id)
 
@@ -83,7 +78,7 @@ class UstudioEmbedIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        uploader_id, video_id = re.match(self._VALID_URL, url).groups()
+        uploader_id, video_id = self._match_valid_url(url).groups()
         video_data = self._download_json(
             'http://app.ustudio.com/embed/%s/%s/config.json' % (uploader_id, video_id),
             video_id)['videos'][0]
@@ -102,7 +97,6 @@ class UstudioEmbedIE(InfoExtractor):
                     'width': int_or_none(quality.get('width')),
                     'height': height,
                 })
-        self._sort_formats(formats)
 
         thumbnails = []
         for image in video_data.get('images', []):

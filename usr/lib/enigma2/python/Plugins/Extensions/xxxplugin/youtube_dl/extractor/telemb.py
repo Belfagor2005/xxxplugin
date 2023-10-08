@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import re
 
 from .common import InfoExtractor
@@ -38,7 +35,7 @@ class TeleMBIE(InfoExtractor):
     ]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id')
 
@@ -57,10 +54,9 @@ class TeleMBIE(InfoExtractor):
                     'app': rtmp.group('app'),
                     'player_url': 'http://p.jwpcdn.com/6/10/jwplayer.flash.swf',
                     'page_url': 'http://www.telemb.be',
-                    'preference': -1,
+                    'preference': -10,
                 })
             formats.append(fmt)
-        self._sort_formats(formats)
 
         title = remove_start(self._og_search_title(webpage), 'TéléMB : ')
         description = self._html_search_regex(

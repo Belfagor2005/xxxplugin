@@ -1,16 +1,12 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
+from .dplay import DPlayIE
 from ..compat import compat_urlparse
 from ..utils import (
     ExtractorError,
     extract_attributes,
 )
 
-from .dplay import DPlayIE
 
-
-class Tele5IE(DPlayIE):
+class Tele5IE(DPlayIE):  # XXX: Do not subclass from concrete IE
     _VALID_URL = r'https?://(?:www\.)?tele5\.de/(?:[^/]+/)*(?P<id>[^/?#&]+)'
     _GEO_COUNTRIES = ['DE']
     _TESTS = [{
@@ -88,5 +84,5 @@ class Tele5IE(DPlayIE):
             return self._get_disco_api_info(url, asset_id, endpoint, realm, country)
         except ExtractorError as e:
             if getattr(e, 'message', '') == 'Missing deviceId in context':
-                raise ExtractorError('DRM protected', cause=e, expected=True)
+                self.report_drm(video_id)
             raise

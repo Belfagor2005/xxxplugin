@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 from .common import InfoExtractor
 from .youtube import YoutubeIE
 from ..utils import (
@@ -70,11 +67,10 @@ class Tele13IE(InfoExtractor):
                     formats.append({
                         'url': format_url,
                         'format_id': f.get('label'),
-                        'preference': preference(f.get('label')),
+                        'quality': preference(f.get('label')),
                         'ext': ext,
                     })
                 urls.append(format_url)
-        self._sort_formats(formats)
 
         return {
             'id': display_id,

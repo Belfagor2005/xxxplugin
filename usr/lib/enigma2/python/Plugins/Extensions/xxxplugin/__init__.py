@@ -44,3 +44,4 @@ else:
             return gettext.gettext(txt)
 localeInit()
 language.addCallback(localeInit)
+

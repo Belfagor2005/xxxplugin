@@ -6,7 +6,7 @@
 # ****************************************
 # *        coded by Lululla              *
 # *          skin by MMark               *
-# *             02/07/2023               *
+# *   start init 09/10/2022              *
 # ****************************************
 # '''
 
@@ -27,53 +27,56 @@ except Exception as e:
     print(e)
 from Components.ActionMap import ActionMap
 from Components.Button import Button
-from Components.config import config, ConfigSubsection
-from Components.config import ConfigSelection, getConfigListEntry
-from Components.config import ConfigDirectory, ConfigYesNo
-from Components.config import configfile, ConfigEnableDisable
 from Components.ConfigList import ConfigListScreen
 from Components.Label import Label
 from Components.MenuList import MenuList
-from Components.MultiContent import MultiContentEntryText
 from Components.MultiContent import MultiContentEntryPixmapAlphaTest
+from Components.MultiContent import MultiContentEntryText
 from Components.Pixmap import Pixmap, MovingPixmap
 from Components.ProgressBar import ProgressBar
+from Components.ScrollLabel import ScrollLabel
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
 from Components.Sources.List import List
 from Components.Sources.StaticText import StaticText
-from enigma import eListboxPythonMultiContent, eServiceReference
-from enigma import eTimer
-from enigma import gFont
-from enigma import iPlayableService
-from enigma import loadPNG
-from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER
-from os.path import splitext
-from Plugins.Plugin import PluginDescriptor
+from Components.config import ConfigDirectory, ConfigYesNo
+from Components.config import ConfigSelection, getConfigListEntry
+from Components.config import config, ConfigSubsection
+from Components.config import configfile, ConfigEnableDisable
 from PIL import Image, ImageFile, ImageChops
-from Screens.InfoBarGenerics import InfoBarSubtitleSupport
+from Plugins.Plugin import PluginDescriptor
 from Screens.InfoBarGenerics import InfoBarSeek, InfoBarAudioSelection
+from Screens.InfoBarGenerics import InfoBarSubtitleSupport
 from Screens.LocationBox import LocationBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Tools.Downloader import downloadWithProgress
+from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER
+from enigma import eListboxPythonMultiContent, eServiceReference
+from enigma import eTimer
+from enigma import gFont
+from enigma import iPlayableService
+from enigma import loadPNG
+from os.path import exists as file_exists
+from os.path import splitext
 from requests import get, exceptions
 from requests.exceptions import HTTPError
 from twisted.internet.reactor import callInThread
-from os.path import exists as file_exists
 import os
 import re
 import requests
 import sys
-# import json
 import shutil
 import six
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 _session = None
 THISPLUG = '/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/'
+global defpic, dblank
+global Path_Movies, Path_Cache
+_session = None
+
+
 PY3 = sys.version_info.major >= 3
-
-
 if PY3:
     from http.client import HTTPConnection
     from urllib.parse import urlparse
@@ -81,7 +84,6 @@ if PY3:
 else:
     from httplib import HTTPConnection
     from urlparse import urlparse
-
 
 HTTPConnection.debuglevel = 1
 
@@ -100,12 +102,8 @@ def getversioninfo():
     return (currversion)
 
 
-global defpic, dblank
-# _firstStartxxxplugin = True
-_session = None
-
 currversion = getversioninfo()
-Version = currversion + ' - 12.07.2023'
+Version = currversion + ' - 08.10.2023'
 title_plug = '..:: XXX Revolution V. %s ::..' % Version
 folder_path = "/tmp/xplugin/"
 name_plug = 'XXX Revolution'
@@ -115,17 +113,15 @@ pngx = os.path.join(res_plugin_path, 'pics/setting2.png')
 
 if not file_exists(folder_path):
     os.makedirs(folder_path)
-
 try:
     folder_path = sum([sum(map(lambda fname: os.path.getsize(os.path.join(folder_path, fname)), files)) for folder_p, folders, files in os.walk(folder_path)])
-    posterpng = "%0.f" % (folder_path / (1024 * 1024.0))
+    posterpng = "%0.f" % (folder_path // (1024 * 1024.0))
     if posterpng >= "5":
         shutil.rmtree(folder_path)
 except:
     pass
 
 
-# screenwidth = getDesktop(0).size()
 if screenwidth.width() == 2560:
     defpic = THISPLUG + 'res/img/no_work.png'
     dblank = THISPLUG + 'res/img/undefinided.png'
@@ -133,6 +129,7 @@ if screenwidth.width() == 2560:
 elif screenwidth.width() == 1920:
     defpic = THISPLUG + 'res/img/tvs2.png'
     dblank = THISPLUG + 'res/img/undefinided.png'
+
 else:
     defpic = THISPLUG + 'res/img/no_work.png'
     dblank = THISPLUG + 'res/img/undefinided.png'
@@ -233,8 +230,6 @@ except:
     if file_exists("/usr/bin/apt-get"):
         cfg.movie = ConfigDirectory(default='/media/hdd/movie')
 
-
-global Path_Movies, Path_Cache
 
 Path_Movies = str(cfg.movie.value) + '/'
 Path_Cache = str(cfg.cachefold.value)
@@ -480,59 +475,6 @@ def savePoster(dwn_poster, url_poster):
         f.close()
 
 
-class Abouttvr(Screen):
-    def __init__(self, session):
-        Screen.__init__(self, session)
-        self.session = session
-        skin = os.path.join(skin_path, 'Abouttvr.xml')
-        with codecs.open(skin, "r", encoding="utf-8") as f:
-            self.skin = f.read()
-        title = _(name_plug)
-        self["title"] = Button(title)
-        self["info"] = Label()
-        self["info"].setText(title_plug)
-        self["pixmap"] = Pixmap()
-        self["key_red"] = Button(_("Cancel"))
-        self["key_green"] = Button(_("Select"))
-        self["actions"] = ActionMap(["WizardActions", "InputActions", "ColorActions", 'ButtonSetupActions', "DirectionActions"], {
-            "ok": self.okClicked,
-            "back": self.close,
-            "cancel": self.cancel,
-            "red": self.close,
-            "green": self.okClicked
-        }, -1)
-        self.onLayoutFinish.append(self.startSession)
-
-    def startSession(self):
-        self['info'].setText(self.getinfo())
-
-    def okClicked(self):
-        Screen.close(self, False)
-
-    def getinfo(self):
-        continfo = _("==  WELCOME to WWW.TIVUSTREAM.COM ==\n")
-        continfo += _("== SUPPORT ON: WWW.CORVOBOYS.ORG http://t.me/tivustream ==\n")
-        continfo += _("== thank's to @PCD @KIDDAC @MMARK @LINUXSAT-SUPPORT.COM\n")
-        continfo += _("========================================\n")
-        continfo += _("DISCLAIMER:\n")
-        continfo += _("The lists created at HOC contain addresses freely and freely found on\n")
-        continfo += _("the net and not protected by subscription or subscription.\n")
-        continfo += _("The structural reference server for projects released\n")
-        continfo += _("is not a source of any stream/flow.\n")
-        continfo += _("Absolutely PROHIBITED to use this lists without authorization\n")
-        continfo += _("========================================\n")
-        return continfo
-
-    def keyLeft(self):
-        self['list'].left()
-
-    def keyRight(self):
-        self['list'].right()
-
-    def cancel(self):
-        self.close()
-
-
 class ConfigEx(ConfigListScreen, Screen):
 
     def __init__(self, session):
@@ -693,14 +635,6 @@ class Main(Screen):
         global _session
         _session = session
         self.list = []
-        self["menu"] = List(self.list)
-        self["menu"] = rvList([])
-        self["title"] = Button(name_plug)
-        self["info"] = Label()
-        self["info"].setText(title_plug)
-        self["pixmap"] = Pixmap()
-        self["key_red"] = Button(_("Cancel"))
-        self["key_green"] = Button(_("Select"))
         self["actions"] = ActionMap(["WizardActions",
                                      "InputActions",
                                      "ColorActions",
@@ -709,11 +643,14 @@ class Main(Screen):
                                                             "ok": self.okClicked,
                                                             "back": self.close,
                                                             "red": self.close,
-                                                            "green": self.okClicked,
+                                                            # "green": self.okClicked,
                                                            }, -1)
-        self.onLayoutFinish.append(self.startSession)
+        self.onLayoutFinish.append(self.startSession2)
 
     def startSession(self):
+        self.session.openWithCallback(self.startSession2, startInit)
+
+    def startSession2(self):
         self.names = []
         self.urls = []
         self.pics = []
@@ -759,7 +696,6 @@ class Main(Screen):
                     url = item.split('###')[1]
                     pic = item.split('###')[2]
                     # sort test
-
                     self.names.append(name)
                     self.urls.append(url)
                     self.pics.append(pic)
@@ -873,12 +809,13 @@ class GridMain(Screen):
 
         print("Going in openTest")
         self.onLayoutFinish.append(self.openTest)
+        # self.onLayoutFinish.append(self.about)
 
     def configure(self):
         self.session.open(ConfigEx)
 
     def about(self):
-        self.session.open(Abouttvr)
+        self.session.open(startInit)
 
     def cancel(self):
         self.close()
@@ -1570,6 +1507,90 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         self.close()
 
 
+class startInit(Screen):
+    def __init__(self, session):
+        Screen.__init__(self, session)
+        self.session = session
+        global _session
+        _session = session
+        skin = os.path.join(skin_path, 'start.xml')
+        with codecs.open(skin, "r", encoding="utf-8") as f:
+            self.skin = f.read()
+        info = 'Please Wait..'
+        # self['info'] = Label('')
+        self['text'] = ScrollLabel(info)
+        self['actions'] = ActionMap(['OkCancelActions',
+                                     'ColorActions',
+                                     'DirectionActions'], {'cancel': self.close,
+                                                           'red': self.close,
+                                                           'ok': self.ok,
+                                                           'up': self.Up,
+                                                           'down': self.Down,
+                                                           }, -1)
+
+        # self.onLayoutFinish.append(self.startSession)
+        self.timer = eTimer()
+        if Utils.DreamOS():
+            self.timer_conn = self.timer.timeout.connect(self.startSession)
+        else:
+            self.timer.callback.append(self.startSession)
+        self.timer.start(100, 1)
+
+    def ok(self):
+        self.close()
+
+    def Down(self):
+        self['text'].pageDown()
+
+    def Up(self):
+        self['text'].pageUp()
+
+    def getinfo(self):
+        continfo = ("==========       WELCOME     ============\n")
+        continfo += ("XXXPLUGIN V.%s\n") % Version
+        continfo += _("ATTENTION PLEASE: \n")
+        continfo += _("This plugin contains adult content not\n")
+        continfo += _("suitable for all readers.\n")
+        continfo += _("If you are over 18 years old and wish to\n")
+        continfo += _("use the aforementioned content.\n")
+        continfo += ("\n")
+        continfo += _("For Support visit our social links go to\n")
+        continfo += _("tivustream.com or corvoboys.org and ask\n")
+        continfo += _("about this plugins.\n")
+        continfo += _("…if you like what we do and how we do it,\n")
+        continfo += _("do we deserve a coffee?\n")
+        continfo += _("…frame the QR code and donate €1.00\n")
+        continfo += _("Thank you with all my heart\n")
+        continfo += _("Just for passion!!!.\n")
+        continfo += ("==========   from Lululla     ==========\n\n")
+        continfo += ("=========     SUPPORT ON:   ============\n")
+        continfo += _("+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n")
+        continfo += _("http://t.me/tivustream\n\n")
+        continfo += _("THANK'S TO:\n")
+        continfo += _("@PCD @KIDDAC @MMARK @OKTUS\n")
+        continfo += _("and to: linuxsat-support forum\n\n")
+        return continfo
+
+    def startSession(self):
+        try:
+            self['text'].setText(self.getinfo())
+        except:
+            self['text'].setText(_('Error Report Issue!'))
+        self.timer.startLongTimer(60)
+        # self.timer.start(600, 1)
+        # self.contdown()
+
+    # def contdown(self):
+        # import time
+        # time.sleep(1)
+        # n = 10000
+        # while n > 0:
+            # print(n)
+            # self['info'].setText(str(n))
+            # n -= 1
+        # self['info'].setText('START')
+
+
 class AutoStartTimerxxxplugin:
 
     def __init__(self, session):
@@ -1608,11 +1629,6 @@ def main(session, **kwargs):
             pass
 
         try:
-            os.mkdir(os.path.join(str(cfg.cachefold.value), "xxxplugin/vid"))
-        except:
-            pass
-
-        try:
             os.mkdir(os.path.join(str(cfg.cachefold.value), "xxxplugin/pic"))
         except:
             pass
@@ -1621,7 +1637,6 @@ def main(session, **kwargs):
             os.mkdir(os.path.join(str(cfg.cachefold.value), "xxxplugin/tmp"))
         except:
             pass
-
         exo = Main(_session)
         exo.startSession()
     except:

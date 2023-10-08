@@ -1,24 +1,19 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
-import re
-
 from .common import InfoExtractor
+from ..networking import HEADRequest
 from ..utils import (
-    HEADRequest,
     ExtractorError,
-    int_or_none,
-    update_url_query,
-    qualities,
-    get_element_by_attribute,
     clean_html,
+    get_element_by_attribute,
+    int_or_none,
+    qualities,
+    update_url_query,
 )
 
 
 class SinaIE(InfoExtractor):
     _VALID_URL = r'''(?x)https?://(?:.*?\.)?video\.sina\.com\.cn/
                         (?:
-                            (?:view/|.*\#)(?P<video_id>\d+)|
+                            (?:view/|.*\#)(?P<id>\d+)|
                             .+?/(?P<pseudo_id>[^/?#]+)(?:\.s?html)|
                             # This is used by external sites like Weibo
                             api/sinawebApi/outplay.php/(?P<token>.+?)\.swf
@@ -56,16 +51,16 @@ class SinaIE(InfoExtractor):
     ]
 
     def _real_extract(self, url):
-        mobj = re.match(self._VALID_URL, url)
+        mobj = self._match_valid_url(url)
 
-        video_id = mobj.group('video_id')
+        video_id = mobj.group('id')
         if not video_id:
             if mobj.group('token') is not None:
                 # The video id is in the redirected url
                 self.to_screen('Getting video id')
                 request = HEADRequest(url)
                 _, urlh = self._download_webpage_handle(request, 'NA', False)
-                return self._real_extract(urlh.geturl())
+                return self._real_extract(urlh.url)
             else:
                 pseudo_id = mobj.group('pseudo_id')
                 webpage = self._download_webpage(url, pseudo_id)
@@ -99,10 +94,9 @@ class SinaIE(InfoExtractor):
                 formats.append({
                     'format_id': quality_id,
                     'url': update_url_query(file_api, {'vid': file_id}),
-                    'preference': preference(quality_id),
+                    'quality': preference(quality_id),
                     'ext': 'mp4',
                 })
-            self._sort_formats(formats)
 
             return {
                 'id': video_id,

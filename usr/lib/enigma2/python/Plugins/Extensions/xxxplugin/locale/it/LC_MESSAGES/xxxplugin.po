@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: xxxplugin\n"
-"POT-Creation-Date: 2023-10-08 16:27+0200\n"
+"POT-Creation-Date: 2023-10-08 19:56+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,162 +14,223 @@ msgstr ""
 "X-Poedit-SearchPath-0: plugin.py\n"
 "X-Poedit-SearchPath-1: Sites\n"
 
+#: Sites/alphaporno.py:106 Sites/alphaporno.py:243 Sites/alphaporno.py:312
+#: Sites/alphaporno.py:410 Sites/alphaporno.py:506 Sites/alphaporno.py:609
+#: Sites/area51.py:104 Sites/area51.py:230 Sites/area51.py:301
+#: Sites/area51.py:399 Sites/area51.py:496 Sites/area51.py:597
+#: Sites/bemyhole.py:99 Sites/bemyhole.py:235 Sites/bemyhole.py:341
+#: Sites/bemyhole.py:401 Sites/bemyhole.py:500 Sites/bemyhole.py:603
+#: Sites/born2tease.py:83 Sites/born2tease.py:179 Sites/born2tease.py:284
+#: Sites/cumlouder.py:99 Sites/cumlouder.py:241 Sites/cumlouder.py:307
+#: Sites/cumlouder.py:416 Sites/cumlouder.py:476 Sites/cumlouder.py:576
+#: Sites/easyporn.py:84 Sites/easyporn.py:220 Sites/easyporn.py:273
+#: Sites/easyporn.py:336 Sites/easyporn.py:433 Sites/easyporn.py:532
+#: Sites/empflix.py:71 Sites/empflix.py:162 Sites/empflix.py:263
+#: Sites/empflix.py:329 Sites/famefun.py:79 Sites/famefun.py:196
+#: Sites/famefun.py:261 Sites/famefun.py:357 Sites/freearhey.py:67
+#: Sites/fullporner.py:103 Sites/fullporner.py:234 Sites/fullporner.py:332
+#: Sites/fullporner.py:399 Sites/fullporner.py:495 Sites/fullporner.py:592
+#: Sites/fullporner.py:690 Sites/fullporner.py:790 Sites/glavmatures.py:97
+#: Sites/glavmatures.py:220 Sites/glavmatures.py:319 Sites/glavmatures.py:385
+#: Sites/glavmatures.py:482 Sites/heavyr.py:85 Sites/heavyr.py:180
+#: Sites/heavyr.py:244 Sites/hypnotube.py:94 Sites/hypnotube.py:211
+#: Sites/hypnotube.py:277 Sites/hypnotube.py:372 Sites/hypnotube.py:467
+#: Sites/madnessporn.py:96 Sites/madnessporn.py:234 Sites/madnessporn.py:293
+#: Sites/madnessporn.py:395 Sites/manporn.py:100 Sites/manporn.py:226
+#: Sites/manporn.py:290 Sites/manporn.py:387 Sites/manporn.py:485
+#: Sites/milf300.py:95 Sites/milf300.py:228 Sites/milf300.py:289
+#: Sites/milf300.py:397 Sites/milfzr.py:96 Sites/milfzr.py:219
+#: Sites/milfzr.py:327 Sites/milfzr.py:390 Sites/milfzr.py:505
+#: Sites/milfzr.py:572 Sites/mylust.py:68 Sites/mylust.py:188
+#: Sites/mylust.py:288 Sites/paradisehill.py:95 Sites/paradisehill.py:220
+#: Sites/paradisehill.py:320 Sites/paradisehill.py:390
+#: Sites/paradisehill.py:490 Sites/pornbimbo.py:95 Sites/pornbimbo.py:215
+#: Sites/pornbimbo.py:316 Sites/pornbimbo.py:392 Sites/pornheed.py:97
+#: Sites/pornheed.py:216 Sites/pornheed.py:293 Sites/pornheed.py:391
+#: Sites/pornheed.py:461 Sites/pornheed.py:561 Sites/pornheed.py:664
+#: Sites/pornhub.py:103 Sites/pornhub.py:257 Sites/pornhub.py:357
+#: Sites/pornhub.py:633 Sites/pornhub.py:737 Sites/pornhub.py:842
+#: Sites/revolutionx.py:120 Sites/revolutionx.py:239 Sites/revolutionx.py:339
+#: Sites/revolutionx.py:441 Sites/revolutionx.py:542 Sites/specialtube.py:94
+#: Sites/specialtube.py:225 Sites/specialtube.py:275 Sites/specialtube.py:347
+#: Sites/specialtube.py:448 Sites/specialtube.py:544 Sites/specialtube.py:645
+#: Sites/superzooi.py:92 Sites/superzooi.py:208 Sites/superzooi.py:307
+#: Sites/superzooi.py:390 Sites/superzooi.py:486 Sites/truehomemade.py:85
+#: Sites/truehomemade.py:207 Sites/truehomemade.py:282
+#: Sites/truehomemade.py:376 Sites/truehomemade.py:472
+#: Sites/truehomemade.py:572 Sites/vidxporn.py:95 Sites/vidxporn.py:231
+#: Sites/vidxporn.py:297 Sites/vidxporn.py:398 Sites/xnxx.py:97
+#: Sites/xnxx.py:221 Sites/xnxx.py:317 Sites/xnxx.py:391 Sites/xnxx.py:487
+#: Sites/xnxx.py:583 Sites/xvideos18plus.py:95 Sites/xvideos18plus.py:214
+#: Sites/xvideos18plus.py:312 Sites/xvideos18plus.py:387
+#: Sites/xvideos18plus.py:481 Sites/xvideos18plus.py:574 plugin.py:480
+#: plugin.py:1070
 msgid "Back"
 msgstr "Torna"
 
+#: Sites/alphaporno.py:147 Sites/area51.py:145 Sites/bemyhole.py:147
+#: Sites/cumlouder.py:147 Sites/easyporn.py:132 Sites/famefun.py:107
+#: Sites/fullporner.py:144 Sites/glavmatures.py:138 Sites/hypnotube.py:136
+#: Sites/madnessporn.py:137 Sites/manporn.py:141 Sites/milf300.py:143
+#: Sites/milfzr.py:137 Sites/mylust.py:120 Sites/paradisehill.py:137
+#: Sites/pornbimbo.py:137 Sites/pornheed.py:138 Sites/pornhub.py:151
+#: Sites/revolutionx.py:161 Sites/specialtube.py:135 Sites/superzooi.py:133
+#: Sites/truehomemade.py:139 Sites/vidxporn.py:136 Sites/xnxx.py:138
+#: Sites/xvideos18plus.py:136
 msgid "Filter this category..."
-msgstr ""
+msgstr "Ricerca in questa categoria..."
 
+#: Sites/alphaporno.py:279 Sites/area51.py:266 Sites/bemyhole.py:371
+#: Sites/cumlouder.py:280 Sites/cumlouder.py:446 Sites/easyporn.py:306
+#: Sites/empflix.py:299 Sites/fullporner.py:368 Sites/heavyr.py:216
+#: Sites/hypnotube.py:247 Sites/madnessporn.py:263 Sites/manporn.py:262
+#: Sites/milf300.py:259 Sites/pornheed.py:264 Sites/pornheed.py:433
+#: Sites/pornhub.py:872 Sites/specialtube.py:317 Sites/specialtube.py:687
+#: Sites/superzooi.py:360 Sites/truehomemade.py:254 Sites/vidxporn.py:267
+#: Sites/xnxx.py:357 Sites/xvideos18plus.py:359 Sites/xvideos18plus.py:617
 msgid "Please select ..."
 msgstr "Seleziona prego..."
 
+#: Sites/alphaporno.py:283 Sites/area51.py:270 Sites/bemyhole.py:375
+#: Sites/cumlouder.py:284 Sites/cumlouder.py:450 Sites/easyporn.py:310
+#: Sites/empflix.py:303 Sites/famefun.py:241 Sites/fullporner.py:372
+#: Sites/glavmatures.py:365 Sites/heavyr.py:220 Sites/hypnotube.py:251
+#: Sites/madnessporn.py:267 Sites/manporn.py:266 Sites/milf300.py:263
+#: Sites/milfzr.py:369 Sites/milfzr.py:551 Sites/paradisehill.py:369
+#: Sites/pornbimbo.py:367 Sites/pornheed.py:268 Sites/pornheed.py:437
+#: Sites/pornhub.py:876 Sites/specialtube.py:321 Sites/specialtube.py:691
+#: Sites/superzooi.py:364 Sites/truehomemade.py:258 Sites/vidxporn.py:271
+#: Sites/xnxx.py:361 Sites/xvideos18plus.py:363 Sites/xvideos18plus.py:621
 msgid "Nothing ... Retry"
-msgstr ""
+msgstr "Niente.. riprova"
 
-#: plugin.py:203
-msgid "IPTV(4097)"
-msgstr ""
-
-#: plugin.py:204
-msgid "Dvb(1)"
-msgstr ""
-
-#: plugin.py:205
-msgid "eServiceUri(8193)"
-msgstr ""
-
-#: plugin.py:209
-msgid "Gstreamer(5001)"
-msgstr ""
-
-#: plugin.py:212
-msgid "Exteplayer3(5002)"
-msgstr ""
-
-#: plugin.py:215
-msgid "DreamOS GStreamer(8193)"
-msgstr ""
-
-#: plugin.py:220
+#: plugin.py:208
 msgid "yes"
-msgstr ""
+msgstr "si"
 
-#: plugin.py:220
+#: plugin.py:208
 msgid "no"
-msgstr ""
+msgstr "no"
 
-#: plugin.py:488
+#: plugin.py:476
 msgid "SETUP PLUGIN"
 msgstr "CONFIGURAZIONE PLUGIN"
 
-#: plugin.py:493
+#: plugin.py:481
 msgid "Save"
 msgstr "Salva"
 
-#: plugin.py:494
+#: plugin.py:482
 msgid "Empty Cache"
 msgstr "Vuota Cache"
 
-#: plugin.py:526
+#: plugin.py:514
 msgid "All cache fold empty!"
 msgstr "Tutta la cache è vuota!"
 
-#: plugin.py:531
+#: plugin.py:519
 msgid "Services Player Reference type"
 msgstr "Tipo di Services Player Reference"
 
-#: plugin.py:531
+#: plugin.py:519
 msgid "Configure Service Player Reference, Enigma restart required"
 msgstr "Configura Service Player Reference, richiesto il riavvio di Enigma"
 
-#: plugin.py:532
+#: plugin.py:520
 msgid "Cache folder"
 msgstr "Cartella cache"
 
-#: plugin.py:532
+#: plugin.py:520
 msgid "Folder Cache Path (eg.: /media/hdd), Enigma restart required"
 msgstr ""
 "Percorso cache della cartella (es.: /media/hdd), è richiesto il riavvio di "
 "Enigma"
 
-#: plugin.py:533
+#: plugin.py:521
 msgid "Movie folder"
 msgstr "Cartella Film"
 
-#: plugin.py:533
+#: plugin.py:521
 msgid "Folder Movie Path (eg.: /media/hdd/movie), Enigma restart required"
 msgstr ""
 "Percorso del film della cartella (es.: /media/hdd/movie), è richiesto il "
 "riavvio di Enigma"
 
-#: plugin.py:546
+#: plugin.py:534
 msgid "SELECT YOUR CHOICE"
 msgstr "SCEGLI COSA FARE"
 
-#: plugin.py:587
+#: plugin.py:575
 msgid "Choose Directory:"
 msgstr "Scegli cartella"
 
-#: plugin.py:588
+#: plugin.py:576
 msgid "Choose Directory"
 msgstr "Scegli percorso"
 
-#: plugin.py:611
+#: plugin.py:599
 msgid "Settings saved correctly!"
 msgstr "Settings salvati correttamente"
 
-#: plugin.py:620
+#: plugin.py:608
 msgid "Really close without saving settings?"
 msgstr "Chiudere davvero senza salvare le impostazioni?"
 
-#: plugin.py:1083
+#: plugin.py:1071
 msgid "Select"
 msgstr "Seleziona"
 
-#: plugin.py:1107
+#: plugin.py:1095
 msgid "You are already downloading!!!"
 msgstr "Stai già scaricando!!!"
 
-#: plugin.py:1111
+#: plugin.py:1099
 #, python-format
 msgid ""
 "DOWNLOAD VIDEO?\n"
 "%s"
 msgstr ""
+"DOWNLOAD VIDEO?\n"
+"%s"
 
-#: plugin.py:1114
+#: plugin.py:1102
 msgid "Only VOD Movie allowed or not .ext Filtered!!!"
 msgstr "Sono ammessi solo film VOD!!!"
 
-#: plugin.py:1135 plugin.py:1156 plugin.py:1163
+#: plugin.py:1123 plugin.py:1144 plugin.py:1151
 msgid "Download Failed!!!"
-msgstr ""
+msgstr "Download Fallito!!!"
 
-#: plugin.py:1298
+#: plugin.py:1286
 msgid "Install Streamlink first"
+msgstr "Devi installare Streamlink prima di proseguire"
+
+#: plugin.py:1538
+#, python-format
+msgid ""
+"WELCOME TO XXXPLUGIN V.%s\n"
+"\n"
 msgstr ""
+"BENVENUTO IN XXXPLUGIN V.%s\n"
+"\n"
 
-#: plugin.py:1550
-msgid "WELCOME TO\n"
-msgstr "BENVENUTI IN\n"
-
-#: plugin.py:1552
+#: plugin.py:1539
 msgid "ATTENTION PLEASE: \n"
 msgstr "ATTENZIONE PREGO:\n"
 
-#: plugin.py:1553
+#: plugin.py:1540
 msgid "This plugin contains adult content not\n"
 msgstr "Questo plugin contiene contenuti per adulti\n"
 
-#: plugin.py:1554
+#: plugin.py:1541
 msgid "suitable for all readers.\n"
 msgstr "adatto a tutti i lettori.\n"
 
-#: plugin.py:1555
+#: plugin.py:1542
 msgid "If you are over 18 years old and wish to\n"
 msgstr "Se hai più di 18 anni e lo desideri\n"
 
-#: plugin.py:1556
+#: plugin.py:1543
 msgid ""
 "use the aforementioned content.\n"
 "\n"
@@ -177,53 +238,67 @@ msgstr ""
 "utilizzare i suddetti contenuti.\n"
 "\n"
 
-#: plugin.py:1557
+#: plugin.py:1544
 msgid "For Support visit our social links go to\n"
 msgstr "Per supporto, visita i nostri collegamenti social vai a\n"
 
-#: plugin.py:1558
+#: plugin.py:1545
 msgid "tivustream.com or corvoboys.org and ask\n"
 msgstr "tivustream.com o corvoboys.org e chiedi\n"
 
-#: plugin.py:1559
-msgid "about this plugins.\n"
-msgstr "informazioni su questo plugin.\n"
+#: plugin.py:1546
+msgid ""
+"about this plugins.\n"
+"\n"
+msgstr ""
+"info su questo plugin.\n"
+"\n"
 
-#: plugin.py:1560
-msgid "…if you like what we do and how we do it,\n"
-msgstr "…se ti piace quello che facciamo e come lo facciamo,\n"
-
-#: plugin.py:1561
-msgid "do we deserve a coffee?\n"
-msgstr "ci meritiamo un caffè?\n"
-
-#: plugin.py:1562
-msgid "…frame the QR code and donate €1.00\n"
-msgstr "…inquadra il QR code e dona € 1,00\n"
-
-#: plugin.py:1563
+#: plugin.py:1547
 msgid "Thank you with all my heart\n"
 msgstr "Grazie con tutto il cuore\n"
 
-#: plugin.py:1564
-msgid "Just for passion!!!.\n"
-msgstr "Solo per passione!!!.\n"
-
-#: plugin.py:1565
+#: plugin.py:1548
 msgid ""
-"==========   from Lululla     ==========\n"
+"Just for passion!!! @Lululla.\n"
 "\n"
-msgstr "==========     da Lululla     ==========\n"
+msgstr ""
+"Solo per passione!!! @Lululla\n"
+"\n"
 
-#: plugin.py:1566
+#: plugin.py:1549
+msgid "if you like what we do and how we do it\n"
+msgstr "se ti piace cosa facciamo e come lo facciamo\n"
+
+#: plugin.py:1550
+msgid ""
+"do we deserve a coffee.\n"
+"\n"
+msgstr ""
+"ci meritiamo un caffè.\n"
+"\n"
+
+#: plugin.py:1551
+msgid "QRCODE € 1,00\n"
+msgstr "QRCODE € 1,00\n"
+
+#: plugin.py:1552
+msgid ""
+"Donate now\n"
+"\n"
+msgstr ""
+"Dona ora\n"
+"\n"
+
+#: plugin.py:1553
 msgid "=========     SUPPORT ON:   ============\n"
 msgstr "=========    SUPPORTO SU:   ============\n"
 
-#: plugin.py:1567
+#: plugin.py:1554
 msgid "+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n"
 msgstr "+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n"
 
-#: plugin.py:1568
+#: plugin.py:1555
 msgid ""
 "http://t.me/tivustream\n"
 "\n"
@@ -231,22 +306,79 @@ msgstr ""
 "http://t.me/tivustream\n"
 "\n"
 
-#: plugin.py:1569
+#: plugin.py:1556
 msgid "THANK'S TO:\n"
 msgstr "RINGRAZIAMENTI:\n"
 
-#: plugin.py:1570
-msgid "@PCD @KIDDAC @MMARK @OKTUS\n"
-msgstr "@PCD @KIDDAC @MMARK @OKTUS\n"
-
-#: plugin.py:1571
+#: plugin.py:1557
 msgid ""
-"and to: linuxsat-support forum\n"
-"\n"
+"@PCD\n"
+"@KIDDAC\n"
+"@MMARK\n"
+"@OKTUS\n"
+"and to: linuxsat-support forum"
 msgstr ""
-"e al forum linuxsat-support\n"
-"\n"
+"@PCD\n"
+"@KIDDAC\n"
+"@MMARK\n"
+"@OKTUS\n"
+"ed soptrattutto a: linuxsat-support forum"
 
-#: plugin.py:1578
+#: plugin.py:1564
 msgid "Error Report Issue!"
-msgstr ""
+msgstr "Errore Riporta nel forum"
+
+#~ msgid "do we deserve a coffee.\n"
+#~ msgstr "ci meritiamo un caffè.\n"
+
+#~ msgid "@PCD @KIDDAC @MMARK @OKTUS and to: linuxsat-support forum"
+#~ msgstr "@PCD @KIDDAC @MMARK @OKTUS e a: linuxsat-support forum"
+
+#~ msgid "WELCOME TO XXXPLUGIN V.%s\n"
+#~ msgstr "BENVENUTO IN XXXPLUGIN V.%s\n"
+
+#~ msgid "use the aforementioned content.\n"
+#~ msgstr "utilizzare i suddetti contenuti.\n"
+
+#~ msgid "about this plugins.\n"
+#~ msgstr "informazioni su questo plugin.\n"
+
+#~ msgid "WELCOME TO\n"
+#~ msgstr "BENVENUTI IN\n"
+
+#~ msgid "Just for passion!!!.\n"
+#~ msgstr "Solo per passione!!!.\n"
+
+#~ msgid ""
+#~ "==========   from Lululla     ==========\n"
+#~ "\n"
+#~ msgstr "==========     da Lululla     ==========\n"
+
+#~ msgid "Frame the QRCODE and Donate € 1,00\n"
+#~ msgstr "Inquadra il codice QR e dona € 1,00\n"
+
+#~ msgid "@PCD @KIDDAC @MMARK @OKTUS\n"
+#~ msgstr "@PCD @KIDDAC @MMARK @OKTUS\n"
+
+#~ msgid ""
+#~ "and to: linuxsat-support forum\n"
+#~ "\n"
+#~ msgstr ""
+#~ "e al forum linuxsat-support\n"
+#~ "\n"
+
+#~ msgid "if you like what we do and how we do it,\n"
+#~ msgstr "se ti piace cosa facciamo e come lo facciamo,\n"
+
+#~ msgid ""
+#~ "do we deserve a coffee?\n"
+#~ "Frame the QR code and donate € 1,00\n"
+#~ msgstr ""
+#~ "ci meritiamo un caffè?\n"
+#~ "Inquadra il QR code e dona € 1,00\n"
+
+#~ msgid "do we deserve a coffee?\n"
+#~ msgstr "ci meritiamo un caffè?\n"
+
+#~ msgid "Frame the QR code and donate € 1,00\n"
+#~ msgstr "Inquadra il QR code e dona € 1,00\n"

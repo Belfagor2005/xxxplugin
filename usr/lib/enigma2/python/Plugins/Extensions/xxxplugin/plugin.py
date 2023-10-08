@@ -188,31 +188,19 @@ def show_(name, link):
     return res
 
 
-def cat_(letter, link):
-    res = [(letter, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=letter, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    return res
-
-
 mdpchoices = [
-        ("4097", _("IPTV(4097)")),
-        ("1", _("Dvb(1)")),
-        ("8193", _("eServiceUri(8193)")),
+        ("4097", ("IPTV(4097)")),
+        ("1", ("Dvb(1)")),
     ]
 
 if file_exists("/usr/bin/gstplayer"):
-    mdpchoices.append(("5001", _("Gstreamer(5001)")))
+    mdpchoices.append(("5001", ("Gstreamer(5001)")))
 
 if file_exists("/usr/bin/exteplayer3"):
-    mdpchoices.append(("5002", _("Exteplayer3(5002)")))
+    mdpchoices.append(("5002", ("Exteplayer3(5002)")))
 
 if file_exists("/usr/bin/apt-get"):
-    mdpchoices.append(("8193", _("DreamOS GStreamer(8193)")))
+    mdpchoices.append(("8193", ("DreamOS GStreamer(8193)")))
 
 config.plugins.xxxplugin = ConfigSubsection()
 cfg = config.plugins.xxxplugin
@@ -663,13 +651,13 @@ class Main(Screen):
         pic = ""
         url = ""
         path = THISPLUG + "Sites"
-        print('path= ', path)
+        # print('path= ', path)
         try:
             for root, dirs, files in os.walk(path):
                 # print(files)
                 for file in files:
                     if file.endswith('.py') and not file.endswith('.pyo') and not file.endswith('.pyc'):
-                        print('name= ', file)
+                        # print('name= ', file)
                         if "pycache" in file:
                             continue
                         if 'extractor' in file:
@@ -700,7 +688,7 @@ class Main(Screen):
                     self.urls.append(url)
                     self.pics.append(pic)
                     i += 1
-                    print(name + '\n' + desc + '\n' + url + '\n' + pic)
+                    # print(name + '\n' + desc + '\n' + url + '\n' + pic)
         except Exception as e:
             print(e)
         title = name_plug
@@ -765,7 +753,7 @@ class GridMain(Screen):
         picfold = os.path.join(str(cfg.cachefold.value), "xxxplugin/pic")
 
         picx = getpics(names, pics, tmpfold, picfold)
-        print("In Gridmain pics = ", pics)
+        # print("In Gridmain pics = ", pics)
 
         self.urls = urls
         self.pics = picx
@@ -790,7 +778,7 @@ class GridMain(Screen):
         self.ipage = 1
         ln = len(self.names)
         self.npage = int(float(ln / 10)) + 1
-        print("self.npage =", self.npage)
+        # print("self.npage =", self.npage)
         self["actions"] = ActionMap(["OkCancelActions",
                                      "EPGSelectActions",
                                      "MenuActions",
@@ -807,7 +795,7 @@ class GridMain(Screen):
                                                         "down": self.key_down
                                                        })
 
-        print("Going in openTest")
+        # print("Going in openTest")
         self.onLayoutFinish.append(self.openTest)
         # self.onLayoutFinish.append(self.about)
 
@@ -1074,7 +1062,7 @@ class Playstream1(Screen):
         self.error_message = None
         self.download = None
         self.aborted = False
-        print('In Playstream1 self.url =', url)
+        # print('In Playstream1 self.url =', url)
         self.srefInit = self.session.nav.getCurrentlyPlayingServiceReference()
         self['list'] = rvList([])
         self['info'] = Label()
@@ -1163,7 +1151,7 @@ class Playstream1(Screen):
         self.session.open(MessageBox, _('Download Failed!!!'), MessageBox.TYPE_INFO, timeout=5)
 
     def abort(self):
-        print("aborting", self.url)
+        # print("aborting", self.url)
         if self.download:
             self.download.stop()
         self.aborted = True
@@ -1547,8 +1535,7 @@ class startInit(Screen):
 
     def getinfo(self):
         # continfo = []
-        continfo = _("WELCOME TO\n")
-        continfo += ("XXXPLUGIN V.%s\n") % Version
+        continfo = _("WELCOME TO XXXPLUGIN V.%s\n\n") % Version
         continfo += _("ATTENTION PLEASE: \n")
         continfo += _("This plugin contains adult content not\n")
         continfo += _("suitable for all readers.\n")
@@ -1556,19 +1543,18 @@ class startInit(Screen):
         continfo += _("use the aforementioned content.\n\n")
         continfo += _("For Support visit our social links go to\n")
         continfo += _("tivustream.com or corvoboys.org and ask\n")
-        continfo += _("about this plugins.\n")
-        continfo += _("…if you like what we do and how we do it,\n")
-        continfo += _("do we deserve a coffee?\n")
-        continfo += _("…frame the QR code and donate €1.00\n")
+        continfo += _("about this plugins.\n\n")
         continfo += _("Thank you with all my heart\n")
-        continfo += _("Just for passion!!!.\n")
-        continfo += _("==========   from Lululla     ==========\n\n")
+        continfo += _("Just for passion!!! @Lululla.\n\n")
+        continfo += _("if you like what we do and how we do it\n")
+        continfo += _("do we deserve a coffee.\n\n")
+        continfo += _("QRCODE € 1,00\n")
+        continfo += _("Donate now\n\n")
         continfo += _("=========     SUPPORT ON:   ============\n")
         continfo += _("+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n")
         continfo += _("http://t.me/tivustream\n\n")
         continfo += _("THANK'S TO:\n")
-        continfo += _("@PCD @KIDDAC @MMARK @OKTUS\n")
-        continfo += _("and to: linuxsat-support forum\n\n")
+        continfo += _("@PCD\n@KIDDAC\n@MMARK\n@OKTUS\nand to: linuxsat-support forum")
         return continfo
 
     def startSession(self):

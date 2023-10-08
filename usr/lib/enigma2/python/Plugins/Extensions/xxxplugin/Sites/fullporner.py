@@ -667,7 +667,8 @@ class fullporner3(Screen):
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
-        except Except
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(fullporner4, str(name), str(url))
@@ -766,7 +767,8 @@ class fullporner4(Screen):
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
-        except Except
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
         print('play_that_shit fullporner4 url= ', url)

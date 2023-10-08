@@ -298,7 +298,7 @@ class glavmatures(Screen):
             url = self['menulist'].getCurrent()[0][1]
             self.play_that_shit(url, name)
         except Exception as e:
-            print(e
+            print(e)
 
     def play_that_shit(self, url, name):
         self.session.open(glavmaturesx, name, url)

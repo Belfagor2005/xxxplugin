@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xxxplugin\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-08 14:44+0200\n"
+"POT-Creation-Date: 2023-10-08 16:31+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: ))^^(( <>\n"
 "Language-Team: *\n"
@@ -206,8 +206,7 @@ msgstr ""
 
 #: plugin.py:1111
 #, python-format
-msgid ""
-"DOWNLOAD VIDEO?\n"
+msgid "DOWNLOAD VIDEO?\n"
 "%s"
 msgstr ""
 
@@ -223,80 +222,113 @@ msgstr ""
 msgid "Install Streamlink first"
 msgstr ""
 
-#: plugin.py:1551
-msgid "ATTENTION PLEASE: \n"
+#: plugin.py:1550
+msgid "WELCOME TO\n"
+""
 msgstr ""
 
 #: plugin.py:1552
-msgid "This plugin contains adult content not\n"
+msgid "ATTENTION PLEASE: \n"
+""
 msgstr ""
 
 #: plugin.py:1553
-msgid "suitable for all readers.\n"
+msgid "This plugin contains adult content not\n"
+""
 msgstr ""
 
 #: plugin.py:1554
-msgid "If you are over 18 years old and wish to\n"
+msgid "suitable for all readers.\n"
+""
 msgstr ""
 
 #: plugin.py:1555
+msgid "If you are over 18 years old and wish to\n"
+""
+msgstr ""
+
+#: plugin.py:1556
 msgid "use the aforementioned content.\n"
+"\n"
+""
 msgstr ""
 
 #: plugin.py:1557
 msgid "For Support visit our social links go to\n"
+""
 msgstr ""
 
 #: plugin.py:1558
 msgid "tivustream.com or corvoboys.org and ask\n"
+""
 msgstr ""
 
 #: plugin.py:1559
 msgid "about this plugins.\n"
+""
 msgstr ""
 
 #: plugin.py:1560
 msgid "…if you like what we do and how we do it,\n"
+""
 msgstr ""
 
 #: plugin.py:1561
 msgid "do we deserve a coffee?\n"
+""
 msgstr ""
 
 #: plugin.py:1562
 msgid "…frame the QR code and donate €1.00\n"
+""
 msgstr ""
 
 #: plugin.py:1563
 msgid "Thank you with all my heart\n"
+""
 msgstr ""
 
 #: plugin.py:1564
 msgid "Just for passion!!!.\n"
+""
+msgstr ""
+
+#: plugin.py:1565
+msgid "==========   from Lululla     ==========\n"
+"\n"
+""
+msgstr ""
+
+#: plugin.py:1566
+msgid "=========     SUPPORT ON:   ============\n"
+""
 msgstr ""
 
 #: plugin.py:1567
 msgid "+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n"
+""
 msgstr ""
 
 #: plugin.py:1568
-msgid ""
-"http://t.me/tivustream\n"
+msgid "http://t.me/tivustream\n"
 "\n"
+""
 msgstr ""
 
 #: plugin.py:1569
 msgid "THANK'S TO:\n"
+""
 msgstr ""
 
 #: plugin.py:1570
 msgid "@PCD @KIDDAC @MMARK @OKTUS\n"
+""
 msgstr ""
 
 #: plugin.py:1571
-msgid ""
-"and to: linuxsat-support forum\n"
+msgid "and to: linuxsat-support forum\n"
 "\n"
+""
 msgstr ""
 
 #: plugin.py:1578

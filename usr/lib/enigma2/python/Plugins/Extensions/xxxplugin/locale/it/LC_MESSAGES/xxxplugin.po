@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: xxxplugin\n"
-"POT-Creation-Date: 2023-10-08 14:42+0200\n"
+"POT-Creation-Date: 2023-10-08 16:27+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,90 +14,15 @@ msgstr ""
 "X-Poedit-SearchPath-0: plugin.py\n"
 "X-Poedit-SearchPath-1: Sites\n"
 
-#: Sites/alphaporno.py:106 Sites/alphaporno.py:243 Sites/alphaporno.py:312
-#: Sites/alphaporno.py:410 Sites/alphaporno.py:506 Sites/alphaporno.py:609
-#: Sites/area51.py:104 Sites/area51.py:230 Sites/area51.py:301
-#: Sites/area51.py:399 Sites/area51.py:496 Sites/area51.py:597
-#: Sites/born2tease.py:83 Sites/born2tease.py:179 Sites/born2tease.py:284
-#: Sites/cumlouder.py:99 Sites/cumlouder.py:241 Sites/cumlouder.py:307
-#: Sites/cumlouder.py:416 Sites/cumlouder.py:476 Sites/cumlouder.py:576
-#: Sites/easyporn.py:84 Sites/easyporn.py:220 Sites/easyporn.py:273
-#: Sites/easyporn.py:336 Sites/easyporn.py:433 Sites/easyporn.py:532
-#: Sites/empflix.py:71 Sites/empflix.py:162 Sites/empflix.py:263
-#: Sites/empflix.py:329 Sites/famefun.py:79 Sites/famefun.py:196
-#: Sites/famefun.py:261 Sites/famefun.py:357 Sites/freearhey.py:67
-#: Sites/fullporner.py:103 Sites/fullporner.py:234 Sites/fullporner.py:332
-#: Sites/fullporner.py:399 Sites/fullporner.py:495 Sites/fullporner.py:592
-#: Sites/fullporner.py:690 Sites/fullporner.py:790 Sites/glavmatures.py:97
-#: Sites/glavmatures.py:220 Sites/glavmatures.py:319 Sites/glavmatures.py:385
-#: Sites/glavmatures.py:482 Sites/heavyr.py:85 Sites/heavyr.py:180
-#: Sites/heavyr.py:244 Sites/hypnotube.py:94 Sites/hypnotube.py:211
-#: Sites/hypnotube.py:277 Sites/hypnotube.py:372 Sites/hypnotube.py:467
-#: Sites/madnessporn.py:96 Sites/madnessporn.py:234 Sites/madnessporn.py:293
-#: Sites/madnessporn.py:395 Sites/manporn.py:100 Sites/manporn.py:226
-#: Sites/manporn.py:290 Sites/manporn.py:387 Sites/manporn.py:485
-#: Sites/milf300.py:95 Sites/milf300.py:228 Sites/milf300.py:289
-#: Sites/milf300.py:397 Sites/milfzr.py:96 Sites/milfzr.py:219
-#: Sites/milfzr.py:327 Sites/milfzr.py:390 Sites/milfzr.py:505
-#: Sites/milfzr.py:572 Sites/mylust.py:68 Sites/mylust.py:188
-#: Sites/mylust.py:288 Sites/paradisehill.py:95 Sites/paradisehill.py:220
-#: Sites/paradisehill.py:320 Sites/paradisehill.py:390
-#: Sites/paradisehill.py:490 Sites/pornbimbo.py:95 Sites/pornbimbo.py:215
-#: Sites/pornbimbo.py:316 Sites/pornbimbo.py:392 Sites/pornheed.py:97
-#: Sites/pornheed.py:216 Sites/pornheed.py:293 Sites/pornheed.py:391
-#: Sites/pornheed.py:461 Sites/pornheed.py:561 Sites/pornheed.py:664
-#: Sites/pornhub.py:103 Sites/pornhub.py:257 Sites/pornhub.py:357
-#: Sites/pornhub.py:633 Sites/pornhub.py:737 Sites/pornhub.py:842
-#: Sites/revolutionx.py:120 Sites/revolutionx.py:239 Sites/revolutionx.py:339
-#: Sites/revolutionx.py:441 Sites/revolutionx.py:542 Sites/specialtube.py:94
-#: Sites/specialtube.py:225 Sites/specialtube.py:275 Sites/specialtube.py:347
-#: Sites/specialtube.py:448 Sites/specialtube.py:544 Sites/specialtube.py:645
-#: Sites/superzooi.py:92 Sites/superzooi.py:208 Sites/superzooi.py:307
-#: Sites/superzooi.py:390 Sites/superzooi.py:486 Sites/truehomemade.py:85
-#: Sites/truehomemade.py:207 Sites/truehomemade.py:282
-#: Sites/truehomemade.py:376 Sites/truehomemade.py:472
-#: Sites/truehomemade.py:572 Sites/vidxporn.py:95 Sites/vidxporn.py:231
-#: Sites/vidxporn.py:297 Sites/vidxporn.py:398 Sites/xnxx.py:97
-#: Sites/xnxx.py:221 Sites/xnxx.py:317 Sites/xnxx.py:391 Sites/xnxx.py:487
-#: Sites/xnxx.py:583 Sites/xvideos18plus.py:95 Sites/xvideos18plus.py:214
-#: Sites/xvideos18plus.py:312 Sites/xvideos18plus.py:387
-#: Sites/xvideos18plus.py:481 Sites/xvideos18plus.py:574 plugin.py:492
-#: plugin.py:1082
 msgid "Back"
 msgstr "Torna"
 
-#: Sites/alphaporno.py:147 Sites/area51.py:145 Sites/cumlouder.py:147
-#: Sites/easyporn.py:132 Sites/famefun.py:107 Sites/fullporner.py:144
-#: Sites/glavmatures.py:138 Sites/hypnotube.py:136 Sites/madnessporn.py:137
-#: Sites/manporn.py:141 Sites/milf300.py:143 Sites/milfzr.py:137
-#: Sites/mylust.py:120 Sites/paradisehill.py:137 Sites/pornbimbo.py:137
-#: Sites/pornheed.py:138 Sites/pornhub.py:151 Sites/revolutionx.py:161
-#: Sites/specialtube.py:135 Sites/superzooi.py:133 Sites/truehomemade.py:139
-#: Sites/vidxporn.py:136 Sites/xnxx.py:138 Sites/xvideos18plus.py:136
 msgid "Filter this category..."
 msgstr ""
 
-#: Sites/alphaporno.py:279 Sites/area51.py:266 Sites/cumlouder.py:280
-#: Sites/cumlouder.py:446 Sites/easyporn.py:306 Sites/empflix.py:299
-#: Sites/fullporner.py:368 Sites/heavyr.py:216 Sites/hypnotube.py:247
-#: Sites/madnessporn.py:263 Sites/manporn.py:262 Sites/milf300.py:259
-#: Sites/pornheed.py:264 Sites/pornheed.py:433 Sites/pornhub.py:872
-#: Sites/specialtube.py:317 Sites/specialtube.py:687 Sites/superzooi.py:360
-#: Sites/truehomemade.py:254 Sites/vidxporn.py:267 Sites/xnxx.py:357
-#: Sites/xvideos18plus.py:359 Sites/xvideos18plus.py:617
 msgid "Please select ..."
 msgstr "Seleziona prego..."
 
-#: Sites/alphaporno.py:283 Sites/area51.py:270 Sites/cumlouder.py:284
-#: Sites/cumlouder.py:450 Sites/easyporn.py:310 Sites/empflix.py:303
-#: Sites/famefun.py:241 Sites/fullporner.py:372 Sites/glavmatures.py:365
-#: Sites/heavyr.py:220 Sites/hypnotube.py:251 Sites/madnessporn.py:267
-#: Sites/manporn.py:266 Sites/milf300.py:263 Sites/milfzr.py:369
-#: Sites/milfzr.py:551 Sites/paradisehill.py:369 Sites/pornbimbo.py:367
-#: Sites/pornheed.py:268 Sites/pornheed.py:437 Sites/pornhub.py:876
-#: Sites/specialtube.py:321 Sites/specialtube.py:691 Sites/superzooi.py:364
-#: Sites/truehomemade.py:258 Sites/vidxporn.py:271 Sites/xnxx.py:361
-#: Sites/xvideos18plus.py:363 Sites/xvideos18plus.py:621
 msgid "Nothing ... Retry"
 msgstr ""
 
@@ -224,25 +149,33 @@ msgstr ""
 msgid "Install Streamlink first"
 msgstr ""
 
-#: plugin.py:1551
+#: plugin.py:1550
+msgid "WELCOME TO\n"
+msgstr "BENVENUTI IN\n"
+
+#: plugin.py:1552
 msgid "ATTENTION PLEASE: \n"
 msgstr "ATTENZIONE PREGO:\n"
 
-#: plugin.py:1552
+#: plugin.py:1553
 msgid "This plugin contains adult content not\n"
 msgstr "Questo plugin contiene contenuti per adulti\n"
 
-#: plugin.py:1553
+#: plugin.py:1554
 msgid "suitable for all readers.\n"
 msgstr "adatto a tutti i lettori.\n"
 
-#: plugin.py:1554
+#: plugin.py:1555
 msgid "If you are over 18 years old and wish to\n"
 msgstr "Se hai più di 18 anni e lo desideri\n"
 
-#: plugin.py:1555
-msgid "use the aforementioned content.\n"
-msgstr "puoi utilizzare i suddetti contenuti.\n"
+#: plugin.py:1556
+msgid ""
+"use the aforementioned content.\n"
+"\n"
+msgstr ""
+"utilizzare i suddetti contenuti.\n"
+"\n"
 
 #: plugin.py:1557
 msgid "For Support visit our social links go to\n"
@@ -276,6 +209,16 @@ msgstr "Grazie con tutto il cuore\n"
 msgid "Just for passion!!!.\n"
 msgstr "Solo per passione!!!.\n"
 
+#: plugin.py:1565
+msgid ""
+"==========   from Lululla     ==========\n"
+"\n"
+msgstr "==========     da Lululla     ==========\n"
+
+#: plugin.py:1566
+msgid "=========     SUPPORT ON:   ============\n"
+msgstr "=========    SUPPORTO SU:   ============\n"
+
 #: plugin.py:1567
 msgid "+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n"
 msgstr "+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n"
@@ -307,46 +250,3 @@ msgstr ""
 #: plugin.py:1578
 msgid "Error Report Issue!"
 msgstr ""
-
-#~ msgid "Cancel"
-#~ msgstr "Annulla"
-
-#~ msgid "About"
-#~ msgstr "Informazioni"
-
-#~ msgid "Information Us"
-#~ msgstr "Informazioni su"
-
-#~ msgid "Config"
-#~ msgstr "Impostazioni"
-
-#~ msgid "Setup Plugin"
-#~ msgstr "Configura Plugin"
-
-#~ msgid "Search"
-#~ msgstr "Cerca"
-
-#~ msgid "DISCLAIMER:\n"
-#~ msgstr "NOTA BENE:\n"
-
-#~ msgid ""
-#~ "The lists created at HOC contain addresses freely and freely found on\n"
-#~ msgstr ""
-#~ "Le liste create ad HOC contengono indirizzi liberamente e "
-#~ "gratuitamente\n"
-
-#~ msgid "the net and not protected by subscription or subscription.\n"
-#~ msgstr "trovati in rete e non protetti da sottoscrizione o abbonamento.\n"
-
-#~ msgid "The structural reference server for projects released\n"
-#~ msgstr "Il server di riferimento strutturale ai progetti rilasciati\n"
-
-#~ msgid "is not a source of any stream/flow.\n"
-#~ msgstr "non e' fonte di alcun stream/flusso.\n"
-
-#~ msgid "Absolutely PROHIBITED to use this lists without authorization\n"
-#~ msgstr ""
-#~ "ssolutamente VIETATO utilizzare queste liste senza autorizzazione.\n"
-
-#~ msgid "Exit"
-#~ msgstr "Uscire"

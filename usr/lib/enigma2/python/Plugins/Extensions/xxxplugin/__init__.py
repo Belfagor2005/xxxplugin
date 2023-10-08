@@ -11,15 +11,15 @@ global skin_path
 PluginLanguageDomain = 'xxxplugin'
 PluginLanguagePath = 'Extensions/xxxplugin/locale'
 THISPLUG = '/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/'
-isDreamOS = False
-if os.path.exists("/var/lib/dpkg/status"):
-    isDreamOS = True
-
 skin_path = THISPLUG + '/res/skins/hd/'
 screenwidth = getDesktop(0).size()
+isDreamOS = False
+
+
+if os.path.exists("/var/lib/dpkg/status"):
+    isDreamOS = True
 if screenwidth.width() == 2560:
     skin_path = THISPLUG + '/res/skins/uhd/'
-
 elif screenwidth.width() == 1920:
     skin_path = THISPLUG + '/res/skins/fhd/'
 else:

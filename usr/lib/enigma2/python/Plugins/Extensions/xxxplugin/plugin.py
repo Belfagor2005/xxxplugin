@@ -1546,14 +1546,14 @@ class startInit(Screen):
         self['text'].pageUp()
 
     def getinfo(self):
-        continfo = ("==========       WELCOME     ============\n")
+        # continfo = []
+        continfo = _("WELCOME TO\n")
         continfo += ("XXXPLUGIN V.%s\n") % Version
         continfo += _("ATTENTION PLEASE: \n")
         continfo += _("This plugin contains adult content not\n")
         continfo += _("suitable for all readers.\n")
         continfo += _("If you are over 18 years old and wish to\n")
-        continfo += _("use the aforementioned content.\n")
-        continfo += ("\n")
+        continfo += _("use the aforementioned content.\n\n")
         continfo += _("For Support visit our social links go to\n")
         continfo += _("tivustream.com or corvoboys.org and ask\n")
         continfo += _("about this plugins.\n")
@@ -1562,8 +1562,8 @@ class startInit(Screen):
         continfo += _("…frame the QR code and donate €1.00\n")
         continfo += _("Thank you with all my heart\n")
         continfo += _("Just for passion!!!.\n")
-        continfo += ("==========   from Lululla     ==========\n\n")
-        continfo += ("=========     SUPPORT ON:   ============\n")
+        continfo += _("==========   from Lululla     ==========\n\n")
+        continfo += _("=========     SUPPORT ON:   ============\n")
         continfo += _("+WWW.TIVUSTREAM.COM - WWW.CORVOBOYS.ORG+\n")
         continfo += _("http://t.me/tivustream\n\n")
         continfo += _("THANK'S TO:\n")

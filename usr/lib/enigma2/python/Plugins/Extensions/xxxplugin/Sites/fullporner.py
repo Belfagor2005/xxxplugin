@@ -471,12 +471,15 @@ class fullpornerX2(Screen):
             print(e)
 
     def ok(self):
-        name = self['menulist'].getCurrent()[0][0]
-        url = self['menulist'].getCurrent()[0][1]
-        self.play_that_shit(url, name)
+        try:
+            name = self['menulist'].getCurrent()[0][0]
+            url = self['menulist'].getCurrent()[0][1]
+            self.play_that_shit(url, name)
+        except Exception as e:
+            print(e)
 
     def play_that_shit(self, url, name):
-        self.session.open(fullporner3, name, url)
+        self.session.open(fullporner3, str(name), str(url))
 
     def exit(self):
         self.close()
@@ -870,6 +873,4 @@ class fullporner5(Screen):
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
-        global search
-        search = False
         self.close()

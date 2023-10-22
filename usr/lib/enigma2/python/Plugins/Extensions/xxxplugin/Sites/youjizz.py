@@ -302,7 +302,7 @@ class youjizz5(Screen):
 
     def ok(self):
         try:
-            name = self['menulist'].getCurrent()[0]
+            name = self['menulist'].getCurrent()[0][0]
             print('name:  ', name)
             url = self['menulist'].getCurrent()[0][1]
             print('url:  ', url)
@@ -846,6 +846,4 @@ class youjizz8(Screen):
         # self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
-        global search
-        search = False
         self.close()

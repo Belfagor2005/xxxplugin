@@ -480,6 +480,4 @@ class milf3004(Screen):
         self.session.open(Playstream1, str(name), str(url))
 
     def exit(self):
-        global search
-        search = False
         self.close()

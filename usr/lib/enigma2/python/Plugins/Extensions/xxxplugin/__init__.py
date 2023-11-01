@@ -19,11 +19,11 @@ isDreamOS = False
 if os.path.exists("/var/lib/dpkg/status"):
     isDreamOS = True
 if screenwidth.width() == 2560:
-    skin_path = THISPLUG + '/res/skins/uhd/'
+    skin_path = THISPLUG + 'res/skins/uhd/'
 elif screenwidth.width() == 1920:
-    skin_path = THISPLUG + '/res/skins/fhd/'
+    skin_path = THISPLUG + 'res/skins/fhd/'
 else:
-    skin_path = THISPLUG + '/res/skins/hd/'
+    skin_path = THISPLUG + 'res/skins/hd/'
 
 
 def localeInit():

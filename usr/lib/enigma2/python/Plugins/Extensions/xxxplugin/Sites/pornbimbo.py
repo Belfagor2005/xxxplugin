@@ -347,13 +347,6 @@ class pornbimbox(Screen):
                 url1 = url + str(p) + "/"
                 name = "Page " + str(p)
                 i += 1
-
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # p = page - 1
-                # url1 = url + str(p) + "/"
-                # name = "pornbimbo-Page " + str(p)
-                # name = name.upper()
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -367,13 +360,11 @@ class pornbimbox(Screen):
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        try:
-            name = self['menulist'].getCurrent()[0][0]
-            url = self['menulist'].getCurrent()[0][1]
-            print('pages url: ', url)
-            self.session.open(pornbimbo2, name, url)
-        except Exception as e:
-            print(e)
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        print('pages url: ', url)
+        self.session.open(pornbimbo2, name, url)
+
     def exit(self):
         global search
         search = False

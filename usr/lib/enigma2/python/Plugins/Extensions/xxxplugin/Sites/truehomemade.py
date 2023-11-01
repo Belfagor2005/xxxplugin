@@ -227,8 +227,8 @@ class truehomemadeplus2(Screen):
         self.timer.start(500, True)
 
     def _gotPageLoad(self):
-        self.names = []
-        self.urls = []
+        self.cat_list = []
+        name = self.name
         url = self.url
         try:
             pages = 100
@@ -237,33 +237,22 @@ class truehomemadeplus2(Screen):
                 url1 = url + "/" + str(i)
                 name = "Page " + str(i)
                 i += 1
-                self.urls.append(url1)
-                self.names.append(name)
-       
-            # pages = []
-            # page = 1
-            # while page < 30:
-                # pages.append(page)
-                # page = page + 1
-            # for page in pages:
-                # p1 = page - 1
-                # url1 = url + "/" + str(p1)
-                # name = "Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
-            self['name'].setText(_('Please select ...'))
-            showlist(self.names, self['menulist'])
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        i = len(self.names)
-        if i < 0:
-            return
-        idx = self["menulist"].getSelectionIndex()
-        name = self.names[idx]
-        url = self.urls[idx]
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        print('pages url: ', url)
         self.session.open(truehomemade2, name, url)
 
     def exit(self):

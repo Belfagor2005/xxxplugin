@@ -259,7 +259,9 @@ class luxuretv5(Screen):
         self.timer.start(500, True)
 
     def _gotPageLoad(self):
-        self.cat_list = []
+        self.names = []
+        self.urls = []
+        url = self.url
         try:
             pages = 100
             i = 1
@@ -269,31 +271,21 @@ class luxuretv5(Screen):
                 url1 = self.url + "page/" + (pp) + '/'
                 name = "Page " + page
                 i += 1
-                print('url page= ', url1)
-                self.cat_list.append(show_(name, url1))
-            if len(self.cat_list) < 0:
-                return
-            else:
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0][0]
-                self['name'].setText(str(auswahl))
+                self.urls.append(url1)
+                self.names.append(name)
+            self['name'].setText(_('Please select ...'))
+            showlist(self.names, self['menulist'])
         except Exception as e:
             print(e)
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        try:
-            name = self['menulist'].getCurrent()[0][0]
-            print('name:  ', name)
-            url = self['menulist'].getCurrent()[0][1]
-            print('url:  ', url)
-            self.play_that_shit(url, name)
-        except Exception as e:
-            print(e)
-
-    def play_that_shit(self, url, name):
-        print('url ok: ', url)
+        i = len(self.names)
+        if i < 0:
+            return
+        idx = self["menulist"].getSelectionIndex()
+        name = self.names[idx]
+        url = self.urls[idx]
         self.session.open(luxuretv3, name, url)
 
     def exit(self):
@@ -365,8 +357,7 @@ class luxuretv3(Screen):
             content = Utils.getUrl2(self.url, 'https://www.luxuretv.com/')
             if six.PY3:
                 content = six.ensure_str(content)
-                
-            # n1 = content.find('class="searches-list">', 0)         
+            # n1 = content.find('class="searches-list">', 0)
             # n2 = content.find('</header>', (n1))
             # content2 = content[n1:n2]
             # <a class='clouds_xsmall' href='http://zadrochi.net/225-v.html'><strong>sekis</strong></a>
@@ -375,10 +366,8 @@ class luxuretv3(Screen):
             for url, name in match:
                 name = name
                 url = 'https://pc.seks-film.vip' + url
-                
                 print('url 3: ', url)
                 self.cat_list.append(show_(name, url))
-
             if len(self.cat_list) < 0:
                 return
             else:

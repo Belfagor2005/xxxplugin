@@ -237,8 +237,8 @@ class pornheed(Screen):
         self.timer.start(500, True)
 
     def _gotPageLoad(self):
-        self.names = []
-        self.urls = []
+        self.cat_list = []
+        name = self.name
         url = self.url
         try:
             pages = 100
@@ -250,31 +250,22 @@ class pornheed(Screen):
                     url1 = url + "/" + str(i) + "/"
                 name = "Page " + str(i)
                 i += 1
-                self.urls.append(url1)
-                self.names.append(name)
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # if page == 1:
-                    # url1 = url
-                # else:
-                    # url1 = url + "/" + str(page) + "/"
-                # name = "pornheed-Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
-            self['name'].setText(_('Please select ...'))
-            showlist(self.names, self['menulist'])
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        i = len(self.names)
-        if i < 0:
-            return
-        idx = self["menulist"].getSelectionIndex()
-        name = self.names[idx]
-        url = self.urls[idx]
-        print('pornheed url: ', url)
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        print('pages url: ', url)
         self.session.open(pornheed1, name, url)
 
     def exit(self):
@@ -412,8 +403,8 @@ class pornheed22(Screen):
         self.timer.start(500, True)
 
     def _gotPageLoad(self):
-        self.names = []
-        self.urls = []
+        self.cat_list = []
+        name = self.name
         url = self.url
         try:
             pages = 100
@@ -422,28 +413,22 @@ class pornheed22(Screen):
                 url1 = url + "/" + str(i)
                 name = "Page " + str(i)
                 i += 1
-                self.urls.append(url1)
-                self.names.append(name)
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # url1 = url + "/" + str(page)
-                # name = "pornheed22-Page " + str(page)
-                # self.urls.append(url1)
-                # self.names.append(name)
-            self['name'].setText(_('Please select ...'))
-            showlist(self.names, self['menulist'])
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        i = len(self.names)
-        if i < 0:
-            return
-        idx = self["menulist"].getSelectionIndex()
-        name = self.names[idx]
-        url = self.urls[idx]
-        print('pornheed22 url: ', url)
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        print('pages url: ', url)
         self.session.open(pornheed2, name, url)
 
     def exit(self):

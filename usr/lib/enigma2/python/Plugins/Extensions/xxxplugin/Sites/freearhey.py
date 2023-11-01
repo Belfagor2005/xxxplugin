@@ -144,7 +144,6 @@ class main(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
-        print('pages url: ', url)
         self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):

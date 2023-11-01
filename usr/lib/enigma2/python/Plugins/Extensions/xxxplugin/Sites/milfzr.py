@@ -349,6 +349,7 @@ class milfzrx(Screen):
     def _gotPageLoad(self):
         self.cat_list = []
         name = self.name
+        url = self.url
         try:
             pages = 100
             i = 1
@@ -527,6 +528,7 @@ class milfzrx2(Screen):
     def _gotPageLoad(self):
         self.cat_list = []
         name = self.name
+        url = self.url
         try:
             pages = 100
             i = 1
@@ -534,10 +536,6 @@ class milfzrx2(Screen):
                 url1 = self.url.replace('npage', str(i))
                 name = "Page " + str(i)
                 i += 1
-            # pages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            # for page in pages:
-                # url1 = self.url.replace('npage', str(page))
-                # name = "milfzr-Page " + str(page)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return

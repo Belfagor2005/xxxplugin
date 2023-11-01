@@ -351,11 +351,6 @@ class paradisehillx(Screen):
                 url1 = url + "&page=" + str(p)
                 name = "Page " + str(p)
                 i += 1
-            # pages = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
-            # for page in pages:
-                # p = page - 1
-                # url1 = url + "&page=" + str(p)
-                # name = "paradisehill-Page " + str(p)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return

@@ -288,7 +288,7 @@ class bemyhole(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            n1 = content.find('ul class="tags-list">', 0)         
+            n1 = content.find('ul class="tags-list">', 0)
             n2 = content.find('div class="footer-margin"', (n1 + 10))
             content2 = content[n1:n2]
             regexcat = 'a href="(.*?)">(.*?)<'
@@ -356,8 +356,9 @@ class bemyhole2(Screen):
         self.timer.start(500, True)
 
     def _gotPageLoad(self):
-        self.names = []
-        self.urls = []
+        self.cat_list = []
+        name = self.name
+        url = self.url
         try:
             pages = 100
             i = 1
@@ -366,21 +367,22 @@ class bemyhole2(Screen):
                 url1 = self.url + page
                 name = "Page " + page
                 i += 1
-                self.names.append(name)
-                self.urls.append(url1)
-            self['name'].setText(_('Please select ...'))
-            showlist(self.names, self['menulist'])
+                self.cat_list.append(show_(name, url1))
+            if len(self.cat_list) < 0:
+                return
+            else:
+                self['menulist'].l.setList(self.cat_list)
+                self['menulist'].moveToIndex(0)
+                auswahl = self['menulist'].getCurrent()[0][0]
+                self['name'].setText(str(auswahl))
         except Exception as e:
             print(e)
             self['name'].setText(_('Nothing ... Retry'))
 
     def ok(self):
-        i = len(self.names)
-        if i < 0:
-            return
-        idx = self["menulist"].getSelectionIndex()
-        name = self.names[idx]
-        url = self.urls[idx]
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        print('pages url: ', url)
         self.session.open(bemyhole3, name, url)
 
     def exit(self):
@@ -454,7 +456,7 @@ class bemyhole3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            regexcat = 'a class="ite.*?drclass".*?href="(.*?)".*?src="(.*?)".*?video-title">(.*?)<'            
+            regexcat = 'a class="ite.*?drclass".*?href="(.*?)".*?src="(.*?)".*?video-title">(.*?)<'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, pic, name in match:
                 name = name
@@ -553,15 +555,11 @@ class bemyhole4(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # <iframe width="' + width + '" height="' + height + '" src="https://www.bemyhole.com/embed/115589" frameborder="0" allowfullscreen></iframe>';
             regexcat = '<iframe width=".*?src="(.*?)".*?</iframe>'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             url = match[0]
             url = url.replace("&amp;", "&")
             name = self.name
-            # print('url b4= ', url)
-            # for url, name in match:
-                # name = self.name
             self.cat_list.append(show_(name, url))
 
             if len(self.cat_list) < 0:

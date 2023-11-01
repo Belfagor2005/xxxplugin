@@ -41,7 +41,7 @@ from Components.Sources.StaticText import StaticText
 from Components.config import ConfigDirectory, ConfigYesNo
 from Components.config import ConfigSelection, getConfigListEntry
 from Components.config import config, ConfigSubsection
-from Components.config import configfile, ConfigEnableDisable
+from Components.config import configfile
 from PIL import Image, ImageFile, ImageChops
 from Plugins.Plugin import PluginDescriptor
 from Screens.InfoBarGenerics import InfoBarSeek, InfoBarAudioSelection
@@ -540,7 +540,7 @@ class ConfigEx(ConfigListScreen, Screen):
         for x in self.onChangedEntry:
             x()
         try:
-            if isinstance(self['config'].getCurrent()[1], ConfigEnableDisable) or isinstance(self['config'].getCurrent()[1], ConfigYesNo) or isinstance(self['config'].getCurrent()[1], ConfigSelection):
+            if isinstance(self['config'].getCurrent()[1], ConfigYesNo) or isinstance(self['config'].getCurrent()[1], ConfigSelection):
                 self.createSetup()
         except:
             pass
@@ -1534,7 +1534,6 @@ class startInit(Screen):
         self['text'].pageUp()
 
     def getinfo(self):
-        # continfo = []
         continfo = _("WELCOME TO XXXPLUGIN V.%s\n\n") % Version
         continfo += _("ATTENTION PLEASE: \n")
         continfo += _("This plugin contains adult content not\n")

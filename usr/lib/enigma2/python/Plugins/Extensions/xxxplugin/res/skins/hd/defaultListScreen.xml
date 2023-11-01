@@ -1,11 +1,11 @@
 <screen name="xxx" position="0,0" size="1280,720" backgroundColor="#ff000000" flags="wfNoBorder">
-  <widget name="title" position="16,6" size="1016,43" zPosition="5" halign="center" valign="top" foregroundColor="#7bd7f7" backgroundColor="#000000" font="Regular; 28" transparent="1" />
-  <widget name="name" position="16,103" size="807,40" noWrap="1" zPosition="1" transparent="1" font="Regular; 22" valign="center" halign="left" backgroundColor="#30000000" foregroundColor="#ff8b45" />
-  <widget name="menulist" position="19,165" size="638,460" backgroundColor="#30000000" zPosition="1" scrollbarMode="showOnDemand" transparent="1" foregroundColor="#00ffffff" />
-  <widget name="text" position="681,465" size="589,182" zPosition="1" backgroundColor="#30000000" transparent="1" font="Regular; 22" halign="center" foregroundColor="#f4b700" />
+  <widget name="title" position="15,5" size="1050,43" zPosition="5" halign="center" valign="top" foregroundColor="#7bd7f7" backgroundColor="#000000" font="Regular; 28" transparent="1" />
+  <widget name="name" position="15,103" size="850,50" noWrap="1" zPosition="1" transparent="1" font="Regular; 22" valign="center" halign="left" backgroundColor="#30000000" foregroundColor="#ff8b45" />
+  <widget name="menulist" position="19,165" size="660,460" backgroundColor="#30000000" zPosition="1" scrollbarMode="showOnDemand" transparent="1" foregroundColor="#00ffffff" />
+  <widget name="text" position="686,465" size="589,182" zPosition="1" backgroundColor="#30000000" transparent="1" font="Regular; 22" halign="center" foregroundColor="#f4b700" />
   <widget name="poster" position="889,45" size="214,294" zPosition="4" backgroundColor="#30000000" transparent="1" alphatest="blend" />
   <ePixmap pixmap="/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/res/pics/backg2.png" position="889,45" size="214,294" alphatest="on" zPosition="2" scale="1" />
-  <widget source="Title" backgroundColor="#30000000" font="Regular; 34" foregroundColor="#00ffffff" position="17,54" render="Label" size="708,46" transparent="1" halign="center" valign="center" noWrap="1" />
+  <widget source="Title" backgroundColor="#30000000" font="Regular; 34" foregroundColor="#00ffffff" position="15,52" render="Label" size="850,46" transparent="1" halign="center" valign="center" noWrap="1" />
   <ePixmap pixmap="skin_default/buttons/red.png" position="34,675" size="20,20" alphatest="blend" zPosition="1" />
   <widget name="red" font="Regular; 20" halign="left" valign="center" position="61,660" size="188,48" backgroundColor="#30000000" foregroundColor="#00ffffff" transparent="1" zPosition="1" />
   <widget source="global.CurrentTime" render="Label" position="1117,2" size="133,37" font="Regular; 32" halign="right" backgroundColor="#30000000" transparent="1" valign="center" foregroundColor="#00ffffff">

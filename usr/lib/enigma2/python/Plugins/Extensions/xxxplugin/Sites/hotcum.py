@@ -7,8 +7,7 @@
 *             skin by MMark            *
 *             26/03/2023               *
 *       Skin by MMark                  *
-****************************************
-# --------------------#
+*********  tank's pcd for this *********
 # Info http://t.me/tivustream
 '''
 from __future__ import print_function
@@ -19,16 +18,14 @@ from Screens.Screen import Screen
 from Tools.Directories import SCOPE_PLUGINS
 from Tools.Directories import resolveFilename
 from enigma import eTimer
-# from enigma import eServiceReference
 import codecs
 import os
 import re
 import six
 import ssl
 import sys
-import unicodedata
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
-from Plugins.Extensions.xxxplugin.plugin import Playstream2
+# import unicodedata
+from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1, Playstream2
 from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
 from Plugins.Extensions.xxxplugin.plugin import show_
 from Plugins.Extensions.xxxplugin.lib import Utils
@@ -45,16 +42,16 @@ if sys.version_info >= (2, 7, 9):
         sslContext = None
 
 currversion = '1.0'
-title_plug = 'Ztube '
-desc_plugin = ('..:: Ztube by Lululla %s ::.. ' % currversion)
+title_plug = 'Hotcum'
+desc_plugin = ('..:: Hotcum by Lululla %s ::.. ' % currversion)
 PLUGIN_PATH = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('xxxplugin'))
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 print(current)
 print(parent)
-pluglogo = os.path.join(PLUGIN_PATH, 'pic/ztube.png')
-stripurl = 'aHR0cHM6Ly96dHViZS5vcmcv'
+pluglogo = os.path.join(PLUGIN_PATH, 'pic/hotcum.png')
+stripurl = 'aHR0cHM6Ly93d3cuaG90Y3VtcG9ybi5jb20v'
 _session = None
 Path_Movies = '/tmp/'
 global search
@@ -68,21 +65,22 @@ else:
     str = str
 
 
-def normalize(title):
-    try:
-        try:
-            return title.decode('ascii').encode("utf-8")
-        except:
-            pass
+# def normalize(title):
+    # try:
+        # try:
+            # return title.decode('ascii').encode("utf-8")
+        # except:
+            # pass
 
-        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
-    except:
-        return html_conv.html_unescape(title)
+        # return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+    # except:
+        # return html_conv.html_unescape(title)
 
 
 Panel_list = [
-    ('ztube Category'),
-    ('SEARCH'),
+    ('Popular'),
+    ('Top-Rated'),
+    ('Latest'),
     ]
 
 
@@ -151,10 +149,16 @@ class main(Screen):
         if result:
             global search
             name = str(result)
-            url = self.urlx + 'page/' + 'PAGES' + '/?s=' + name
+            # pcd fix
+            result = str(result).replace(" ", "+")
+            # url = self.urlx + str(result) + '/'
+            url = self.urlx + result + '/'
+            #
             try:
                 search = True
-                self.session.open(ztubepage, name, url)
+#                print("wapbold.py going in getVideos name = ", name)
+#                print("wapbold.py going in getVideos url = ", url)
+                self.session.open(getVideos, name, url)
             except:
                 return
         else:
@@ -171,14 +175,19 @@ class main(Screen):
         global namex, lnk
         namex = ''
         sel = self.menu_list[idx]
-        if sel == 'SEARCH':
-            namex = sel.upper()
-            lnk = 'https://ztube.org/'
-            self.search_text(namex, lnk)
-        elif sel == ("ztube Category"):
-            namex = "category"
-            lnk = 'https://ztube.org/'
-            self.session.open(ztube, namex, lnk)
+        if sel == ("Popular"):
+            namex = "Popular"
+            lnk = 'https://www.hotcumporn.com/most-popular/'
+            self.session.open(getPage, namex, lnk)
+        if sel == ("Top-Rated"):
+            namex = "Top-Rated"
+            lnk = 'https://www.hotcumporn.com/top-rated/'
+            self.session.open(getPage, namex, lnk)
+        if sel == ("Latest"):
+            namex = "Latest"
+            lnk = 'https://www.hotcumporn.com/latest-updates/'
+            self.session.open(getPage, namex, lnk)
+
         else:
             return
 
@@ -211,7 +220,7 @@ class main(Screen):
             self.close()
 
 
-class ztubepage(Screen):
+class getPage(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -246,16 +255,16 @@ class ztubepage(Screen):
     def _gotPageLoad(self):
         self.cat_list = []
         name = self.name
-        url = self.url
+        # url = self.url
         try:
-            pages = 100
+            pages = 60
             i = 1
             while i < pages:
                 page = str(i)
-                if 'PAGES' in self.url:
-                    url1 = self.url.replace('PAGES', page)
-                else:
-                    url1 = self.url + 'page/' + page
+                # url1 = url + str(page) + "/"
+                # print("getPage self.name =", self.name)
+                url1 = self.url + str(page) + "/"
+                #
                 name = "Page " + page
                 i += 1
                 self.cat_list.append(show_(name, url1))
@@ -273,7 +282,7 @@ class ztubepage(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
-        self.session.open(ztube2, name, url)
+        self.session.open(getVideos, name, url)
 
     def exit(self):
         global search
@@ -281,7 +290,7 @@ class ztubepage(Screen):
         self.close()
 
 
-class ztube(Screen):
+class getVideos(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -347,111 +356,11 @@ class ztube(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-
-            regexcat = 'href="https\:\/\/ztube\.org\/videos\/(.*?)">(.*?)<'
+            regexcat = '<div class="content_preview">.*?href="(.*?)" title="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
-                name = normalize(name)
-                name = Utils.decodeHtml(name)
-                url = "https://ztube.org/videos/" + str(url)
-                self.cat_list.append(show_(name, url))
-
-            if len(self.cat_list) < 0:
-                return
-            else:
-                self['menulist'].l.setList(self.cat_list)
-                self['menulist'].moveToIndex(0)
-                auswahl = self['menulist'].getCurrent()[0][0]
-                self['name'].setText(str(auswahl))
-        except Exception as e:
-            print(e)
-
-    def ok(self):
-        try:
-            name = self['menulist'].getCurrent()[0][0]
-            url = self['menulist'].getCurrent()[0][1]
-            self.play_that_shit(url, name)
-        except Exception as e:
-            print(e)
-
-    def play_that_shit(self, url, name):
-        self.session.open(ztubepage, str(name), str(url))
-
-    def exit(self):
-        self.close()
-
-
-class ztube2(Screen):
-    def __init__(self, session, name, url):
-        self.session = session
-        Screen.__init__(self, session)
-        skin = os.path.join(skin_path, 'defaultListScreen.xml')
-        with codecs.open(skin, "r", encoding="utf-8") as f:
-            self.skin = f.read()
-        self.menulist = []
-        self['menulist'] = rvList([])
-        self['red'] = Label(_('Back'))
-        # self['green'] = Label(_('Export'))
-        self['title'] = Label('')
-        self['title'].setText(title_plug)
-        self['name'] = Label('')
-        self['text'] = Label('Only for Adult by Lululla')
-        self['poster'] = Pixmap()
-        self.name = name
-        self.url = url
-        self.currentList = 'menulist'
-        self.loading_ok = False
-        self.count = 0
-        self.loading = 0
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions',
-                                     'DirectionActions',
-                                     'MovieSelectionActions'], {'up': self.up,
-                                                                'down': self.down,
-                                                                'left': self.left,
-                                                                'right': self.right,
-                                                                'ok': self.ok,
-                                                                'green': self.ok,
-                                                                'cancel': self.exit,
-                                                                'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.cat)
-        else:
-            self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
-
-    def up(self):
-        self[self.currentList].up()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def down(self):
-        self[self.currentList].down()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def left(self):
-        self[self.currentList].pageUp()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def right(self):
-        self[self.currentList].pageDown()
-        auswahl = self['menulist'].getCurrent()[0][0]
-        self['name'].setText(str(auswahl))
-
-    def cat(self):
-        self.cat_list = []
-        try:
-            content = Utils.getUrl(self.url)
-            if six.PY3:
-                content = six.ensure_str(content)
-            regexcat = 'div class="video-holder.*?a title="(.*?)" href="(.*?)".*?src="(.*?)"'
-            match = re.compile(regexcat, re.DOTALL).findall(content)
-            for name, url, pic in match:
-                name = normalize(name)
-                name = Utils.decodeHtml(name)
+                # name = name
+                name = html_conv.html_unescap(name)
                 url = url
                 self.cat_list.append(show_(name, url))
 
@@ -469,21 +378,26 @@ class ztube2(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
-            self.play_that_shit(url, name)
+            self.playVideo(url, name)
         except Exception as e:
             print(e)
 
-    def play_that_shit(self, url, name):
-        self.session.open(ztube3, str(name), str(url))
+    def playVideo(self, url, name):
+        content = Utils.getUrl(url)
+        regexvideo = "video_url: '(.*?)'"
+        match = re.compile(regexvideo, re.DOTALL).findall(content)
+        url1 = match[0]
+        self.play(url1)
+
+    def play(self, url):
+        name = self.name
+        self.session.open(Playstream2, name, url)
 
     def exit(self):
-        global search
-        search = False
         self.close()
 
 
-class ztube3(Screen):
+class getCats(Screen):
     def __init__(self, session, name, url):
         self.session = session
         Screen.__init__(self, session)
@@ -549,17 +463,16 @@ class ztube3(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-
-            regexcat = '<source src="(.*?)"'
+            regexcat = '<div class="list_content">.*?href="(.*?)".*?img src="(.*?)".*?alt="(.*?)"'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-
-            url = match[0]
-            url = url.replace("&amp;", "&")
-            name = self.name
-            # for url, name in match:
-                # name = name
-                # url = "https://www.hd-easyporn.com" + url
-            self.cat_list.append(show_(name, url))
+            for url, pic, name in match:
+                if "picture" in name.lower():
+                    continue
+                else:
+                    # name = name
+                    name = html_conv.html_unescap(name)
+                    url = url
+                    self.cat_list.append(show_(name, url))
 
             if len(self.cat_list) < 0:
                 return
@@ -572,37 +485,12 @@ class ztube3(Screen):
             print(e)
 
     def ok(self):
-#        try:
+        try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
-            self.play_that_shit(url, name)
-#        except Exception as e:
-#            print(e)
-# ########################## pcd fix ##########################################
-
-    def play_that_shit(self, url, name):
-#        self.session.open(Playstream1, str(name), str(url))
-        print("Here in playVideo url 1=", url)
-        from Plugins.Extensions.xxxplugin import youtube_dl
-        print("Here in playVideo url 2=", url)
-#        url = "https://www.youtube.com/watch?v=" + url
-        from youtube_dl import YoutubeDL
-        print("Here in getVideos url 2", url)
-        ydl_opts = {'format': 'best'}
-        ydl = YoutubeDL(ydl_opts)
-        ydl.add_default_info_extractors()
-       # url = "https://www.youtube.com/watch?v=CSYCEyMQWQA"
-        result = ydl.extract_info(url, download=False)
-        print("result =", result)
-        url = result["url"]
-        print("Here in Test url =", url)
-        self.play(url)
-
-    def play(self, url):
-        name = self.name
-        self.session.open(Playstream2, name, url)
-# ########################## fix end ###############################
+            self.session.open(getPage, name, url)
+        except Exception as e:
+            print(e)
 
     def exit(self):
         self.close()

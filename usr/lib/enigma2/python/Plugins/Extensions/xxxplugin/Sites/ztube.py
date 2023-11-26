@@ -252,10 +252,10 @@ class ztubepage(Screen):
             i = 1
             while i < pages:
                 page = str(i)
-                if 'PAGES' in self.url:
-                    url1 = self.url.replace('PAGES', page)
+                if 'PAGES' in url:
+                    url1 = url.replace('PAGES', page)
                 else:
-                    url1 = self.url + 'page/' + page
+                    url1 = url + 'page/' + page
                 name = "Page " + page
                 i += 1
                 self.cat_list.append(show_(name, url1))
@@ -572,27 +572,27 @@ class ztube3(Screen):
             print(e)
 
     def ok(self):
-#        try:
-            name = self['menulist'].getCurrent()[0][0]
-            url = self['menulist'].getCurrent()[0][1]
-            print("url1 B =", url)
-            self.play_that_shit(url, name)
-#        except Exception as e:
-#            print(e)
-# ########################## pcd fix ##########################################
+        # try:
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        print("url1 B =", url)
+        self.play_that_shit(url, name)
+        # except Exception as e:
+        # print(e)
+        # pcd fix
 
     def play_that_shit(self, url, name):
-#        self.session.open(Playstream1, str(name), str(url))
+        # self.session.open(Playstream1, str(name), str(url))
         print("Here in playVideo url 1=", url)
         from Plugins.Extensions.xxxplugin import youtube_dl
         print("Here in playVideo url 2=", url)
-#        url = "https://www.youtube.com/watch?v=" + url
+        # url = "https://www.youtube.com/watch?v=" + url
         from youtube_dl import YoutubeDL
         print("Here in getVideos url 2", url)
         ydl_opts = {'format': 'best'}
         ydl = YoutubeDL(ydl_opts)
         ydl.add_default_info_extractors()
-       # url = "https://www.youtube.com/watch?v=CSYCEyMQWQA"
+        # url = "https://www.youtube.com/watch?v=CSYCEyMQWQA"
         result = ydl.extract_info(url, download=False)
         print("result =", result)
         url = result["url"]
@@ -602,7 +602,7 @@ class ztube3(Screen):
     def play(self, url):
         name = self.name
         self.session.open(Playstream2, name, url)
-# ########################## fix end ###############################
+        # fix end
 
     def exit(self):
         self.close()

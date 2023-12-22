@@ -1,6 +1,11 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
-from ..compat import compat_str
-from ..networking.exceptions import HTTPError
+from ..compat import (
+    compat_str,
+    compat_HTTPError,
+)
 from ..utils import (
     qualities,
     strip_or_none,
@@ -38,8 +43,8 @@ class FilmOnIE(InfoExtractor):
                 'https://www.filmon.com/api/vod/movie?id=%s' % video_id,
                 video_id)['response']
         except ExtractorError as e:
-            if isinstance(e.cause, HTTPError):
-                errmsg = self._parse_json(e.cause.response.read().decode(), video_id)['reason']
+            if isinstance(e.cause, compat_HTTPError):
+                errmsg = self._parse_json(e.cause.read().decode(), video_id)['reason']
                 raise ExtractorError('%s said: %s' % (self.IE_NAME, errmsg), expected=True)
             raise
 
@@ -63,6 +68,7 @@ class FilmOnIE(InfoExtractor):
                 'quality': QUALITY(stream.get('quality')),
                 'protocol': 'm3u8_native',
             })
+        self._sort_formats(formats)
 
         thumbnails = []
         poster = response.get('poster', {})
@@ -122,8 +128,8 @@ class FilmOnChannelIE(InfoExtractor):
             channel_data = self._download_json(
                 'http://www.filmon.com/api-v2/channel/' + channel_id, channel_id)['data']
         except ExtractorError as e:
-            if isinstance(e.cause, HTTPError):
-                errmsg = self._parse_json(e.cause.response.read().decode(), channel_id)['message']
+            if isinstance(e.cause, compat_HTTPError):
+                errmsg = self._parse_json(e.cause.read().decode(), channel_id)['message']
                 raise ExtractorError('%s said: %s' % (self.IE_NAME, errmsg), expected=True)
             raise
 
@@ -150,6 +156,7 @@ class FilmOnChannelIE(InfoExtractor):
                 'ext': 'mp4',
                 'quality': QUALITY(quality),
             })
+        self._sort_formats(formats)
 
         thumbnails = []
         for name, width, height in self._THUMBNAIL_RES:
@@ -163,7 +170,7 @@ class FilmOnChannelIE(InfoExtractor):
         return {
             'id': channel_id,
             'display_id': channel_data.get('alias'),
-            'title': title,
+            'title': self._live_title(title) if is_live else title,
             'description': channel_data.get('description'),
             'thumbnails': thumbnails,
             'formats': formats,

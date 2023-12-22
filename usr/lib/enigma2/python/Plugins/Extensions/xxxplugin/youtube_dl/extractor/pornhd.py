@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     determine_ext,
@@ -43,7 +47,7 @@ class PornHdIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id')
 
@@ -84,6 +88,7 @@ class PornHdIE(InfoExtractor):
             })
         if formats:
             info['formats'] = formats
+        self._sort_formats(info['formats'])
 
         description = self._html_search_regex(
             (r'(?s)<section[^>]+class=["\']video-description[^>]+>(?P<value>.+?)</section>',

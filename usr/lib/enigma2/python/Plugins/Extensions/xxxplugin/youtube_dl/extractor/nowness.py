@@ -1,11 +1,16 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .brightcove import (
     BrightcoveLegacyIE,
     BrightcoveNewIE,
 )
 from .common import InfoExtractor
 from ..compat import compat_str
-from ..networking import Request
-from ..utils import ExtractorError
+from ..utils import (
+    ExtractorError,
+    sanitized_Request,
+)
 
 
 class NownessBaseIE(InfoExtractor):
@@ -32,13 +37,13 @@ class NownessBaseIE(InfoExtractor):
                     elif source == 'youtube':
                         return self.url_result(video_id, 'Youtube')
                     elif source == 'cinematique':
-                        # yt-dlp currently doesn't support cinematique
+                        # youtube-dl currently doesn't support cinematique
                         # return self.url_result('http://cinematique.com/embed/%s' % video_id, 'Cinematique')
                         pass
 
     def _api_request(self, url, request_path):
         display_id = self._match_id(url)
-        request = Request(
+        request = sanitized_Request(
             'http://api.nowness.com/api/' + request_path % display_id,
             headers={
                 'X-Nowness-Language': 'zh-cn' if 'cn.nowness.com' in url else 'en-us',

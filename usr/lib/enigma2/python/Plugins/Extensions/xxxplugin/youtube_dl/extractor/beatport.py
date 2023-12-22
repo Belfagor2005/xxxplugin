@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -37,7 +40,7 @@ class BeatportIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         track_id = mobj.group('id')
         display_id = mobj.group('display_id')
 
@@ -66,14 +69,17 @@ class BeatportIE(InfoExtractor):
                 'vcodec': 'none',
             }
             if ext == 'mp3':
+                fmt['preference'] = 0
                 fmt['acodec'] = 'mp3'
                 fmt['abr'] = 96
                 fmt['asr'] = 44100
             elif ext == 'mp4':
+                fmt['preference'] = 1
                 fmt['acodec'] = 'aac'
                 fmt['abr'] = 96
                 fmt['asr'] = 44100
             formats.append(fmt)
+        self._sort_formats(formats)
 
         images = []
         for name, info in track['images'].items():

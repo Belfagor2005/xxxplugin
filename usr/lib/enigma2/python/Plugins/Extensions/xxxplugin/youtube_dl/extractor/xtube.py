@@ -1,13 +1,15 @@
+from __future__ import unicode_literals
+
 import itertools
 import re
 
 from .common import InfoExtractor
-from ..networking import Request
 from ..utils import (
     int_or_none,
     js_to_json,
     orderedSet,
     parse_duration,
+    sanitized_Request,
     str_to_int,
     url_or_none,
 )
@@ -38,6 +40,22 @@ class XTubeIE(InfoExtractor):
             'age_limit': 18,
         }
     }, {
+        # FLV videos with duplicated formats
+        'url': 'http://www.xtube.com/video-watch/A-Super-Run-Part-1-YT-9299752',
+        'md5': 'a406963eb349dd43692ec54631efd88b',
+        'info_dict': {
+            'id': '9299752',
+            'display_id': 'A-Super-Run-Part-1-YT',
+            'ext': 'flv',
+            'title': 'A Super Run - Part 1 (YT)',
+            'description': 'md5:4cc3af1aa1b0413289babc88f0d4f616',
+            'uploader': 'tshirtguy59',
+            'duration': 579,
+            'view_count': int,
+            'comment_count': int,
+            'age_limit': 18,
+        },
+    }, {
         # new URL schema
         'url': 'http://www.xtube.com/video-watch/strange-erotica-625837',
         'only_matching': True,
@@ -53,7 +71,7 @@ class XTubeIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id')
 
@@ -129,6 +147,7 @@ class XTubeIE(InfoExtractor):
                     })
 
         self._remove_duplicate_formats(formats)
+        self._sort_formats(formats)
 
         if not title:
             title = self._search_regex(
@@ -186,7 +205,7 @@ class XTubeUserIE(InfoExtractor):
 
         entries = []
         for pagenum in itertools.count(1):
-            request = Request(
+            request = sanitized_Request(
                 'http://www.xtube.com/profile/%s/videos/%d' % (user_id, pagenum),
                 headers={
                     'Cookie': 'popunder=4',

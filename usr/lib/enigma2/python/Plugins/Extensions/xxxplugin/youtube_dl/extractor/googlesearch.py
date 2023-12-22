@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import itertools
 import re
 
@@ -6,33 +8,52 @@ from .common import SearchInfoExtractor
 
 class GoogleSearchIE(SearchInfoExtractor):
     IE_DESC = 'Google Video search'
+    _MAX_RESULTS = 1000
     IE_NAME = 'video.google:search'
     _SEARCH_KEY = 'gvsearch'
-    _TESTS = [{
+    _TEST = {
         'url': 'gvsearch15:python language',
         'info_dict': {
             'id': 'python language',
             'title': 'python language',
         },
         'playlist_count': 15,
-    }]
-    _PAGE_SIZE = 100
+    }
 
-    def _search_results(self, query):
+    def _get_n_results(self, query, n):
+        """Get a specified number of results for a query"""
+
+        entries = []
+        res = {
+            '_type': 'playlist',
+            'id': query,
+            'title': query,
+        }
+
         for pagenum in itertools.count():
             webpage = self._download_webpage(
-                'http://www.google.com/search', f'gvsearch:{query}',
-                note=f'Downloading result page {pagenum + 1}',
+                'http://www.google.com/search',
+                'gvsearch:' + query,
+                note='Downloading result page %s' % (pagenum + 1),
                 query={
                     'tbm': 'vid',
                     'q': query,
-                    'start': pagenum * self._PAGE_SIZE,
-                    'num': self._PAGE_SIZE,
+                    'start': pagenum * 10,
                     'hl': 'en',
                 })
 
-            for url in re.findall(r'<div[^>]* class="dXiKIc"[^>]*><a href="([^"]+)"', webpage):
-                yield self.url_result(url)
+            for hit_idx, mobj in enumerate(re.finditer(
+                    r'<h3 class="r"><a href="([^"]+)"', webpage)):
 
-            if not re.search(r'id="pnnext"', webpage):
-                return
+                # Skip playlists
+                if not re.search(r'id="vidthumb%d"' % (hit_idx + 1), webpage):
+                    continue
+
+                entries.append({
+                    '_type': 'url',
+                    'url': mobj.group(1)
+                })
+
+            if (len(entries) >= n) or not re.search(r'id="pnnext"', webpage):
+                res['entries'] = entries[:n]
+                return res

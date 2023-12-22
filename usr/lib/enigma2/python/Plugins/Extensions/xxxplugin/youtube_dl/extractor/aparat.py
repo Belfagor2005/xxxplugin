@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     get_element_by_id,
@@ -10,7 +13,6 @@ from ..utils import (
 
 class AparatIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?aparat\.com/(?:v/|video/video/embed/videohash/)(?P<id>[a-zA-Z0-9]+)'
-    _EMBED_REGEX = [r'<iframe .*?src="(?P<url>http://www\.aparat\.com/video/[^"]+)"']
 
     _TESTS = [{
         'url': 'http://www.aparat.com/v/wP8On',
@@ -31,22 +33,19 @@ class AparatIE(InfoExtractor):
         'only_matching': True,
     }]
 
-    def _parse_options(self, webpage, video_id, fatal=True):
-        return self._parse_json(self._search_regex(
-            r'options\s*=\s*({.+?})\s*;', webpage, 'options', default='{}'), video_id)
-
     def _real_extract(self, url):
         video_id = self._match_id(url)
 
-        # If available, provides more metadata
+        # Provides more metadata
         webpage = self._download_webpage(url, video_id, fatal=False)
-        options = self._parse_options(webpage, video_id, fatal=False)
 
-        if not options:
+        if not webpage:
             webpage = self._download_webpage(
                 'http://www.aparat.com/video/video/embed/vt/frame/showvideo/yes/videohash/' + video_id,
-                video_id, 'Downloading embed webpage')
-            options = self._parse_options(webpage, video_id)
+                video_id)
+
+        options = self._parse_json(self._search_regex(
+            r'options\s*=\s*({.+?})\s*;', webpage, 'options'), video_id)
 
         formats = []
         for sources in (options.get('multiSRC') or []):
@@ -73,6 +72,8 @@ class AparatIE(InfoExtractor):
                             r'(\d+)[pP]', label or '', 'height',
                             default=None)),
                     })
+        self._sort_formats(
+            formats, field_preference=('height', 'width', 'tbr', 'format_id'))
 
         info = self._search_json_ld(webpage, video_id, default={})
 

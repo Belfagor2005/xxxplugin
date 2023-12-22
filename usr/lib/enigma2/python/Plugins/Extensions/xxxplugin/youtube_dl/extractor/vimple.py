@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import int_or_none
 
@@ -13,6 +15,7 @@ class SprutoBaseIE(InfoExtractor):
         formats = [{
             'url': f['url'],
         } for f in playlist['video']]
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

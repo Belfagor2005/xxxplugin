@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     js_to_json,
@@ -22,7 +26,7 @@ class DRBonanzaIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id, display_id = mobj.group('id', 'display_id')
 
         webpage = self._download_webpage(url, display_id)
@@ -30,6 +34,7 @@ class DRBonanzaIE(InfoExtractor):
         info = self._parse_html5_media_entries(
             url, webpage, display_id, m3u8_id='hls',
             m3u8_entry_protocol='m3u8_native')[0]
+        self._sort_formats(info['formats'])
 
         asset = self._parse_json(
             self._search_regex(

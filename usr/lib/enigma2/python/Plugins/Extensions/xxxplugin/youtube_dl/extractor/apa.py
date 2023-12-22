@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     determine_ext,
@@ -8,7 +13,6 @@ from ..utils import (
 
 class APAIE(InfoExtractor):
     _VALID_URL = r'(?P<base_url>https?://[^/]+\.apa\.at)/embed/(?P<id>[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})'
-    _EMBED_REGEX = [r'<iframe[^>]+\bsrc=(["\'])(?P<url>(?:https?:)?//[^/]+\.apa\.at/embed/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}.*?)\1']
     _TESTS = [{
         'url': 'http://uvp.apa.at/embed/293f6d17-692a-44e3-9fd5-7b178f3a1029',
         'md5': '2b12292faeb0a7d930c778c7a5b4759b',
@@ -29,8 +33,16 @@ class APAIE(InfoExtractor):
         'only_matching': True,
     }]
 
+    @staticmethod
+    def _extract_urls(webpage):
+        return [
+            mobj.group('url')
+            for mobj in re.finditer(
+                r'<iframe[^>]+\bsrc=(["\'])(?P<url>(?:https?:)?//[^/]+\.apa\.at/embed/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}.*?)\1',
+                webpage)]
+
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id, base_url = mobj.group('id', 'base_url')
 
         webpage = self._download_webpage(
@@ -72,6 +84,7 @@ class APAIE(InfoExtractor):
                     'format_id': format_id,
                     'height': height,
                 })
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

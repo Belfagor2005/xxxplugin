@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -53,6 +56,8 @@ class RockstarGamesIE(InfoExtractor):
             youtube_id = video.get('youtube_id')
             if youtube_id:
                 return self.url_result(youtube_id, 'Youtube')
+
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

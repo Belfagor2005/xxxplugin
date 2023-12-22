@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -55,6 +58,7 @@ class ReutersIE(InfoExtractor):
                     'ext': ext,
                     'container': container if method != 'mobile' else None,
                 })
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

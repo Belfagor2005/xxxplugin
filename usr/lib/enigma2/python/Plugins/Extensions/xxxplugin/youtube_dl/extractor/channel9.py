@@ -1,8 +1,11 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
 from ..utils import (
     clean_html,
+    ExtractorError,
     int_or_none,
     parse_iso8601,
     qualities,
@@ -14,7 +17,6 @@ class Channel9IE(InfoExtractor):
     IE_DESC = 'Channel 9'
     IE_NAME = 'channel9'
     _VALID_URL = r'https?://(?:www\.)?(?:channel9\.msdn\.com|s\.ch9\.ms)/(?P<contentpath>.+?)(?P<rss>/RSS)?/?(?:[?#&]|$)'
-    _EMBED_REGEX = [r'<iframe[^>]+src=["\'](?P<url>https?://channel9\.msdn\.com/(?:[^/]+/)+)player\b']
 
     _TESTS = [{
         'url': 'http://channel9.msdn.com/Events/TechEd/Australia/2013/KOS002',
@@ -79,6 +81,12 @@ class Channel9IE(InfoExtractor):
 
     _RSS_URL = 'http://channel9.msdn.com/%s/RSS'
 
+    @staticmethod
+    def _extract_urls(webpage):
+        return re.findall(
+            r'<iframe[^>]+src=["\'](https?://channel9\.msdn\.com/(?:[^/]+/)+)player\b',
+            webpage)
+
     def _extract_list(self, video_id, rss_url=None):
         if not rss_url:
             rss_url = self._RSS_URL % video_id
@@ -89,7 +97,7 @@ class Channel9IE(InfoExtractor):
         return self.playlist_result(entries, video_id, title_text)
 
     def _real_extract(self, url):
-        content_path, rss = self._match_valid_url(url).groups()
+        content_path, rss = re.match(self._VALID_URL, url).groups()
 
         if rss:
             return self._extract_list(content_path, url)
@@ -179,11 +187,13 @@ class Channel9IE(InfoExtractor):
                     'quality': quality(q, q_url),
                 })
 
+            self._sort_formats(formats)
+
             slides = content_data.get('Slides')
             zip_file = content_data.get('ZipFile')
 
             if not formats and not slides and not zip_file:
-                self.raise_no_formats(
+                raise ExtractorError(
                     'None of recording, slides or zip are available for %s' % content_path)
 
             subtitles = {}

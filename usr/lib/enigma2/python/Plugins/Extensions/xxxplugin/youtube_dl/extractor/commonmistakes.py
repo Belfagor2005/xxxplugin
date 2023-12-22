@@ -1,10 +1,16 @@
+from __future__ import unicode_literals
+
+import sys
+
 from .common import InfoExtractor
 from ..utils import ExtractorError
 
 
 class CommonMistakesIE(InfoExtractor):
     IE_DESC = False  # Do not list
-    _VALID_URL = r'(?:url|URL|yt-dlp)$'
+    _VALID_URL = r'''(?x)
+        (?:url|URL)$
+    '''
 
     _TESTS = [{
         'url': 'url',
@@ -16,12 +22,12 @@ class CommonMistakesIE(InfoExtractor):
 
     def _real_extract(self, url):
         msg = (
-            'You\'ve asked yt-dlp to download the URL "%s". '
+            'You\'ve asked youtube-dl to download the URL "%s". '
             'That doesn\'t make any sense. '
             'Simply remove the parameter in your command or configuration.'
         ) % url
-        if not self.get_param('verbose'):
-            msg += ' Add -v to the command line to see what arguments and configuration yt-dlp has'
+        if not self._downloader.params.get('verbose'):
+            msg += ' Add -v to the command line to see what arguments and configuration youtube-dl got.'
         raise ExtractorError(msg, expected=True)
 
 
@@ -29,7 +35,9 @@ class UnicodeBOMIE(InfoExtractor):
     IE_DESC = False
     _VALID_URL = r'(?P<bom>\ufeff)(?P<id>.*)$'
 
-    _TESTS = [{
+    # Disable test for python 3.2 since BOM is broken in re in this version
+    # (see https://github.com/ytdl-org/youtube-dl/issues/9751)
+    _TESTS = [] if (3, 0) < sys.version_info <= (3, 3) else [{
         'url': '\ufeffhttp://www.youtube.com/watch?v=BaW_jenozKc',
         'only_matching': True,
     }]

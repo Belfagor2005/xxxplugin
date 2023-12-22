@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import itertools
 
 from .common import InfoExtractor
@@ -27,11 +29,12 @@ class FoxgayIE(InfoExtractor):
         video_id = self._match_id(url)
         webpage = self._download_webpage(url, video_id)
 
-        title = remove_end(self._html_extract_title(webpage), ' - Foxgay.com')
+        title = remove_end(self._html_search_regex(
+            r'<title>([^<]+)</title>', webpage, 'title'), ' - Foxgay.com')
         description = get_element_by_id('inf_tit', webpage)
 
         # The default user-agent with foxgay cookies leads to pages without videos
-        self.cookiejar.clear('.foxgay.com')
+        self._downloader.cookiejar.clear('.foxgay.com')
         # Find the URL for the iFrame which contains the actual video.
         iframe_url = self._html_search_regex(
             r'<iframe[^>]+src=([\'"])(?P<url>[^\'"]+)\1', webpage,
@@ -47,6 +50,8 @@ class FoxgayIE(InfoExtractor):
             'height': int_or_none(resolution),
         } for source, resolution in zip(
             video_data['sources'], video_data.get('resolutions', itertools.repeat(None)))]
+
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

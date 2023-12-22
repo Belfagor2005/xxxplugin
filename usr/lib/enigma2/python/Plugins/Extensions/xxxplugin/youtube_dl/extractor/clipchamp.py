@@ -1,6 +1,12 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
+from ..compat import compat_str
 from ..utils import (
     ExtractorError,
+    merge_dicts,
+    T,
     traverse_obj,
     unified_timestamp,
     url_or_none,
@@ -20,7 +26,10 @@ class ClipchampIE(InfoExtractor):
             'upload_date': '20230406',
             'thumbnail': r're:^https?://.+\.jpg',
         },
-        'params': {'skip_download': 'm3u8'},
+        'params': {
+            'skip_download': 'm3u8',
+            'format': 'bestvideo',
+        },
     }]
 
     _STREAM_URL_TMPL = 'https://%s.cloudflarestream.com/%s/manifest/video.%s'
@@ -33,14 +42,14 @@ class ClipchampIE(InfoExtractor):
 
         storage_location = data.get('storage_location')
         if storage_location != 'cf_stream':
-            raise ExtractorError(f'Unsupported clip storage location "{storage_location}"')
+            raise ExtractorError('Unsupported clip storage location "%s"' % (storage_location,))
 
         path = data['download_url']
         iframe = self._download_webpage(
-            f'https://iframe.cloudflarestream.com/{path}', video_id, 'Downloading player iframe')
+            'https://iframe.cloudflarestream.com/' + path, video_id, 'Downloading player iframe')
         subdomain = self._search_regex(
-            r'\bcustomer-domain-prefix=["\']([\w-]+)["\']', iframe,
-            'subdomain', fatal=False) or 'customer-2ut9yn3y6fta1yxe'
+            r'''\bcustomer-domain-prefix\s*=\s*("|')(?P<sd>[\w-]+)\1''', iframe,
+            'subdomain', group='sd', fatal=False) or 'customer-2ut9yn3y6fta1yxe'
 
         formats = self._extract_mpd_formats(
             self._STREAM_URL_TMPL % (subdomain, path, 'mpd'), video_id,
@@ -49,13 +58,12 @@ class ClipchampIE(InfoExtractor):
             self._STREAM_URL_TMPL % (subdomain, path, 'm3u8'), video_id, 'mp4',
             query=self._STREAM_URL_QUERY, fatal=False, m3u8_id='hls'))
 
-        return {
+        return merge_dicts({
             'id': video_id,
             'formats': formats,
-            'uploader': ' '.join(traverse_obj(data, ('creator', ('first_name', 'last_name'), {str}))) or None,
-            **traverse_obj(data, {
-                'title': ('project', 'project_name', {str}),
-                'timestamp': ('created_at', {unified_timestamp}),
-                'thumbnail': ('thumbnail_url', {url_or_none}),
-            }),
-        }
+            'uploader': ' '.join(traverse_obj(data, ('creator', ('first_name', 'last_name'), T(compat_str)))) or None,
+        }, traverse_obj(data, {
+            'title': ('project', 'project_name', T(compat_str)),
+            'timestamp': ('created_at', T(unified_timestamp)),
+            'thumbnail': ('thumbnail_url', T(url_or_none)),
+        }), rev=True)

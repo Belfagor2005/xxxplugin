@@ -1,8 +1,12 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
     determine_ext,
-    format_field,
     int_or_none,
     unified_timestamp,
 )
@@ -10,7 +14,6 @@ from ..utils import (
 
 class VineIE(InfoExtractor):
     _VALID_URL = r'https?://(?:www\.)?vine\.co/(?:v|oembed)/(?P<id>\w+)'
-    _EMBED_REGEX = [r'<iframe[^>]+src=[\'"](?P<url>(?:https?:)?//(?:www\.)?vine\.co/v/[^/]+/embed/(?:simple|postcard))']
     _TESTS = [{
         'url': 'https://vine.co/v/b9KOOWX7HUx',
         'md5': '2f36fed6235b16da96ce9b4dc890940d',
@@ -85,11 +88,11 @@ class VineIE(InfoExtractor):
                     'format_id': format_id or 'standard',
                     'quality': quality,
                 })
-        self._check_formats(formats, video_id)
+        self._sort_formats(formats)
 
         username = data.get('username')
 
-        alt_title = format_field(username, None, 'Vine by %s')
+        alt_title = 'Vine by %s' % username if username else None
 
         return {
             'id': video_id,
@@ -129,7 +132,7 @@ class VineUserIE(InfoExtractor):
         return False if VineIE.suitable(url) else super(VineUserIE, cls).suitable(url)
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         user = mobj.group('user')
         u = mobj.group('u')
 

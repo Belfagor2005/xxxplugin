@@ -1,3 +1,7 @@
+# coding: utf-8
+
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import js_to_json
 
@@ -29,6 +33,7 @@ class HelsinkiIE(InfoExtractor):
             'url': s['file'],
             'ext': 'mp4',
         } for s in params['sources']]
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

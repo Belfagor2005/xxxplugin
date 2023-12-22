@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     clean_html,
@@ -10,7 +15,6 @@ from ..utils import (
 
 class LibsynIE(InfoExtractor):
     _VALID_URL = r'(?P<mainurl>https?://html5-player\.libsyn\.com/embed/episode/id/(?P<id>[0-9]+))'
-    _EMBED_REGEX = [r'<iframe[^>]+src=(["\'])(?P<url>(?:https?:)?//html5-player\.libsyn\.com/embed/.+?)\1']
 
     _TESTS = [{
         'url': 'http://html5-player.libsyn.com/embed/episode/id/6385796/',
@@ -38,7 +42,7 @@ class LibsynIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        url, video_id = self._match_valid_url(url).groups()
+        url, video_id = re.match(self._VALID_URL, url).groups()
         webpage = self._download_webpage(url, video_id)
 
         data = self._parse_json(self._search_regex(

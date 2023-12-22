@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -62,6 +65,8 @@ class BigflixIE(InfoExtractor):
                 formats.append({
                     'url': decode_url(file_url),
                 })
+
+        self._sort_formats(formats)
 
         description = self._html_search_meta('description', webpage)
 

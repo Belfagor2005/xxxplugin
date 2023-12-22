@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 
 
@@ -20,7 +25,7 @@ class LocalNews8IE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id')
 

@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .theplatform import ThePlatformIE
 from ..utils import (
     ExtractorError,
@@ -10,7 +15,7 @@ from ..utils import (
 )
 
 
-class AENetworksBaseIE(ThePlatformIE):  # XXX: Do not subclass from concrete IE
+class AENetworksBaseIE(ThePlatformIE):
     _BASE_URL_REGEX = r'''(?x)https?://
         (?:(?:www|play|watch)\.)?
         (?P<domain>
@@ -64,6 +69,7 @@ class AENetworksBaseIE(ThePlatformIE):  # XXX: Do not subclass from concrete IE
             subtitles = self._merge_subtitles(subtitles, tp_subtitles)
         if last_e and not formats:
             raise last_e
+        self._sort_formats(formats)
         return {
             'id': video_id,
             'formats': formats,
@@ -177,7 +183,7 @@ class AENetworksIE(AENetworksBaseIE):
     }]
 
     def _real_extract(self, url):
-        domain, canonical = self._match_valid_url(url).groups()
+        domain, canonical = re.match(self._VALID_URL, url).groups()
         return self._extract_aetn_info(domain, 'canonical', '/' + canonical, url)
 
 
@@ -194,7 +200,7 @@ class AENetworksListBaseIE(AENetworksBaseIE):
             }))['data'][resource]
 
     def _real_extract(self, url):
-        domain, slug = self._match_valid_url(url).groups()
+        domain, slug = re.match(self._VALID_URL, url).groups()
         _, brand = self._DOMAIN_MAP[domain]
         playlist = self._call_api(self._RESOURCE, slug, brand, self._FIELDS)
         base_url = 'http://watch.%s' % domain
@@ -316,7 +322,7 @@ class HistoryPlayerIE(AENetworksBaseIE):
     _TESTS = []
 
     def _real_extract(self, url):
-        domain, video_id = self._match_valid_url(url).groups()
+        domain, video_id = re.match(self._VALID_URL, url).groups()
         return self._extract_aetn_info(domain, 'id', video_id, url)
 
 
@@ -338,7 +344,6 @@ class BiographyIE(AENetworksBaseIE):
             'skip_download': True,
         },
         'add_ie': ['ThePlatform'],
-        'skip': '404 Not Found',
     }]
 
     def _real_extract(self, url):

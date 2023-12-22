@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -80,6 +83,7 @@ class OnetBaseIE(InfoExtractor):
                                 'vbr': float_or_none(f.get('video_bitrate')),
                             })
                         formats.append(http_f)
+        self._sort_formats(formats)
 
         meta = video.get('meta', {})
 
@@ -134,7 +138,7 @@ class OnetIE(OnetBaseIE):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         display_id, video_id = mobj.group('display_id', 'id')
 
         webpage = self._download_webpage(url, display_id)
@@ -178,9 +182,14 @@ class OnetChannelIE(OnetBaseIE):
         video_id = remove_start(current_clip_info['ckmId'], 'mvp:')
         video_name = url_basename(current_clip_info['url'])
 
-        if not self._yes_playlist(channel_id, video_name, playlist_label='channel'):
+        if self._downloader.params.get('noplaylist'):
+            self.to_screen(
+                'Downloading just video %s because of --no-playlist' % video_name)
             return self._extract_from_id(video_id, webpage)
 
+        self.to_screen(
+            'Downloading channel %s - add --no-playlist to just download video %s' % (
+                channel_id, video_name))
         matches = re.findall(
             r'<a[^>]+href=[\'"](%s[a-z]+/[0-9a-z-]+/[0-9a-z]+)' % self._URL_BASE_RE,
             webpage)

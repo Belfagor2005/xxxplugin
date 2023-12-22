@@ -1,45 +1,35 @@
-import enum
-import json
+from __future__ import unicode_literals
+
 import os
 import re
 import subprocess
 import sys
 import tempfile
 import time
-import uuid
 
-from .fragment import FragmentFD
-from ..compat import functools
-from ..networking import Request
-from ..postprocessor.ffmpeg import EXT_TO_OUT_FORMATS, FFmpegPostProcessor
+from .common import FileDownloader
+from ..compat import (
+    compat_setenv,
+    compat_str,
+)
+from ..postprocessor.ffmpeg import FFmpegPostProcessor, EXT_TO_OUT_FORMATS
 from ..utils import (
-    Popen,
-    RetryManager,
-    _configuration_args,
-    check_executable,
-    classproperty,
-    cli_bool_option,
     cli_option,
     cli_valueless_option,
-    determine_ext,
-    encodeArgument,
+    cli_bool_option,
+    cli_configuration_args,
     encodeFilename,
-    find_available_port,
-    remove_end,
+    encodeArgument,
+    handle_youtubedl_headers,
+    check_executable,
+    is_outdated_version,
+    process_communicate_or_kill,
+    T,
     traverse_obj,
 )
 
 
-class Features(enum.Enum):
-    TO_STDOUT = enum.auto()
-    MULTIPLE_FORMATS = enum.auto()
-
-
-class ExternalFD(FragmentFD):
-    SUPPORTED_PROTOCOLS = ('http', 'https', 'ftp', 'ftps')
-    SUPPORTED_FEATURES = ()
-    _CAPTURE_STDERR = True
-
+class ExternalFD(FileDownloader):
     def real_download(self, filename, info_dict):
         self.report_destination(filename)
         tmpfilename = self.temp_name(filename)
@@ -57,8 +47,12 @@ class ExternalFD(FragmentFD):
             retval = 0
             self.to_screen('[%s] Interrupted by user' % self.get_basename())
         finally:
-            if self._cookies_tempfile:
-                self.try_remove(self._cookies_tempfile)
+            if self._cookies_tempfile and os.path.isfile(self._cookies_tempfile):
+                try:
+                    os.remove(self._cookies_tempfile)
+                except OSError:
+                    self.report_warning(
+                        'Unable to delete temporary cookies file "{0}"'.format(self._cookies_tempfile))
 
         if retval == 0:
             status = {
@@ -68,12 +62,13 @@ class ExternalFD(FragmentFD):
             }
             if filename != '-':
                 fsize = os.path.getsize(encodeFilename(tmpfilename))
+                self.to_screen('\r[%s] Downloaded %s bytes' % (self.get_basename(), fsize))
                 self.try_rename(tmpfilename, filename)
                 status.update({
                     'downloaded_bytes': fsize,
                     'total_bytes': fsize,
                 })
-            self._hook_progress(status, info_dict)
+            self._hook_progress(status)
             return True
         else:
             self.to_stderr('\n')
@@ -85,36 +80,21 @@ class ExternalFD(FragmentFD):
     def get_basename(cls):
         return cls.__name__[:-2].lower()
 
-    @classproperty
-    def EXE_NAME(cls):
-        return cls.get_basename()
-
-    @functools.cached_property
+    @property
     def exe(self):
-        return self.EXE_NAME
+        return self.params.get('external_downloader')
 
     @classmethod
-    def available(cls, path=None):
-        path = check_executable(
-            cls.EXE_NAME if path in (None, cls.get_basename()) else path,
-            [cls.AVAILABLE_OPT])
-        if not path:
-            return False
-        cls.exe = path
-        return path
+    def available(cls):
+        return check_executable(cls.get_basename(), [cls.AVAILABLE_OPT])
 
     @classmethod
     def supports(cls, info_dict):
-        return all((
-            not info_dict.get('to_stdout') or Features.TO_STDOUT in cls.SUPPORTED_FEATURES,
-            '+' not in info_dict['protocol'] or Features.MULTIPLE_FORMATS in cls.SUPPORTED_FEATURES,
-            not traverse_obj(info_dict, ('hls_aes', ...), 'extra_param_to_segment_url'),
-            all(proto in cls.SUPPORTED_PROTOCOLS for proto in info_dict['protocol'].split('+')),
-        ))
+        return info_dict['protocol'] in ('http', 'https', 'ftp', 'ftps')
 
     @classmethod
-    def can_download(cls, info_dict, path=None):
-        return cls.available(path) and cls.supports(info_dict)
+    def can_download(cls, info_dict):
+        return cls.available() and cls.supports(info_dict)
 
     def _option(self, command_option, param):
         return cli_option(self.params, command_option, param)
@@ -125,19 +105,17 @@ class ExternalFD(FragmentFD):
     def _valueless_option(self, command_option, param, expected_value=True):
         return cli_valueless_option(self.params, command_option, param, expected_value)
 
-    def _configuration_args(self, keys=None, *args, **kwargs):
-        return _configuration_args(
-            self.get_basename(), self.params.get('external_downloader_args'), self.EXE_NAME,
-            keys, *args, **kwargs)
+    def _configuration_args(self, default=[]):
+        return cli_configuration_args(self.params, 'external_downloader_args', default)
 
     def _write_cookies(self):
         if not self.ydl.cookiejar.filename:
             tmp_cookies = tempfile.NamedTemporaryFile(suffix='.cookies', delete=False)
             tmp_cookies.close()
             self._cookies_tempfile = tmp_cookies.name
-            self.to_screen(f'[download] Writing temporary cookies file to "{self._cookies_tempfile}"')
-        # real_download resets _cookies_tempfile; if it's None then save() will write to cookiejar.filename
-        self.ydl.cookiejar.save(self._cookies_tempfile)
+            self.to_screen('[download] Writing temporary cookies file to "{0}"'.format(self._cookies_tempfile))
+        # real_download resets _cookies_tempfile; if it's None, save() will write to cookiejar.filename
+        self.ydl.cookiejar.save(self._cookies_tempfile, ignore_discard=True, ignore_expires=True)
         return self.ydl.cookiejar.filename or self._cookies_tempfile
 
     def _call_downloader(self, tmpfilename, info_dict):
@@ -146,66 +124,29 @@ class ExternalFD(FragmentFD):
 
         self._debug_cmd(cmd)
 
-        if 'fragments' not in info_dict:
-            _, stderr, returncode = self._call_process(cmd, info_dict)
-            if returncode and stderr:
-                self.to_stderr(stderr)
-            return returncode
+        p = subprocess.Popen(
+            cmd, stderr=subprocess.PIPE)
+        _, stderr = process_communicate_or_kill(p)
+        if p.returncode != 0:
+            self.to_stderr(stderr.decode('utf-8', 'replace'))
+        return p.returncode
 
-        skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
-
-        retry_manager = RetryManager(self.params.get('fragment_retries'), self.report_retry,
-                                     frag_index=None, fatal=not skip_unavailable_fragments)
-        for retry in retry_manager:
-            _, stderr, returncode = self._call_process(cmd, info_dict)
-            if not returncode:
-                break
-            # TODO: Decide whether to retry based on error code
-            # https://aria2.github.io/manual/en/html/aria2c.html#exit-status
-            if stderr:
-                self.to_stderr(stderr)
-            retry.error = Exception()
-            continue
-        if not skip_unavailable_fragments and retry_manager.error:
-            return -1
-
-        decrypt_fragment = self.decrypter(info_dict)
-        dest, _ = self.sanitize_open(tmpfilename, 'wb')
-        for frag_index, fragment in enumerate(info_dict['fragments']):
-            fragment_filename = '%s-Frag%d' % (tmpfilename, frag_index)
-            try:
-                src, _ = self.sanitize_open(fragment_filename, 'rb')
-            except OSError as err:
-                if skip_unavailable_fragments and frag_index > 1:
-                    self.report_skip_fragment(frag_index, err)
-                    continue
-                self.report_error(f'Unable to open fragment {frag_index}; {err}')
-                return -1
-            dest.write(decrypt_fragment(fragment, src.read()))
-            src.close()
-            if not self.params.get('keep_fragments', False):
-                self.try_remove(encodeFilename(fragment_filename))
-        dest.close()
-        self.try_remove(encodeFilename('%s.frag.urls' % tmpfilename))
-        return 0
-
-    def _call_process(self, cmd, info_dict):
-        return Popen.run(cmd, text=True, stderr=subprocess.PIPE if self._CAPTURE_STDERR else None)
+    @staticmethod
+    def _header_items(info_dict):
+        return traverse_obj(
+            info_dict, ('http_headers', T(dict.items), Ellipsis))
 
 
 class CurlFD(ExternalFD):
     AVAILABLE_OPT = '-V'
-    _CAPTURE_STDERR = False  # curl writes the progress to stderr
 
     def _make_cmd(self, tmpfilename, info_dict):
         cmd = [self.exe, '--location', '-o', tmpfilename, '--compressed']
         cookie_header = self.ydl.cookiejar.get_cookie_header(info_dict['url'])
         if cookie_header:
             cmd += ['--cookie', cookie_header]
-        if info_dict.get('http_headers') is not None:
-            for key, val in info_dict['http_headers'].items():
-                cmd += ['--header', f'{key}: {val}']
-
+        for key, val in self._header_items(info_dict):
+            cmd += ['--header', '%s: %s' % (key, val)]
         cmd += self._bool_option('--continue-at', 'continuedl', '-', '0')
         cmd += self._valueless_option('--silent', 'noprogress')
         cmd += self._valueless_option('--verbose', 'verbose')
@@ -223,18 +164,27 @@ class CurlFD(ExternalFD):
         cmd += ['--', info_dict['url']]
         return cmd
 
+    def _call_downloader(self, tmpfilename, info_dict):
+        cmd = [encodeArgument(a) for a in self._make_cmd(tmpfilename, info_dict)]
+
+        self._debug_cmd(cmd)
+
+        # curl writes the progress to stderr so don't capture it.
+        p = subprocess.Popen(cmd)
+        process_communicate_or_kill(p)
+        return p.returncode
+
 
 class AxelFD(ExternalFD):
     AVAILABLE_OPT = '-V'
 
     def _make_cmd(self, tmpfilename, info_dict):
         cmd = [self.exe, '-o', tmpfilename]
-        if info_dict.get('http_headers') is not None:
-            for key, val in info_dict['http_headers'].items():
-                cmd += ['-H', f'{key}: {val}']
+        for key, val in self._header_items(info_dict):
+            cmd += ['-H', '%s: %s' % (key, val)]
         cookie_header = self.ydl.cookiejar.get_cookie_header(info_dict['url'])
         if cookie_header:
-            cmd += ['-H', f'Cookie: {cookie_header}', '--max-redirect=0']
+            cmd += ['-H', 'Cookie: {0}'.format(cookie_header), '--max-redirect=0']
         cmd += self._configuration_args()
         cmd += ['--', info_dict['url']]
         return cmd
@@ -247,9 +197,8 @@ class WgetFD(ExternalFD):
         cmd = [self.exe, '-O', tmpfilename, '-nv', '--compression=auto']
         if self.ydl.cookiejar.get_cookie_header(info_dict['url']):
             cmd += ['--load-cookies', self._write_cookies()]
-        if info_dict.get('http_headers') is not None:
-            for key, val in info_dict['http_headers'].items():
-                cmd += ['--header', f'{key}: {val}']
+        for key, val in self._header_items(info_dict):
+            cmd += ['--header', '%s: %s' % (key, val)]
         cmd += self._option('--limit-rate', 'ratelimit')
         retry = self._option('--tries', 'retries')
         if len(retry) == 2:
@@ -257,10 +206,7 @@ class WgetFD(ExternalFD):
                 retry[1] = '0'
             cmd += retry
         cmd += self._option('--bind-address', 'source_address')
-        proxy = self.params.get('proxy')
-        if proxy:
-            for var in ('http_proxy', 'https_proxy'):
-                cmd += ['--execute', f'{var}={proxy}']
+        cmd += self._option('--proxy', 'proxy')
         cmd += self._valueless_option('--no-check-certificate', 'nocheckcertificate')
         cmd += self._configuration_args()
         cmd += ['--', info_dict['url']]
@@ -269,32 +215,13 @@ class WgetFD(ExternalFD):
 
 class Aria2cFD(ExternalFD):
     AVAILABLE_OPT = '-v'
-    SUPPORTED_PROTOCOLS = ('http', 'https', 'ftp', 'ftps', 'dash_frag_urls', 'm3u8_frag_urls')
-
-    @staticmethod
-    def supports_manifest(manifest):
-        UNSUPPORTED_FEATURES = [
-            r'#EXT-X-BYTERANGE',  # playlists composed of byte ranges of media files [1]
-            # 1. https://tools.ietf.org/html/draft-pantos-http-live-streaming-17#section-4.3.2.2
-        ]
-        check_results = (not re.search(feature, manifest) for feature in UNSUPPORTED_FEATURES)
-        return all(check_results)
 
     @staticmethod
     def _aria2c_filename(fn):
-        return fn if os.path.isabs(fn) else f'.{os.path.sep}{fn}'
-
-    def _call_downloader(self, tmpfilename, info_dict):
-        # FIXME: Disabled due to https://github.com/yt-dlp/yt-dlp/issues/5931
-        if False and 'no-external-downloader-progress' not in self.params.get('compat_opts', []):
-            info_dict['__rpc'] = {
-                'port': find_available_port() or 19190,
-                'secret': str(uuid.uuid4()),
-            }
-        return super()._call_downloader(tmpfilename, info_dict)
+        return fn if os.path.isabs(fn) else os.path.join('.', fn)
 
     def _make_cmd(self, tmpfilename, info_dict):
-        cmd = [self.exe, '-c', '--no-conf',
+        cmd = [self.exe, '-c',
                '--console-log-level=warn', '--summary-interval=0', '--download-result=hide',
                '--http-accept-gzip=true', '--file-allocation=none', '-x16', '-j16', '-s16']
         if 'fragments' in info_dict:
@@ -303,10 +230,11 @@ class Aria2cFD(ExternalFD):
             cmd += ['--min-split-size', '1M']
 
         if self.ydl.cookiejar.get_cookie_header(info_dict['url']):
-            cmd += [f'--load-cookies={self._write_cookies()}']
-        if info_dict.get('http_headers') is not None:
-            for key, val in info_dict['http_headers'].items():
-                cmd += ['--header', f'{key}: {val}']
+            cmd += ['--load-cookies={0}'.format(self._write_cookies())]
+        for key, val in self._header_items(info_dict):
+            cmd += ['--header', '%s: %s' % (key, val)]
+        cmd += self._configuration_args(['--max-connection-per-server', '4'])
+        cmd += ['--out', os.path.basename(tmpfilename)]
         cmd += self._option('--max-overall-download-limit', 'ratelimit')
         cmd += self._option('--interface', 'source_address')
         cmd += self._option('--all-proxy', 'proxy')
@@ -314,12 +242,6 @@ class Aria2cFD(ExternalFD):
         cmd += self._bool_option('--remote-time', 'updatetime', 'true', 'false', '=')
         cmd += self._bool_option('--show-console-readout', 'noprogress', 'false', 'true', '=')
         cmd += self._configuration_args()
-
-        if '__rpc' in info_dict:
-            cmd += [
-                '--enable-rpc',
-                f'--rpc-listen-port={info_dict["__rpc"]["port"]}',
-                f'--rpc-secret={info_dict["__rpc"]["secret"]}']
 
         # aria2c strips out spaces from the beginning/end of filenames and paths.
         # We work around this issue by adding a "./" to the beginning of the
@@ -333,10 +255,9 @@ class Aria2cFD(ExternalFD):
         if 'fragments' not in info_dict:
             cmd += ['--out', self._aria2c_filename(os.path.basename(tmpfilename))]
         cmd += ['--auto-file-renaming=false']
-
         if 'fragments' in info_dict:
-            cmd += ['--uri-selector=inorder']
-            url_list_file = '%s.frag.urls' % tmpfilename
+            cmd += ['--file-allocation=none', '--uri-selector=inorder']
+            url_list_file = '%s.frag.urls' % (tmpfilename, )
             url_list = []
             for frag_index, fragment in enumerate(info_dict['fragments']):
                 fragment_filename = '%s-Frag%d' % (os.path.basename(tmpfilename), frag_index)
@@ -349,98 +270,76 @@ class Aria2cFD(ExternalFD):
             cmd += ['--', info_dict['url']]
         return cmd
 
-    def aria2c_rpc(self, rpc_port, rpc_secret, method, params=()):
-        # Does not actually need to be UUID, just unique
-        sanitycheck = str(uuid.uuid4())
-        d = json.dumps({
-            'jsonrpc': '2.0',
-            'id': sanitycheck,
-            'method': method,
-            'params': [f'token:{rpc_secret}', *params],
-        }).encode('utf-8')
-        request = Request(
-            f'http://localhost:{rpc_port}/jsonrpc',
-            data=d, headers={
-                'Content-Type': 'application/json',
-                'Content-Length': f'{len(d)}',
-            }, proxies={'all': None})
-        with self.ydl.urlopen(request) as r:
-            resp = json.load(r)
-        assert resp.get('id') == sanitycheck, 'Something went wrong with RPC server'
-        return resp['result']
 
-    def _call_process(self, cmd, info_dict):
-        if '__rpc' not in info_dict:
-            return super()._call_process(cmd, info_dict)
+class Aria2pFD(ExternalFD):
+    ''' Aria2pFD class
+    This class support to use aria2p as downloader.
+    (Aria2p, a command-line tool and Python library to interact with an aria2c daemon process
+    through JSON-RPC.)
+    It can help you to get download progress more easily.
+    To use aria2p as downloader, you need to install aria2c and aria2p, aria2p can download with pip.
+    Then run aria2c in the background and enable with the --enable-rpc option.
+    '''
+    try:
+        import aria2p
+        __avail = True
+    except ImportError:
+        __avail = False
 
-        send_rpc = functools.partial(self.aria2c_rpc, info_dict['__rpc']['port'], info_dict['__rpc']['secret'])
-        started = time.time()
+    @classmethod
+    def available(cls):
+        return cls.__avail
 
-        fragmented = 'fragments' in info_dict
-        frag_count = len(info_dict['fragments']) if fragmented else 1
-        status = {
-            'filename': info_dict.get('_filename'),
-            'status': 'downloading',
-            'elapsed': 0,
-            'downloaded_bytes': 0,
-            'fragment_count': frag_count if fragmented else None,
-            'fragment_index': 0 if fragmented else None,
+    def _call_downloader(self, tmpfilename, info_dict):
+        aria2 = self.aria2p.API(
+            self.aria2p.Client(
+                host='http://localhost',
+                port=6800,
+                secret=''
+            )
+        )
+
+        options = {
+            'min-split-size': '1M',
+            'max-connection-per-server': 4,
+            'auto-file-renaming': 'false',
         }
-        self._hook_progress(status, info_dict)
-
-        def get_stat(key, *obj, average=False):
-            val = tuple(filter(None, map(float, traverse_obj(obj, (..., ..., key))))) or [0]
-            return sum(val) / (len(val) if average else 1)
-
-        with Popen(cmd, text=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE) as p:
-            # Add a small sleep so that RPC client can receive response,
-            # or the connection stalls infinitely
-            time.sleep(0.2)
-            retval = p.poll()
-            while retval is None:
-                # We don't use tellStatus as we won't know the GID without reading stdout
-                # Ref: https://aria2.github.io/manual/en/html/aria2c.html#aria2.tellActive
-                active = send_rpc('aria2.tellActive')
-                completed = send_rpc('aria2.tellStopped', [0, frag_count])
-
-                downloaded = get_stat('totalLength', completed) + get_stat('completedLength', active)
-                speed = get_stat('downloadSpeed', active)
-                total = frag_count * get_stat('totalLength', active, completed, average=True)
-                if total < downloaded:
-                    total = None
-
-                status.update({
-                    'downloaded_bytes': int(downloaded),
-                    'speed': speed,
-                    'total_bytes': None if fragmented else total,
-                    'total_bytes_estimate': total,
-                    'eta': (total - downloaded) / (speed or 1),
-                    'fragment_index': min(frag_count, len(completed) + 1) if fragmented else None,
-                    'elapsed': time.time() - started
-                })
-                self._hook_progress(status, info_dict)
-
-                if not active and len(completed) >= frag_count:
-                    send_rpc('aria2.shutdown')
-                    retval = p.wait()
-                    break
-
-                time.sleep(0.1)
-                retval = p.poll()
-
-            return '', p.stderr.read(), retval
+        options['dir'] = os.path.dirname(tmpfilename) or os.path.abspath('.')
+        options['out'] = os.path.basename(tmpfilename)
+        if self.ydl.cookiejar.get_cookie_header(info_dict['url']):
+            options['load-cookies'] = self._write_cookies()
+        options['header'] = []
+        for key, val in self._header_items(info_dict):
+            options['header'].append('{0}: {1}'.format(key, val))
+        download = aria2.add_uris([info_dict['url']], options)
+        status = {
+            'status': 'downloading',
+            'tmpfilename': tmpfilename,
+        }
+        started = time.time()
+        while download.status in ['active', 'waiting']:
+            download = aria2.get_download(download.gid)
+            status.update({
+                'downloaded_bytes': download.completed_length,
+                'total_bytes': download.total_length,
+                'elapsed': time.time() - started,
+                'eta': download.eta.total_seconds(),
+                'speed': download.download_speed,
+            })
+            self._hook_progress(status)
+            time.sleep(.5)
+        return download.status != 'complete'
 
 
 class HttpieFD(ExternalFD):
-    AVAILABLE_OPT = '--version'
-    EXE_NAME = 'http'
+    @classmethod
+    def available(cls):
+        return check_executable('http', ['--version'])
 
     def _make_cmd(self, tmpfilename, info_dict):
         cmd = ['http', '--download', '--output', tmpfilename, info_dict['url']]
-
-        if info_dict.get('http_headers') is not None:
-            for key, val in info_dict['http_headers'].items():
-                cmd += [f'{key}:{val}']
+        for key, val in self._header_items(info_dict):
+            cmd += ['%s:%s' % (key, val)]
 
         # httpie 3.1.0+ removes the Cookie header on redirect, so this should be safe for now. [1]
         # If we ever need cookie handling for redirects, we can export the cookiejar into a session. [2]
@@ -448,37 +347,24 @@ class HttpieFD(ExternalFD):
         # 2: https://httpie.io/docs/cli/sessions
         cookie_header = self.ydl.cookiejar.get_cookie_header(info_dict['url'])
         if cookie_header:
-            cmd += [f'Cookie:{cookie_header}']
+            cmd += ['Cookie:%s' % cookie_header]
         return cmd
 
 
 class FFmpegFD(ExternalFD):
-    SUPPORTED_PROTOCOLS = ('http', 'https', 'ftp', 'ftps', 'm3u8', 'm3u8_native', 'rtsp', 'rtmp', 'rtmp_ffmpeg', 'mms', 'http_dash_segments')
-    SUPPORTED_FEATURES = (Features.TO_STDOUT, Features.MULTIPLE_FORMATS)
+    @classmethod
+    def supports(cls, info_dict):
+        return info_dict['protocol'] in ('http', 'https', 'ftp', 'ftps', 'm3u8', 'rtsp', 'rtmp', 'mms', 'http_dash_segments')
 
     @classmethod
-    def available(cls, path=None):
-        # TODO: Fix path for ffmpeg
-        # Fixme: This may be wrong when --ffmpeg-location is used
+    def available(cls):
         return FFmpegPostProcessor().available
 
-    def on_process_started(self, proc, stdin):
-        """ Override this in subclasses  """
-        pass
-
-    @classmethod
-    def can_merge_formats(cls, info_dict, params):
-        return (
-            info_dict.get('requested_formats')
-            and info_dict.get('protocol')
-            and not params.get('allow_unplayable_formats')
-            and 'no-direct-merge' not in params.get('compat_opts', [])
-            and cls.can_download(info_dict))
-
     def _call_downloader(self, tmpfilename, info_dict):
+        url = info_dict['url']
         ffpp = FFmpegPostProcessor(downloader=self)
         if not ffpp.available:
-            self.report_error('m3u8 download detected but ffmpeg could not be found. Please install')
+            self.report_error('m3u8 download detected but ffmpeg or avconv could not be found. Please install one.')
             return False
         ffpp.check_version()
 
@@ -488,14 +374,7 @@ class FFmpegFD(ExternalFD):
             if self.params.get(log_level, False):
                 args += ['-loglevel', log_level]
                 break
-        if not self.params.get('verbose'):
-            args += ['-hide_banner']
 
-        args += traverse_obj(info_dict, ('downloader_options', 'ffmpeg_args'), default=[])
-
-        # These exists only for compatibility. Extractors should use
-        # info_dict['downloader_options']['ffmpeg_args'] instead
-        args += info_dict.get('_ffmpeg_args') or []
         seekable = info_dict.get('_seekable')
         if seekable is not None:
             # setting -seekable prevents ffmpeg from guessing if the server
@@ -504,6 +383,30 @@ class FFmpegFD(ExternalFD):
             # https://github.com/ytdl-org/youtube-dl/issues/11800#issuecomment-275037127
             # http://trac.ffmpeg.org/ticket/6125#comment:10
             args += ['-seekable', '1' if seekable else '0']
+
+        args += self._configuration_args()
+
+        # start_time = info_dict.get('start_time') or 0
+        # if start_time:
+        #     args += ['-ss', compat_str(start_time)]
+        # end_time = info_dict.get('end_time')
+        # if end_time:
+        #     args += ['-t', compat_str(end_time - start_time)]
+
+        cookies = self.ydl.cookiejar.get_cookies_for_url(url)
+        if cookies:
+            args.extend(['-cookies', ''.join(
+                '{0}={1}; path={2}; domain={3};\r\n'.format(
+                    cookie.name, cookie.value, cookie.path, cookie.domain)
+                for cookie in cookies)])
+
+        if info_dict.get('http_headers') and re.match(r'^https?://', url):
+            # Trailing \r\n after each HTTP header is important to prevent warning from ffmpeg/avconv:
+            # [http @ 00000000003d2fa0] No trailing CRLF found in HTTP header.
+            headers = handle_youtubedl_headers(info_dict['http_headers'])
+            args += [
+                '-headers',
+                ''.join('%s: %s\r\n' % (key, val) for key, val in headers.items())]
 
         env = None
         proxy = self.params.get('proxy')
@@ -521,8 +424,8 @@ class FFmpegFD(ExternalFD):
             # We could switch to the following code if we are able to detect version properly
             # args += ['-http_proxy', proxy]
             env = os.environ.copy()
-            env['HTTP_PROXY'] = proxy
-            env['http_proxy'] = proxy
+            compat_setenv('HTTP_PROXY', proxy, env=env)
+            compat_setenv('http_proxy', proxy, env=env)
 
         protocol = info_dict.get('protocol')
 
@@ -552,104 +455,58 @@ class FFmpegFD(ExternalFD):
             if isinstance(conn, list):
                 for entry in conn:
                     args += ['-rtmp_conn', entry]
-            elif isinstance(conn, str):
+            elif isinstance(conn, compat_str):
                 args += ['-rtmp_conn', conn]
 
-        start_time, end_time = info_dict.get('section_start') or 0, info_dict.get('section_end')
-
-        selected_formats = info_dict.get('requested_formats') or [info_dict]
-        for i, fmt in enumerate(selected_formats):
-            is_http = re.match(r'^https?://', fmt['url'])
-            cookies = self.ydl.cookiejar.get_cookies_for_url(fmt['url']) if is_http else []
-            if cookies:
-                args.extend(['-cookies', ''.join(
-                    f'{cookie.name}={cookie.value}; path={cookie.path}; domain={cookie.domain};\r\n'
-                    for cookie in cookies)])
-            if fmt.get('http_headers') and is_http:
-                # Trailing \r\n after each HTTP header is important to prevent warning from ffmpeg/avconv:
-                # [http @ 00000000003d2fa0] No trailing CRLF found in HTTP header.
-                args.extend(['-headers', ''.join(f'{key}: {val}\r\n' for key, val in fmt['http_headers'].items())])
-
-            if start_time:
-                args += ['-ss', str(start_time)]
-            if end_time:
-                args += ['-t', str(end_time - start_time)]
-
-            args += self._configuration_args((f'_i{i + 1}', '_i')) + ['-i', fmt['url']]
-
-        if not (start_time or end_time) or not self.params.get('force_keyframes_at_cuts'):
-            args += ['-c', 'copy']
-
-        if info_dict.get('requested_formats') or protocol == 'http_dash_segments':
-            for i, fmt in enumerate(selected_formats):
-                stream_number = fmt.get('manifest_stream_number', 0)
-                args.extend(['-map', f'{i}:{stream_number}'])
+        args += ['-i', url, '-c', 'copy']
 
         if self.params.get('test', False):
-            args += ['-fs', str(self._TEST_FILE_SIZE)]
+            args += ['-fs', compat_str(self._TEST_FILE_SIZE)]
 
-        ext = info_dict['ext']
         if protocol in ('m3u8', 'm3u8_native'):
-            use_mpegts = (tmpfilename == '-') or self.params.get('hls_use_mpegts')
-            if use_mpegts is None:
-                use_mpegts = info_dict.get('is_live')
-            if use_mpegts:
+            if self.params.get('hls_use_mpegts', False) or tmpfilename == '-':
                 args += ['-f', 'mpegts']
             else:
                 args += ['-f', 'mp4']
-                if (ffpp.basename == 'ffmpeg' and ffpp._features.get('needs_adtstoasc')) and (not info_dict.get('acodec') or info_dict['acodec'].split('.')[0] in ('aac', 'mp4a')):
+                if (ffpp.basename == 'ffmpeg' and is_outdated_version(ffpp._versions['ffmpeg'], '3.2', False)) and (not info_dict.get('acodec') or info_dict['acodec'].split('.')[0] in ('aac', 'mp4a')):
                     args += ['-bsf:a', 'aac_adtstoasc']
         elif protocol == 'rtmp':
             args += ['-f', 'flv']
-        elif ext == 'mp4' and tmpfilename == '-':
-            args += ['-f', 'mpegts']
-        elif ext == 'unknown_video':
-            ext = determine_ext(remove_end(tmpfilename, '.part'))
-            if ext == 'unknown_video':
-                self.report_warning(
-                    'The video format is unknown and cannot be downloaded by ffmpeg. '
-                    'Explicitly set the extension in the filename to attempt download in that format')
-            else:
-                self.report_warning(f'The video format is unknown. Trying to download as {ext} according to the filename')
-                args += ['-f', EXT_TO_OUT_FORMATS.get(ext, ext)]
         else:
-            args += ['-f', EXT_TO_OUT_FORMATS.get(ext, ext)]
-
-        args += self._configuration_args(('_o1', '_o', ''))
+            args += ['-f', EXT_TO_OUT_FORMATS.get(info_dict['ext'], info_dict['ext'])]
 
         args = [encodeArgument(opt) for opt in args]
         args.append(encodeFilename(ffpp._ffmpeg_filename_argument(tmpfilename), True))
+
         self._debug_cmd(args)
 
-        piped = any(fmt['url'] in ('-', 'pipe:') for fmt in selected_formats)
-        with Popen(args, stdin=subprocess.PIPE, env=env) as proc:
-            if piped:
-                self.on_process_started(proc, proc.stdin)
-            try:
-                retval = proc.wait()
-            except BaseException as e:
-                # subprocces.run would send the SIGKILL signal to ffmpeg and the
-                # mp4 file couldn't be played, but if we ask ffmpeg to quit it
-                # produces a file that is playable (this is mostly useful for live
-                # streams). Note that Windows is not affected and produces playable
-                # files (see https://github.com/ytdl-org/youtube-dl/issues/8300).
-                if isinstance(e, KeyboardInterrupt) and sys.platform != 'win32' and not piped:
-                    proc.communicate_or_kill(b'q')
-                else:
-                    proc.kill(timeout=None)
-                raise
-            return retval
+        proc = subprocess.Popen(args, stdin=subprocess.PIPE, env=env)
+        try:
+            retval = proc.wait()
+        except BaseException as e:
+            # subprocess.run would send the SIGKILL signal to ffmpeg and the
+            # mp4 file couldn't be played, but if we ask ffmpeg to quit it
+            # produces a file that is playable (this is mostly useful for live
+            # streams). Note that Windows is not affected and produces playable
+            # files (see https://github.com/ytdl-org/youtube-dl/issues/8300).
+            if isinstance(e, KeyboardInterrupt) and sys.platform != 'win32':
+                process_communicate_or_kill(proc, b'q')
+            else:
+                proc.kill()
+                proc.wait()
+            raise
+        return retval
 
 
 class AVconvFD(FFmpegFD):
     pass
 
 
-_BY_NAME = {
-    klass.get_basename(): klass
+_BY_NAME = dict(
+    (klass.get_basename(), klass)
     for name, klass in globals().items()
-    if name.endswith('FD') and name not in ('ExternalFD', 'FragmentFD')
-}
+    if name.endswith('FD') and name != 'ExternalFD'
+)
 
 
 def list_external_downloaders():
@@ -657,8 +514,8 @@ def list_external_downloaders():
 
 
 def get_external_downloader(external_downloader):
-    """ Given the name of the executable, see whether we support the given downloader """
+    """ Given the name of the executable, see whether we support the given
+        downloader . """
+    # Drop .exe extension on Windows
     bn = os.path.splitext(os.path.basename(external_downloader))[0]
-    return _BY_NAME.get(bn) or next((
-        klass for klass in _BY_NAME.values() if klass.EXE_NAME in bn
-    ), None)
+    return _BY_NAME[bn]

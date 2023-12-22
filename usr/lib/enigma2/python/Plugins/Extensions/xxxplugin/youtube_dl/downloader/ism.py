@@ -1,23 +1,27 @@
+from __future__ import unicode_literals
+
+import time
 import binascii
 import io
-import struct
-import time
 
 from .fragment import FragmentFD
-from ..networking.exceptions import HTTPError
-from ..utils import RetryManager
+from ..compat import (
+    compat_Struct,
+    compat_urllib_error,
+)
 
-u8 = struct.Struct('>B')
-u88 = struct.Struct('>Bx')
-u16 = struct.Struct('>H')
-u1616 = struct.Struct('>Hxx')
-u32 = struct.Struct('>I')
-u64 = struct.Struct('>Q')
 
-s88 = struct.Struct('>bx')
-s16 = struct.Struct('>h')
-s1616 = struct.Struct('>hxx')
-s32 = struct.Struct('>i')
+u8 = compat_Struct('>B')
+u88 = compat_Struct('>Bx')
+u16 = compat_Struct('>H')
+u1616 = compat_Struct('>Hxx')
+u32 = compat_Struct('>I')
+u64 = compat_Struct('>Q')
+
+s88 = compat_Struct('>bx')
+s16 = compat_Struct('>h')
+s1616 = compat_Struct('>hxx')
+s32 = compat_Struct('>i')
 
 unity_matrix = (s32.pack(0x10000) + s32.pack(0) * 3) * 2 + s32.pack(0x40000000)
 
@@ -44,7 +48,7 @@ def write_piff_header(stream, params):
     language = params.get('language', 'und')
     height = params.get('height', 0)
     width = params.get('width', 0)
-    stream_type = params['stream_type']
+    is_audio = width == 0 and height == 0
     creation_time = modification_time = int(time.time())
 
     ftyp_payload = b'isml'  # major brand
@@ -73,7 +77,7 @@ def write_piff_header(stream, params):
     tkhd_payload += u32.pack(0) * 2  # reserved
     tkhd_payload += s16.pack(0)  # layer
     tkhd_payload += s16.pack(0)  # alternate group
-    tkhd_payload += s88.pack(1 if stream_type == 'audio' else 0)  # volume
+    tkhd_payload += s88.pack(1 if is_audio else 0)  # volume
     tkhd_payload += u16.pack(0)  # reserved
     tkhd_payload += unity_matrix
     tkhd_payload += u1616.pack(width)
@@ -89,34 +93,19 @@ def write_piff_header(stream, params):
     mdia_payload = full_box(b'mdhd', 1, 0, mdhd_payload)  # Media Header Box
 
     hdlr_payload = u32.pack(0)  # pre defined
-    if stream_type == 'audio':  # handler type
-        hdlr_payload += b'soun'
-        hdlr_payload += u32.pack(0) * 3  # reserved
-        hdlr_payload += b'SoundHandler\0'  # name
-    elif stream_type == 'video':
-        hdlr_payload += b'vide'
-        hdlr_payload += u32.pack(0) * 3  # reserved
-        hdlr_payload += b'VideoHandler\0'  # name
-    elif stream_type == 'text':
-        hdlr_payload += b'subt'
-        hdlr_payload += u32.pack(0) * 3  # reserved
-        hdlr_payload += b'SubtitleHandler\0'  # name
-    else:
-        assert False
+    hdlr_payload += b'soun' if is_audio else b'vide'  # handler type
+    hdlr_payload += u32.pack(0) * 3  # reserved
+    hdlr_payload += (b'Sound' if is_audio else b'Video') + b'Handler\0'  # name
     mdia_payload += full_box(b'hdlr', 0, 0, hdlr_payload)  # Handler Reference Box
 
-    if stream_type == 'audio':
+    if is_audio:
         smhd_payload = s88.pack(0)  # balance
         smhd_payload += u16.pack(0)  # reserved
         media_header_box = full_box(b'smhd', 0, 0, smhd_payload)  # Sound Media Header
-    elif stream_type == 'video':
+    else:
         vmhd_payload = u16.pack(0)  # graphics mode
         vmhd_payload += u16.pack(0) * 3  # opcolor
         media_header_box = full_box(b'vmhd', 0, 1, vmhd_payload)  # Video Media Header
-    elif stream_type == 'text':
-        media_header_box = full_box(b'sthd', 0, 0, b'')  # Subtitle Media Header
-    else:
-        assert False
     minf_payload = media_header_box
 
     dref_payload = u32.pack(1)  # entry count
@@ -128,7 +117,7 @@ def write_piff_header(stream, params):
 
     sample_entry_payload = u8.pack(0) * 6  # reserved
     sample_entry_payload += u16.pack(1)  # data reference index
-    if stream_type == 'audio':
+    if is_audio:
         sample_entry_payload += u32.pack(0) * 2  # reserved
         sample_entry_payload += u16.pack(params.get('channels', 2))
         sample_entry_payload += u16.pack(params.get('bits_per_sample', 16))
@@ -138,9 +127,7 @@ def write_piff_header(stream, params):
 
         if fourcc == 'AACL':
             sample_entry_box = box(b'mp4a', sample_entry_payload)
-        if fourcc == 'EC-3':
-            sample_entry_box = box(b'ec-3', sample_entry_payload)
-    elif stream_type == 'video':
+    else:
         sample_entry_payload += u16.pack(0)  # pre defined
         sample_entry_payload += u16.pack(0)  # reserved
         sample_entry_payload += u32.pack(0) * 3  # pre defined
@@ -154,7 +141,7 @@ def write_piff_header(stream, params):
         sample_entry_payload += u16.pack(0x18)  # depth
         sample_entry_payload += s16.pack(-1)  # pre defined
 
-        codec_private_data = binascii.unhexlify(params['codec_private_data'].encode())
+        codec_private_data = binascii.unhexlify(params['codec_private_data'].encode('utf-8'))
         if fourcc in ('H264', 'AVC1'):
             sps, pps = codec_private_data.split(u32.pack(1))[1:]
             avcc_payload = u8.pack(1)  # configuration version
@@ -168,18 +155,6 @@ def write_piff_header(stream, params):
             avcc_payload += pps
             sample_entry_payload += box(b'avcC', avcc_payload)  # AVC Decoder Configuration Record
             sample_entry_box = box(b'avc1', sample_entry_payload)  # AVC Simple Entry
-        else:
-            assert False
-    elif stream_type == 'text':
-        if fourcc == 'TTML':
-            sample_entry_payload += b'http://www.w3.org/ns/ttml\0'  # namespace
-            sample_entry_payload += b'\0'  # schema location
-            sample_entry_payload += b'\0'  # auxilary mime types(??)
-            sample_entry_box = box(b'stpp', sample_entry_payload)
-        else:
-            assert False
-    else:
-        assert False
     stsd_payload += sample_entry_box
 
     stbl_payload = full_box(b'stsd', 0, 0, stsd_payload)  # Sample Description Box
@@ -233,6 +208,8 @@ class IsmFD(FragmentFD):
     Download segments in a ISM manifest
     """
 
+    FD_NAME = 'ism'
+
     def real_download(self, filename, info_dict):
         segments = info_dict['fragments'][:1] if self.params.get(
             'test', False) else info_dict['fragments']
@@ -242,42 +219,41 @@ class IsmFD(FragmentFD):
             'total_frags': len(segments),
         }
 
-        self._prepare_and_start_frag_download(ctx, info_dict)
+        self._prepare_and_start_frag_download(ctx)
 
-        extra_state = ctx.setdefault('extra_state', {
-            'ism_track_written': False,
-        })
-
+        fragment_retries = self.params.get('fragment_retries', 0)
         skip_unavailable_fragments = self.params.get('skip_unavailable_fragments', True)
 
+        track_written = False
         frag_index = 0
         for i, segment in enumerate(segments):
             frag_index += 1
             if frag_index <= ctx['fragment_index']:
                 continue
-
-            retry_manager = RetryManager(self.params.get('fragment_retries'), self.report_retry,
-                                         frag_index=frag_index, fatal=not skip_unavailable_fragments)
-            for retry in retry_manager:
+            count = 0
+            while count <= fragment_retries:
                 try:
-                    success = self._download_fragment(ctx, segment['url'], info_dict)
+                    success, frag_content = self._download_fragment(ctx, segment['url'], info_dict)
                     if not success:
                         return False
-                    frag_content = self._read_fragment(ctx)
-
-                    if not extra_state['ism_track_written']:
+                    if not track_written:
                         tfhd_data = extract_box_data(frag_content, [b'moof', b'traf', b'tfhd'])
                         info_dict['_download_params']['track_id'] = u32.unpack(tfhd_data[4:8])[0]
                         write_piff_header(ctx['dest_stream'], info_dict['_download_params'])
-                        extra_state['ism_track_written'] = True
+                        track_written = True
                     self._append_fragment(ctx, frag_content)
-                except HTTPError as err:
-                    retry.error = err
+                    break
+                except compat_urllib_error.HTTPError as err:
+                    count += 1
+                    if count <= fragment_retries:
+                        self.report_retry_fragment(err, frag_index, count, fragment_retries)
+            if count > fragment_retries:
+                if skip_unavailable_fragments:
+                    self.report_skip_fragment(frag_index)
                     continue
+                self.report_error('giving up after %s fragment retries' % fragment_retries)
+                return False
 
-            if retry_manager.error:
-                if not skip_unavailable_fragments:
-                    return False
-                self.report_skip_fragment(frag_index)
+        self._finish_frag_download(ctx)
 
-        return self._finish_frag_download(ctx, info_dict)
+        return True

@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
 import re
 
@@ -49,6 +52,7 @@ class Laola1TvEmbedIE(InfoExtractor):
         formats = self._extract_akamai_formats(
             '%s?hdnea=%s' % (token_attrib['url'], token_attrib['auth']),
             video_id)
+        self._sort_formats(formats)
         return formats
 
     def _real_extract(self, url):
@@ -108,7 +112,7 @@ class Laola1TvEmbedIE(InfoExtractor):
 
         return {
             'id': video_id,
-            'title': title,
+            'title': self._live_title(title) if is_live else title,
             'upload_date': unified_strdate(_v('time_date')),
             'uploader': _v('meta_organisation'),
             'categories': categories,
@@ -117,7 +121,7 @@ class Laola1TvEmbedIE(InfoExtractor):
         }
 
 
-class Laola1TvBaseIE(Laola1TvEmbedIE):  # XXX: Do not subclass from concrete IE
+class Laola1TvBaseIE(Laola1TvEmbedIE):
     def _extract_video(self, url):
         display_id = self._match_id(url)
         webpage = self._download_webpage(url, display_id)
@@ -157,7 +161,7 @@ class Laola1TvBaseIE(Laola1TvEmbedIE):  # XXX: Do not subclass from concrete IE
         return {
             'id': video_id,
             'display_id': display_id,
-            'title': title,
+            'title': self._live_title(title) if is_live else title,
             'description': video_data.get('description'),
             'thumbnail': video_data.get('image'),
             'categories': categories,

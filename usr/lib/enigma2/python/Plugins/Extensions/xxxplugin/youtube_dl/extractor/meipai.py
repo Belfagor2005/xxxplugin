@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -48,7 +51,9 @@ class MeipaiIE(InfoExtractor):
         video_id = self._match_id(url)
         webpage = self._download_webpage(url, video_id)
 
-        title = self._generic_title('', webpage)
+        title = self._og_search_title(
+            webpage, default=None) or self._html_search_regex(
+            r'<title[^>]*>([^<]+)</title>', webpage, 'title')
 
         formats = []
 

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -35,10 +37,11 @@ class FourTubeBaseIE(InfoExtractor):
             'resolution': format + 'p',
             'quality': int(format),
         } for format in sources]
+        self._sort_formats(formats)
         return formats
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         kind, video_id, display_id = mobj.group('kind', 'id', 'display_id')
 
         if kind == 'm' or not display_id:
@@ -225,7 +228,7 @@ class PornTubeIE(FourTubeBaseIE):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id, display_id = mobj.group('id', 'display_id')
 
         webpage = self._download_webpage(url, display_id)

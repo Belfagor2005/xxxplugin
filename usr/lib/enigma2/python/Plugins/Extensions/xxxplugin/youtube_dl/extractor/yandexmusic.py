@@ -1,5 +1,9 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import hashlib
 import itertools
+import re
 
 from .common import InfoExtractor
 from ..compat import compat_str
@@ -26,12 +30,12 @@ class YandexMusicBaseIE(InfoExtractor):
     @staticmethod
     def _raise_captcha():
         raise ExtractorError(
-            'YandexMusic has considered yt-dlp requests automated and '
+            'YandexMusic has considered youtube-dl requests automated and '
             'asks you to solve a CAPTCHA. You can either wait for some '
             'time until unblocked and optionally use --sleep-interval '
             'in future or alternatively you can go to https://music.yandex.ru/ '
             'solve CAPTCHA, then export cookies and pass cookie file to '
-            'yt-dlp with --cookies',
+            'youtube-dl with --cookies',
             expected=True)
 
     def _download_webpage_handle(self, *args, **kwargs):
@@ -105,7 +109,7 @@ class YandexMusicTrackIE(YandexMusicBaseIE):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         tld, album_id, track_id = mobj.group('tld'), mobj.group('album_id'), mobj.group('id')
 
         track = self._call_api(
@@ -115,7 +119,8 @@ class YandexMusicTrackIE(YandexMusicBaseIE):
 
         download_data = self._download_json(
             'https://music.yandex.ru/api/v2.1/handlers/track/%s:%s/web-album_track-track-track-main/download/m' % (track_id, album_id),
-            track_id, 'Downloading track location url JSON', query={'hq': 1}, headers={'X-Retpath-Y': url})
+            track_id, 'Downloading track location url JSON',
+            headers={'X-Retpath-Y': url})
 
         fd_data = self._download_json(
             download_data['src'], track_id,
@@ -286,7 +291,7 @@ class YandexMusicAlbumIE(YandexMusicPlaylistBaseIE):
         return False if YandexMusicTrackIE.suitable(url) else super(YandexMusicAlbumIE, cls).suitable(url)
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         tld = mobj.group('tld')
         album_id = mobj.group('id')
 
@@ -337,7 +342,7 @@ class YandexMusicPlaylistIE(YandexMusicPlaylistBaseIE):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         tld = mobj.group('tld')
         user = mobj.group('user')
         playlist_id = mobj.group('id')
@@ -376,7 +381,7 @@ class YandexMusicArtistBaseIE(YandexMusicPlaylistBaseIE):
             })
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         tld = mobj.group('tld')
         artist_id = mobj.group('id')
         data = self._call_artist(tld, url, artist_id)
@@ -405,7 +410,7 @@ class YandexMusicArtistTracksIE(YandexMusicArtistBaseIE):
     _ARTIST_WHAT = 'tracks'
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         tld = mobj.group('tld')
         artist_id = mobj.group('id')
         data = self._call_artist(tld, url, artist_id)
@@ -435,7 +440,7 @@ class YandexMusicArtistAlbumsIE(YandexMusicArtistBaseIE):
     _ARTIST_WHAT = 'albums'
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         tld = mobj.group('tld')
         artist_id = mobj.group('id')
         data = self._call_artist(tld, url, artist_id)

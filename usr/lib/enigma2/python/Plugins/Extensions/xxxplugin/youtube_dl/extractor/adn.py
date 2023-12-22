@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import base64
 import binascii
 import json
@@ -5,11 +8,13 @@ import os
 import random
 
 from .common import InfoExtractor
-from ..aes import aes_cbc_decrypt_bytes, unpad_pkcs7
-from ..compat import compat_b64decode
-from ..networking.exceptions import HTTPError
+from ..aes import aes_cbc_decrypt
+from ..compat import (
+    compat_HTTPError,
+    compat_b64decode,
+    compat_ord,
+)
 from ..utils import (
-    ass_subtitles_timecode,
     bytes_to_intlist,
     bytes_to_long,
     ExtractorError,
@@ -67,6 +72,10 @@ class ADNIE(InfoExtractor):
         'end': 4,
     }
 
+    @staticmethod
+    def _ass_subtitles_timecode(seconds):
+        return '%01d:%02d:%02d.%02d' % (seconds / 3600, (seconds % 3600) / 60, seconds % 60, (seconds % 1) * 100)
+
     def _get_subtitles(self, sub_url, video_id):
         if not sub_url:
             return None
@@ -82,11 +91,14 @@ class ADNIE(InfoExtractor):
             return None
 
         # http://animationdigitalnetwork.fr/components/com_vodvideo/videojs/adn-vjs.min.js
-        dec_subtitles = unpad_pkcs7(aes_cbc_decrypt_bytes(
-            compat_b64decode(enc_subtitles[24:]),
-            binascii.unhexlify(self._K + '7fac1178830cfe0c'),
-            compat_b64decode(enc_subtitles[:24])))
-        subtitles_json = self._parse_json(dec_subtitles.decode(), None, fatal=False)
+        dec_subtitles = intlist_to_bytes(aes_cbc_decrypt(
+            bytes_to_intlist(compat_b64decode(enc_subtitles[24:])),
+            bytes_to_intlist(binascii.unhexlify(self._K + '7fac1178830cfe0c')),
+            bytes_to_intlist(compat_b64decode(enc_subtitles[:24]))
+        ))
+        subtitles_json = self._parse_json(
+            dec_subtitles[:-compat_ord(dec_subtitles[-1])].decode(),
+            None, fatal=False)
         if not subtitles_json:
             return None
 
@@ -109,8 +121,8 @@ Format: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text'''
                     continue
                 alignment = self._POS_ALIGN_MAP.get(position_align, 2) + self._LINE_ALIGN_MAP.get(line_align, 0)
                 ssa += os.linesep + 'Dialogue: Marked=0,%s,%s,Default,,0,0,0,,%s%s' % (
-                    ass_subtitles_timecode(start),
-                    ass_subtitles_timecode(end),
+                    self._ass_subtitles_timecode(start),
+                    self._ass_subtitles_timecode(end),
                     '{\\a%d}' % alignment if alignment != 2 else '',
                     text.replace('\n', '\\N').replace('<i>', '{\\i1}').replace('</i>', '{\\i0}'))
 
@@ -125,11 +137,14 @@ Format: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text'''
             }])
         return subtitles
 
-    def _perform_login(self, username, password):
+    def _real_initialize(self):
+        username, password = self._get_login_info()
+        if not username:
+            return
         try:
+            url = self._API_BASE_URL + 'authentication/login'
             access_token = (self._download_json(
-                self._API_BASE_URL + 'authentication/login', None,
-                'Logging in', self._LOGIN_ERR_MESSAGE, fatal=False,
+                url, None, 'Logging in', self._LOGIN_ERR_MESSAGE, fatal=False,
                 data=urlencode_postdata({
                     'password': password,
                     'rememberMe': False,
@@ -140,9 +155,10 @@ Format: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text'''
                 self._HEADERS = {'authorization': 'Bearer ' + access_token}
         except ExtractorError as e:
             message = None
-            if isinstance(e.cause, HTTPError) and e.cause.status == 401:
+            if isinstance(e.cause, compat_HTTPError) and e.cause.code == 401:
                 resp = self._parse_json(
-                    e.cause.response.read().decode(), None, fatal=False) or {}
+                    self._webpage_read_content(e.cause, url, username),
+                    username, fatal=False) or {}
                 message = resp.get('message') or resp.get('code')
             self.report_warning(message or self._LOGIN_ERR_MESSAGE)
 
@@ -166,7 +182,7 @@ Format: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text'''
             }, data=b'')['token']
 
         links_url = try_get(options, lambda x: x['video']['url']) or (video_base_url + 'link')
-        self._K = ''.join(random.choices('0123456789abcdef', k=16))
+        self._K = ''.join([random.choice('0123456789abcdef') for _ in range(16)])
         message = bytes_to_intlist(json.dumps({
             'k': self._K,
             't': token,
@@ -193,14 +209,16 @@ Format: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text'''
                     })
                 break
             except ExtractorError as e:
-                if not isinstance(e.cause, HTTPError):
+                if not isinstance(e.cause, compat_HTTPError):
                     raise e
 
-                if e.cause.status == 401:
+                if e.cause.code == 401:
                     # This usually goes away with a different random pkcs1pad, so retry
                     continue
 
-                error = self._parse_json(e.cause.response.read(), video_id)
+                error = self._parse_json(
+                    self._webpage_read_content(e.cause, links_url, video_id),
+                    video_id, fatal=False) or {}
                 message = error.get('message')
                 if e.cause.code == 403 and error.get('code') == 'player-bad-geolocation-country':
                     self.raise_geo_restricted(msg=message)
@@ -233,6 +251,7 @@ Format: Marked,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text'''
                     for f in m3u8_formats:
                         f['language'] = 'fr'
                 formats.extend(m3u8_formats)
+        self._sort_formats(formats)
 
         video = (self._download_json(
             self._API_BASE_URL + 'video/%s' % video_id, video_id,

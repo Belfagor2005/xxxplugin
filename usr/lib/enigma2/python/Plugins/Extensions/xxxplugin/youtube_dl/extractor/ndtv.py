@@ -1,7 +1,16 @@
-import urllib.parse
+# coding: utf-8
+from __future__ import unicode_literals
 
 from .common import InfoExtractor
-from ..utils import parse_duration, remove_end, unified_strdate, urljoin
+from ..compat import (
+    compat_urllib_parse_unquote_plus
+)
+from ..utils import (
+    parse_duration,
+    remove_end,
+    unified_strdate,
+    urljoin
+)
 
 
 class NDTVIE(InfoExtractor):
@@ -74,7 +83,7 @@ class NDTVIE(InfoExtractor):
         webpage = self._download_webpage(url, video_id)
 
         # '__title' does not contain extra words such as sub-site name, "Video" etc.
-        title = urllib.parse.unquote_plus(
+        title = compat_urllib_parse_unquote_plus(
             self._search_regex(r"__title\s*=\s*'([^']+)'", webpage, 'title', default=None)
             or self._og_search_title(webpage))
 

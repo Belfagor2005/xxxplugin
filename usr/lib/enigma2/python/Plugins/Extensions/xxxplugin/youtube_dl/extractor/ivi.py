@@ -1,16 +1,22 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
 import re
+import sys
 
 from .common import InfoExtractor
-from ..dependencies import Cryptodome
-from ..utils import ExtractorError, int_or_none, qualities
+from ..utils import (
+    ExtractorError,
+    int_or_none,
+    qualities,
+)
 
 
 class IviIE(InfoExtractor):
     IE_DESC = 'ivi.ru'
     IE_NAME = 'ivi'
     _VALID_URL = r'https?://(?:www\.)?ivi\.(?:ru|tv)/(?:watch/(?:[^/]+/)?|video/player\?.*?videoId=)(?P<id>\d+)'
-    _EMBED_REGEX = [r'<embed[^>]+?src=(["\'])(?P<url>https?://(?:www\.)?ivi\.ru/video/player.+?)\1']
     _GEO_BYPASS = False
     _GEO_COUNTRIES = ['RU']
     _LIGHT_KEY = b'\xf1\x02\x32\xb7\xbc\x5c\x7a\xe8\xf7\x96\xc1\x33\x2b\x27\xa1\x8c'
@@ -88,10 +94,19 @@ class IviIE(InfoExtractor):
             ]
         })
 
+        bundled = hasattr(sys, 'frozen')
+
         for site in (353, 183):
             content_data = (data % site).encode()
             if site == 353:
-                if not Cryptodome.CMAC:
+                if bundled:
+                    continue
+                try:
+                    from Cryptodome.Cipher import Blowfish
+                    from Cryptodome.Hash import CMAC
+                    pycryptodomex_found = True
+                except ImportError:
+                    pycryptodomex_found = False
                     continue
 
                 timestamp = (self._download_json(
@@ -105,8 +120,7 @@ class IviIE(InfoExtractor):
 
                 query = {
                     'ts': timestamp,
-                    'sign': Cryptodome.CMAC.new(self._LIGHT_KEY, timestamp.encode() + content_data,
-                                                Cryptodome.Blowfish).hexdigest(),
+                    'sign': CMAC.new(self._LIGHT_KEY, timestamp.encode() + content_data, Blowfish).hexdigest(),
                 }
             else:
                 query = {}
@@ -126,8 +140,14 @@ class IviIE(InfoExtractor):
                     extractor_msg = 'Video %s does not exist'
                 elif site == 353:
                     continue
-                elif not Cryptodome.CMAC:
-                    raise ExtractorError('pycryptodomex not found. Please install', expected=True)
+                elif bundled:
+                    raise ExtractorError(
+                        'This feature does not work from bundled exe. Run youtube-dl from sources.',
+                        expected=True)
+                elif not pycryptodomex_found:
+                    raise ExtractorError(
+                        'pycryptodomex not found. Please install it.',
+                        expected=True)
                 elif message:
                     extractor_msg += ': ' + message
                 raise ExtractorError(extractor_msg % video_id, expected=True)
@@ -143,10 +163,7 @@ class IviIE(InfoExtractor):
         for f in result.get('files', []):
             f_url = f.get('url')
             content_format = f.get('content_format')
-            if not f_url:
-                continue
-            if (not self.get_param('allow_unplayable_formats')
-                    and ('-MDRM-' in content_format or '-FPS-' in content_format)):
+            if not f_url or '-MDRM-' in content_format or '-FPS-' in content_format:
                 continue
             formats.append({
                 'url': f_url,
@@ -154,6 +171,7 @@ class IviIE(InfoExtractor):
                 'quality': quality(content_format),
                 'filesize': int_or_none(f.get('size_in_bytes')),
             })
+        self._sort_formats(formats)
 
         compilation = result.get('compilation')
         episode = title if compilation else None
@@ -224,7 +242,7 @@ class IviCompilationIE(InfoExtractor):
                 r'<a\b[^>]+\bhref=["\']/watch/%s/(\d+)["\']' % compilation_id, html)]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         compilation_id = mobj.group('compilationid')
         season_id = mobj.group('seasonid')
 

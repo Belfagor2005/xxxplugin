@@ -1,4 +1,7 @@
+from __future__ import unicode_literals
+
 import json
+import re
 
 from .common import InfoExtractor
 from ..compat import compat_urllib_parse_unquote
@@ -20,7 +23,7 @@ class PhotobucketIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         video_extension = mobj.group('ext')
 

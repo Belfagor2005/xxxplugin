@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -34,7 +39,7 @@ class PornoVoisinesIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id')
 
@@ -55,6 +60,7 @@ class PornoVoisinesIE(InfoExtractor):
                         'height': item.get('height'),
                         'bitrate': item.get('bitrate'),
                     })
+        self._sort_formats(formats)
 
         webpage = self._download_webpage(url, video_id)
 

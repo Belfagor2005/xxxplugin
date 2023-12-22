@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 
 
@@ -27,7 +29,7 @@ class RadioDeIE(InfoExtractor):
             webpage, 'broadcast')
 
         broadcast = self._parse_json(jscode, radio_id)
-        title = broadcast['name']
+        title = self._live_title(broadcast['name'])
         description = broadcast.get('description') or broadcast.get('shortDescription')
         thumbnail = broadcast.get('picture4Url') or broadcast.get('picture4TransUrl') or broadcast.get('logo100x100')
 
@@ -38,6 +40,7 @@ class RadioDeIE(InfoExtractor):
             'abr': stream['bitRate'],
             'asr': stream['sampleRate']
         } for stream in broadcast['streamUrls']]
+        self._sort_formats(formats)
 
         return {
             'id': radio_id,

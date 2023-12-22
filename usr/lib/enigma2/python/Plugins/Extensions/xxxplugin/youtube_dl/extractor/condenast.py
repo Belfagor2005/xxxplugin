@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -58,10 +61,7 @@ class CondeNastIE(InfoExtractor):
         )''' % '|'.join(_SITES.keys())
     IE_DESC = 'Condé Nast media group: %s' % ', '.join(sorted(_SITES.values()))
 
-    _EMBED_REGEX = [r'''(?x)
-        <(?:iframe|script)[^>]+?src=(["\'])(?P<url>
-            (?:https?:)?//player(?:-backend)?\.(?:%s)\.com/(?:embed(?:js)?|(?:script|inline)/video)/.+?
-        )\1''' % '|'.join(_SITES.keys())]
+    EMBED_URL = r'(?:https?:)?//player(?:-backend)?\.(?:%s)\.com/(?:embed(?:js)?|(?:script|inline)/video)/.+?' % '|'.join(_SITES.keys())
 
     _TESTS = [{
         'url': 'http://video.wired.com/watch/3d-printed-speakers-lit-with-led',
@@ -197,6 +197,7 @@ class CondeNastIE(InfoExtractor):
                 'ext': ext,
                 'quality': 1 if quality == 'high' else 0,
             })
+        self._sort_formats(formats)
 
         subtitles = {}
         for t, caption in video_info.get('captions', {}).items():
@@ -221,7 +222,7 @@ class CondeNastIE(InfoExtractor):
         }
 
     def _real_extract(self, url):
-        video_id, player_id, target, url_type, display_id = self._match_valid_url(url).groups()
+        video_id, player_id, target, url_type, display_id = re.match(self._VALID_URL, url).groups()
 
         if video_id:
             return self._extract_video({

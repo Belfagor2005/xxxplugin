@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     clean_html,
@@ -49,7 +54,7 @@ class MoeVideoIE(InfoExtractor):
     ]
 
     def _real_extract(self, url):
-        host, video_id = self._match_valid_url(url).groups()
+        host, video_id = re.match(self._VALID_URL, url).groups()
 
         webpage = self._download_webpage(
             'http://%s/video/%s' % (host, video_id),

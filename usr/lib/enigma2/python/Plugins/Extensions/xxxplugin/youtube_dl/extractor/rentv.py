@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
@@ -47,6 +50,7 @@ class RENTVIE(InfoExtractor):
                 formats.append({
                     'url': src,
                 })
+        self._sort_formats(formats)
         return {
             'id': video_id,
             'title': title,

@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 
 
@@ -18,7 +22,7 @@ class FilmwebIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        article_type, article_id = self._match_valid_url(url).groups()
+        article_type, article_id = re.match(self._VALID_URL, url).groups()
         if article_type == 'filmnytt':
             webpage = self._download_webpage(url, article_id)
             article_id = self._search_regex(r'data-videoid="(\d+)"', webpage, 'article id')

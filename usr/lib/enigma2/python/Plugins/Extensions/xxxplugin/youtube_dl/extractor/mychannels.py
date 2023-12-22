@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 
 
@@ -16,7 +21,7 @@ class MyChannelsIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        id_type, url_id = self._match_valid_url(url).groups()
+        id_type, url_id = re.match(self._VALID_URL, url).groups()
         webpage = self._download_webpage(url, url_id)
         video_data = self._html_search_regex(r'<div([^>]+data-%s-id="%s"[^>]+)>' % (id_type, url_id), webpage, 'video data')
 

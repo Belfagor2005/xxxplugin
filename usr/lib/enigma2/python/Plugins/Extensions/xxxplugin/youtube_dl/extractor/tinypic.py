@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -26,7 +28,7 @@ class TinyPicIE(InfoExtractor):
     ]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
 
         webpage = self._download_webpage(url, video_id, 'Downloading page')

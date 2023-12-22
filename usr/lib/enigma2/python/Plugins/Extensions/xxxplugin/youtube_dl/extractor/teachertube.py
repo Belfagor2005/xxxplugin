@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -73,6 +76,8 @@ class TeacherTubeIE(InfoExtractor):
             } for media_url in set(media_urls)
         ]
 
+        self._sort_formats(formats)
+
         thumbnail = self._og_search_thumbnail(
             webpage, default=None) or self._html_search_meta(
             'thumbnail', webpage)
@@ -106,7 +111,7 @@ class TeacherTubeUserIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         user_id = mobj.group('user')
 
         urls = []

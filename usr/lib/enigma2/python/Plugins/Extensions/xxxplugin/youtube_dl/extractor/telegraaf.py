@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     determine_ext,
@@ -74,6 +77,8 @@ class TelegraafIE(InfoExtractor):
                 'height': int_or_none(location.get('height')),
                 'format_id': 'http' + ('-%s' % label if label else ''),
             })
+
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

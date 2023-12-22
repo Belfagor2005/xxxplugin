@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -49,6 +51,7 @@ class ExpoTVIE(InfoExtractor):
                         r'filename=.*\.([a-z0-9_A-Z]+)&', media_url,
                         'file extension', default=None) or fcfg.get('type'),
                 })
+        self._sort_formats(formats)
 
         title = self._og_search_title(webpage)
         description = self._og_search_description(webpage)

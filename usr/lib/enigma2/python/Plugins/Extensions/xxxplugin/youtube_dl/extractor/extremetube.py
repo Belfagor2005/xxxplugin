@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
+
 from ..utils import str_to_int
 from .keezmovies import KeezMoviesIE
 
 
-class ExtremeTubeIE(KeezMoviesIE):  # XXX: Do not subclass from concrete IE
+class ExtremeTubeIE(KeezMoviesIE):
     _VALID_URL = r'https?://(?:www\.)?extremetube\.com/(?:[^/]+/)?video/(?P<id>[^/#?&]+)'
     _TESTS = [{
         'url': 'http://www.extremetube.com/video/music-video-14-british-euro-brit-european-cumshots-swallow-652431',

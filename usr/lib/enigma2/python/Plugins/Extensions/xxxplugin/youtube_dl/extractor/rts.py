@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .srgssr import SRGSSRIE
@@ -12,7 +15,7 @@ from ..utils import (
 )
 
 
-class RTSIE(SRGSSRIE):  # XXX: Do not subclass from concrete IE
+class RTSIE(SRGSSRIE):
     IE_DESC = 'RTS.ch'
     _VALID_URL = r'rts:(?P<rts_id>\d+)|https?://(?:.+?\.)?rts\.ch/(?:[^/]+/){2,}(?P<id>[0-9]+)-(?P<display_id>.+?)\.html'
 
@@ -113,7 +116,7 @@ class RTSIE(SRGSSRIE):  # XXX: Do not subclass from concrete IE
     ]
 
     def _real_extract(self, url):
-        m = self._match_valid_url(url)
+        m = re.match(self._VALID_URL, url)
         media_id = m.group('rts_id') or m.group('id')
         display_id = m.group('display_id') or media_id
 
@@ -136,8 +139,8 @@ class RTSIE(SRGSSRIE):  # XXX: Do not subclass from concrete IE
 
             if not entries:
                 page, urlh = self._download_webpage_handle(url, display_id)
-                if re.match(self._VALID_URL, urlh.url).group('id') != media_id:
-                    return self.url_result(urlh.url, 'RTS')
+                if re.match(self._VALID_URL, urlh.geturl()).group('id') != media_id:
+                    return self.url_result(urlh.geturl(), 'RTS')
 
                 # article with videos on rhs
                 videos = re.findall(
@@ -212,6 +215,7 @@ class RTSIE(SRGSSRIE):  # XXX: Do not subclass from concrete IE
             })
 
         self._check_formats(formats, media_id)
+        self._sort_formats(formats)
 
         duration = info.get('duration') or info.get('cutout') or info.get('cutduration')
         if isinstance(duration, compat_str):

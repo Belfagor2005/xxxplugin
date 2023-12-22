@@ -1,10 +1,14 @@
+from __future__ import unicode_literals
+
 import functools
 import re
 
 from .turner import TurnerBaseIE
 from ..compat import (
+    compat_parse_qs,
     compat_str,
     compat_urllib_parse_unquote,
+    compat_urllib_parse_urlparse,
 )
 from ..utils import (
     int_or_none,
@@ -12,7 +16,6 @@ from ..utils import (
     OnDemandPagedList,
     parse_duration,
     parse_iso8601,
-    parse_qs,
     try_get,
     update_url_query,
     urljoin,
@@ -92,6 +95,7 @@ class NBAWatchBaseIE(NBACVPBaseIE):
                 formats.extend(cvp_info['formats'])
                 info = merge_dicts(info, cvp_info)
 
+        self._sort_formats(formats)
         info['formats'] = formats
         return info
 
@@ -161,11 +165,15 @@ class NBAWatchIE(NBAWatchBaseIE):
 
     def _real_extract(self, url):
         display_id = self._match_id(url)
-        collection_id = parse_qs(url).get('collection', [None])[0]
-        if self._yes_playlist(collection_id, display_id):
-            return self.url_result(
-                'https://www.nba.com/watch/list/collection/' + collection_id,
-                NBAWatchCollectionIE.ie_key(), collection_id)
+        collection_id = compat_parse_qs(compat_urllib_parse_urlparse(url).query).get('collection', [None])[0]
+        if collection_id:
+            if self._downloader.params.get('noplaylist'):
+                self.to_screen('Downloading just video %s because of --no-playlist' % display_id)
+            else:
+                self.to_screen('Downloading playlist %s - add --no-playlist to just download video' % collection_id)
+                return self.url_result(
+                    'https://www.nba.com/watch/list/collection/' + collection_id,
+                    NBAWatchCollectionIE.ie_key(), collection_id)
         return self._extract_video('seoName', display_id)
 
 
@@ -295,7 +303,7 @@ class NBABaseIE(NBACVPBaseIE):
                 formats.append({
                     'format_id': 'source',
                     'url': source_url,
-                    'quality': 1,
+                    'preference': 1,
                 })
 
             m3u8_url = video.get('m3u8')
@@ -317,6 +325,7 @@ class NBABaseIE(NBACVPBaseIE):
                     subtitles = self._merge_subtitles(subtitles, cvp_info['subtitles'])
                     info = merge_dicts(info, cvp_info)
 
+            self._sort_formats(formats)
         else:
             info.update(self._embed_url_result(team, video['videoId']))
 
@@ -328,7 +337,7 @@ class NBABaseIE(NBACVPBaseIE):
         return info
 
     def _real_extract(self, url):
-        team, display_id = self._match_valid_url(url).groups()
+        team, display_id = re.match(self._VALID_URL, url).groups()
         if '/play#/' in url:
             display_id = compat_urllib_parse_unquote(display_id)
         else:
@@ -350,7 +359,7 @@ class NBAEmbedIE(NBABaseIE):
     }]
 
     def _real_extract(self, url):
-        qs = parse_qs(url)
+        qs = compat_parse_qs(compat_urllib_parse_urlparse(url).query)
         content_id = qs['contentId'][0]
         team = qs.get('team', [None])[0]
         if not team:

@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -57,6 +60,8 @@ class Canalc2IE(InfoExtractor):
             }
         else:
             info = self._parse_html5_media_entries(url, webpage, url)[0]
+
+        self._sort_formats(info['formats'])
 
         info.update({
             'id': video_id,

@@ -1,5 +1,13 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
-from ..compat import compat_b64decode
+from ..compat import (
+    compat_b64decode,
+    compat_chr,
+)
 from ..utils import int_or_none
 
 
@@ -25,7 +33,7 @@ class PopcorntimesIE(InfoExtractor):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id, display_id = mobj.group('id', 'display_id')
 
         webpage = self._download_webpage(url, display_id)
@@ -47,7 +55,7 @@ class PopcorntimesIE(InfoExtractor):
                 c_ord += 13
                 if upper < c_ord:
                     c_ord -= 26
-            loc_b64 += chr(c_ord)
+            loc_b64 += compat_chr(c_ord)
 
         video_url = compat_b64decode(loc_b64).decode('utf-8')
 

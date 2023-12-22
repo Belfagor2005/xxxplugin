@@ -1,14 +1,15 @@
-import base64
+# coding: utf-8
+from __future__ import unicode_literals
+
 import codecs
-import datetime
-import hashlib
-import hmac
-import json
-import random
 import re
 
 from .common import InfoExtractor
-from ..compat import compat_ord, compat_urllib_parse_unquote
+from ..compat import (
+    compat_chr,
+    compat_ord,
+    compat_urllib_parse_unquote,
+)
 from ..utils import (
     ExtractorError,
     float_or_none,
@@ -17,26 +18,13 @@ from ..utils import (
     multipart_encode,
     parse_duration,
     random_birthday,
-    traverse_obj,
-    try_call,
-    try_get,
     urljoin,
 )
 
 
 class CDAIE(InfoExtractor):
     _VALID_URL = r'https?://(?:(?:www\.)?cda\.pl/video|ebd\.cda\.pl/[0-9]+x[0-9]+)/(?P<id>[0-9a-z]+)'
-    _NETRC_MACHINE = 'cdapl'
-
-    _BASE_URL = 'https://www.cda.pl'
-    _BASE_API_URL = 'https://api.cda.pl'
-    _API_HEADERS = {
-        'Accept': 'application/vnd.cda.public+json',
-    }
-    # hardcoded in the app
-    _LOGIN_REQUEST_AUTH = 'Basic YzU3YzBlZDUtYTIzOC00MWQwLWI2NjQtNmZmMWMxY2Y2YzVlOklBTm95QlhRRVR6U09MV1hnV3MwMW0xT2VyNWJNZzV4clRNTXhpNGZJUGVGZ0lWUlo5UGVYTDhtUGZaR1U1U3Q'
-    _BEARER_CACHE = 'cda-bearer'
-
+    _BASE_URL = 'http://www.cda.pl/'
     _TESTS = [{
         'url': 'http://www.cda.pl/video/5749950c',
         'md5': '6f844bf51b15f31fae165365707ae970',
@@ -50,8 +38,6 @@ class CDAIE(InfoExtractor):
             'average_rating': float,
             'duration': 39,
             'age_limit': 0,
-            'upload_date': '20160221',
-            'timestamp': 1456078244,
         }
     }, {
         'url': 'http://www.cda.pl/video/57413289',
@@ -100,110 +86,14 @@ class CDAIE(InfoExtractor):
                 'Content-Type': content_type,
             }, **kwargs)
 
-    def _perform_login(self, username, password):
-        app_version = random.choice((
-            '1.2.88 build 15306',
-            '1.2.174 build 18469',
-        ))
-        android_version = random.randrange(8, 14)
-        phone_model = random.choice((
-            # x-kom.pl top selling Android smartphones, as of 2022-12-26
-            # https://www.x-kom.pl/g-4/c/1590-smartfony-i-telefony.html?f201-system-operacyjny=61322-android
-            'ASUS ZenFone 8',
-            'Motorola edge 20 5G',
-            'Motorola edge 30 neo 5G',
-            'Motorola moto g22',
-            'OnePlus Nord 2T 5G',
-            'Samsung Galaxy A32 SM‑A325F',
-            'Samsung Galaxy M13',
-            'Samsung Galaxy S20 FE 5G',
-            'Xiaomi 11T',
-            'Xiaomi POCO M4 Pro',
-            'Xiaomi Redmi 10',
-            'Xiaomi Redmi 10C',
-            'Xiaomi Redmi 9C NFC',
-            'Xiaomi Redmi Note 10 Pro',
-            'Xiaomi Redmi Note 11 Pro',
-            'Xiaomi Redmi Note 11',
-            'Xiaomi Redmi Note 11S 5G',
-            'Xiaomi Redmi Note 11S',
-            'realme 10',
-            'realme 9 Pro+',
-            'vivo Y33s',
-        ))
-        self._API_HEADERS['User-Agent'] = f'pl.cda 1.0 (version {app_version}; Android {android_version}; {phone_model})'
-
-        cached_bearer = self.cache.load(self._BEARER_CACHE, username) or {}
-        if cached_bearer.get('valid_until', 0) > datetime.datetime.now().timestamp() + 5:
-            self._API_HEADERS['Authorization'] = f'Bearer {cached_bearer["token"]}'
-            return
-
-        password_hash = base64.urlsafe_b64encode(hmac.new(
-            b's01m1Oer5IANoyBXQETzSOLWXgWs01m1Oer5bMg5xrTMMxRZ9Pi4fIPeFgIVRZ9PeXL8mPfXQETZGUAN5StRZ9P',
-            ''.join(f'{bytes((bt & 255, )).hex():0>2}'
-                    for bt in hashlib.md5(password.encode()).digest()).encode(),
-            hashlib.sha256).digest()).decode().replace('=', '')
-
-        token_res = self._download_json(
-            f'{self._BASE_API_URL}/oauth/token', None, 'Logging in', data=b'',
-            headers={**self._API_HEADERS, 'Authorization': self._LOGIN_REQUEST_AUTH},
-            query={
-                'grant_type': 'password',
-                'login': username,
-                'password': password_hash,
-            })
-        self.cache.store(self._BEARER_CACHE, username, {
-            'token': token_res['access_token'],
-            'valid_until': token_res['expires_in'] + datetime.datetime.now().timestamp(),
-        })
-        self._API_HEADERS['Authorization'] = f'Bearer {token_res["access_token"]}'
-
     def _real_extract(self, url):
         video_id = self._match_id(url)
-
-        if 'Authorization' in self._API_HEADERS:
-            return self._api_extract(video_id)
-        else:
-            return self._web_extract(video_id, url)
-
-    def _api_extract(self, video_id):
-        meta = self._download_json(
-            f'{self._BASE_API_URL}/video/{video_id}', video_id, headers=self._API_HEADERS)['video']
-
-        uploader = traverse_obj(meta, 'author', 'login')
-
-        formats = [{
-            'url': quality['file'],
-            'format': quality.get('title'),
-            'resolution': quality.get('name'),
-            'height': try_call(lambda: int(quality['name'][:-1])),
-            'filesize': quality.get('length'),
-        } for quality in meta['qualities'] if quality.get('file')]
-
-        if meta.get('premium') and not meta.get('premium_free') and not formats:
-            raise ExtractorError(
-                'Video requires CDA Premium - subscription needed', expected=True)
-
-        return {
-            'id': video_id,
-            'title': meta.get('title'),
-            'description': meta.get('description'),
-            'uploader': None if uploader == 'anonim' else uploader,
-            'average_rating': float_or_none(meta.get('rating')),
-            'thumbnail': meta.get('thumb'),
-            'formats': formats,
-            'duration': meta.get('duration'),
-            'age_limit': 18 if meta.get('for_adults') else 0,
-            'view_count': meta.get('views'),
-        }
-
-    def _web_extract(self, video_id, url):
         self._set_cookie('cda.pl', 'cda.player', 'html5')
         webpage = self._download_webpage(
-            f'{self._BASE_URL}/video/{video_id}/vfilm', video_id)
+            self._BASE_URL + '/video/' + video_id, video_id)
 
         if 'Ten film jest dostępny dla użytkowników premium' in webpage:
-            self.raise_login_required('This video is only available for premium users')
+            raise ExtractorError('This video is only available for premium users.', expected=True)
 
         if re.search(r'niedostępn[ey] w(?:&nbsp;|\s+)Twoim kraju\s*<', webpage):
             self.raise_geo_restricted()
@@ -253,7 +143,7 @@ class CDAIE(InfoExtractor):
             b = []
             for c in a:
                 f = compat_ord(c)
-                b.append(chr(33 + (f + 14) % 94) if 33 <= f <= 126 else chr(f))
+                b.append(compat_chr(33 + (f + 14) % 94) if 33 <= f and 126 >= f else compat_chr(f))
             a = ''.join(b)
             a = a.replace('.cda.mp4', '')
             for p in ('.2cda.pl', '.3cda.pl'):
@@ -283,34 +173,18 @@ class CDAIE(InfoExtractor):
                     video['file'] = video['file'].replace('adc.mp4', '.mp4')
             elif not video['file'].startswith('http'):
                 video['file'] = decrypt_file(video['file'])
-            video_quality = video.get('quality')
-            qualities = video.get('qualities', {})
-            video_quality = next((k for k, v in qualities.items() if v == video_quality), video_quality)
-            info_dict['formats'].append({
+            f = {
                 'url': video['file'],
-                'format_id': video_quality,
-                'height': int_or_none(video_quality[:-1]),
-            })
-            for quality, cda_quality in qualities.items():
-                if quality == video_quality:
-                    continue
-                data = {'jsonrpc': '2.0', 'method': 'videoGetLink', 'id': 2,
-                        'params': [video_id, cda_quality, video.get('ts'), video.get('hash2'), {}]}
-                data = json.dumps(data).encode('utf-8')
-                video_url = self._download_json(
-                    f'https://www.cda.pl/video/{video_id}', video_id, headers={
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }, data=data, note=f'Fetching {quality} url',
-                    errnote=f'Failed to fetch {quality} url', fatal=False)
-                if try_get(video_url, lambda x: x['result']['status']) == 'ok':
-                    video_url = try_get(video_url, lambda x: x['result']['resp'])
-                    info_dict['formats'].append({
-                        'url': video_url,
-                        'format_id': quality,
-                        'height': int_or_none(quality[:-1])
-                    })
-
+            }
+            m = re.search(
+                r'<a[^>]+data-quality="(?P<format_id>[^"]+)"[^>]+href="[^"]+"[^>]+class="[^"]*quality-btn-active[^"]*">(?P<height>[0-9]+)p',
+                page)
+            if m:
+                f.update({
+                    'format_id': m.group('format_id'),
+                    'height': int(m.group('height')),
+                })
+            info_dict['formats'].append(f)
             if not info_dict['duration']:
                 info_dict['duration'] = parse_duration(video.get('duration'))
 
@@ -334,5 +208,7 @@ class CDAIE(InfoExtractor):
                 continue
 
             extract_format(webpage, resolution)
+
+        self._sort_formats(formats)
 
         return merge_dicts(info_dict, info)

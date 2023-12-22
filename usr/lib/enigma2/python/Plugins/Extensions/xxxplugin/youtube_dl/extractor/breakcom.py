@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from .youtube import YoutubeIE
 from ..utils import (
@@ -37,7 +41,7 @@ class BreakIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        display_id, video_id = self._match_valid_url(url).groups()
+        display_id, video_id = re.match(self._VALID_URL, url).groups()
 
         webpage = self._download_webpage(url, display_id)
 
@@ -63,6 +67,7 @@ class BreakIE(InfoExtractor):
                 'format_id': 'http-%d' % bitrate if bitrate else 'http',
                 'tbr': bitrate,
             })
+        self._sort_formats(formats)
 
         title = self._search_regex(
             (r'title["\']\s*:\s*(["\'])(?P<value>(?:(?!\1).)+)\1',

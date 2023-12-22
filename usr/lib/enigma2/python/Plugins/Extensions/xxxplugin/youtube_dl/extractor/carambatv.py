@@ -1,7 +1,9 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
-    format_field,
     float_or_none,
     int_or_none,
     try_get,
@@ -41,8 +43,9 @@ class CarambaTVIE(InfoExtractor):
         formats = [{
             'url': base_url + f['fn'],
             'height': int_or_none(f.get('height')),
-            'format_id': format_field(f, 'height', '%sp'),
+            'format_id': '%sp' % f['height'] if f.get('height') else None,
         } for f in video['qualities'] if f.get('fn')]
+        self._sort_formats(formats)
 
         thumbnail = video.get('splash')
         duration = float_or_none(try_get(

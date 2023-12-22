@@ -1,13 +1,16 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
-from ..compat import compat_str
 from ..utils import (
     clean_html,
-    determine_ext,
+    parse_iso8601,
     float_or_none,
     int_or_none,
-    parse_iso8601,
+    compat_str,
+    determine_ext,
 )
 
 
@@ -118,6 +121,7 @@ class HitboxIE(InfoExtractor):
                     'tbr': bitrate,
                     'format_note': label,
                 })
+        self._sort_formats(formats)
 
         metadata = self._extract_metadata(
             'https://www.smashcast.tv/api/media/video', video_id)
@@ -126,7 +130,7 @@ class HitboxIE(InfoExtractor):
         return metadata
 
 
-class HitboxLiveIE(HitboxIE):  # XXX: Do not subclass from concrete IE
+class HitboxLiveIE(HitboxIE):
     IE_NAME = 'hitbox:live'
     _VALID_URL = r'https?://(?:www\.)?(?:hitbox|smashcast)\.tv/(?P<id>[^/?#&]+)'
     _TESTS = [{
@@ -199,11 +203,12 @@ class HitboxLiveIE(HitboxIE):  # XXX: Do not subclass from concrete IE
                             'page_url': url,
                             'player_url': 'http://www.hitbox.tv/static/player/flowplayer/flowplayer.commercial-3.2.16.swf',
                         })
+        self._sort_formats(formats)
 
         metadata = self._extract_metadata(
             'https://www.smashcast.tv/api/media/live', video_id)
         metadata['formats'] = formats
         metadata['is_live'] = True
-        metadata['title'] = metadata.get('title')
+        metadata['title'] = self._live_title(metadata.get('title'))
 
         return metadata

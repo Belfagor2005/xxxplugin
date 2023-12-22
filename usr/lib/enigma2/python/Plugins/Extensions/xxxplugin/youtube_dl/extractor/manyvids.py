@@ -1,6 +1,10 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
+from ..compat import compat_str
 from ..utils import (
     determine_ext,
     extract_attributes,
@@ -68,7 +72,7 @@ class ManyVidsIE(InfoExtractor):
         )
 
         def txt_or_none(s, default=None):
-            return (s.strip() or default) if isinstance(s, str) else default
+            return (s.strip() or default) if isinstance(s, compat_str) else default
 
         uploader = txt_or_none(info.get('data-meta-author'))
 
@@ -134,6 +138,8 @@ class ManyVidsIE(InfoExtractor):
                 f['preference'] = -10
             if 'transcoded' in f['format_id']:
                 f['preference'] = f.get('preference', -1) - 1
+
+        self._sort_formats(formats)
 
         def get_likes():
             likes = self._search_regex(

@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -8,8 +11,7 @@ from ..utils import (
 
 
 class GfycatIE(InfoExtractor):
-    _VALID_URL = r'https?://(?:(?:www|giant|thumbs)\.)?gfycat\.com/(?i:ru/|ifr/|gifs/detail/)?(?P<id>[^-/?#\."\']+)'
-    _EMBED_REGEX = [rf'<(?:iframe|source)[^>]+\bsrc=["\'](?P<url>{_VALID_URL})']
+    _VALID_URL = r'https?://(?:(?:www|giant|thumbs)\.)?gfycat\.com/(?:ru/|ifr/|gifs/detail/)?(?P<id>[^-/?#\.]+)'
     _TESTS = [{
         'url': 'http://gfycat.com/DeadlyDecisiveGermanpinscher',
         'info_dict': {
@@ -22,10 +24,9 @@ class GfycatIE(InfoExtractor):
             'duration': 10.4,
             'view_count': int,
             'like_count': int,
+            'dislike_count': int,
             'categories': list,
             'age_limit': 0,
-            'uploader_id': 'anonymous',
-            'description': '',
         }
     }, {
         'url': 'http://gfycat.com/ifr/JauntyTimelyAmazontreeboa',
@@ -39,27 +40,9 @@ class GfycatIE(InfoExtractor):
             'duration': 3.52,
             'view_count': int,
             'like_count': int,
+            'dislike_count': int,
             'categories': list,
             'age_limit': 0,
-            'uploader_id': 'anonymous',
-            'description': '',
-        }
-    }, {
-        'url': 'https://gfycat.com/alienatedsolidgreathornedowl',
-        'info_dict': {
-            'id': 'alienatedsolidgreathornedowl',
-            'ext': 'mp4',
-            'upload_date': '20211226',
-            'uploader_id': 'reactions',
-            'timestamp': 1640536930,
-            'like_count': int,
-            'description': '',
-            'title': 'Ingrid Michaelson, Zooey Deschanel - Merry Christmas Happy New Year',
-            'categories': list,
-            'age_limit': 0,
-            'duration': 2.9583333333333335,
-            'uploader': 'Reaction GIFs',
-            'view_count': int,
         }
     }, {
         'url': 'https://gfycat.com/ru/RemarkableDrearyAmurstarfish',
@@ -76,9 +59,6 @@ class GfycatIE(InfoExtractor):
     }, {
         'url': 'https://giant.gfycat.com/acceptablehappygoluckyharborporpoise.mp4',
         'only_matching': True
-    }, {
-        'url': 'http://gfycat.com/IFR/JauntyTimelyAmazontreeboa',
-        'only_matching': True
     }]
 
     def _real_extract(self, url):
@@ -94,7 +74,7 @@ class GfycatIE(InfoExtractor):
         title = gfy.get('title') or gfy['gfyName']
         description = gfy.get('description')
         timestamp = int_or_none(gfy.get('createDate'))
-        uploader = gfy.get('userName') or gfy.get('username')
+        uploader = gfy.get('userName')
         view_count = int_or_none(gfy.get('views'))
         like_count = int_or_none(gfy.get('likes'))
         dislike_count = int_or_none(gfy.get('dislikes'))
@@ -127,14 +107,14 @@ class GfycatIE(InfoExtractor):
                 'filesize': filesize,
                 'quality': quality(format_id),
             })
+        self._sort_formats(formats)
 
         return {
             'id': video_id,
             'title': title,
             'description': description,
             'timestamp': timestamp,
-            'uploader': gfy.get('userDisplayName') or uploader,
-            'uploader_id': uploader,
+            'uploader': uploader,
             'duration': duration,
             'view_count': view_count,
             'like_count': like_count,

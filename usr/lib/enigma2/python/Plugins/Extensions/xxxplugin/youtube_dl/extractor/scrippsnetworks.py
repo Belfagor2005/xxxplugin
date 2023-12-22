@@ -1,5 +1,9 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
 import hashlib
+import re
 
 from .aws import AWSIE
 from .anvato import AnvatoIE
@@ -39,7 +43,6 @@ class ScrippsNetworksWatchIE(AWSIE):
             'skip_download': True,
         },
         'add_ie': [AnvatoIE.ie_key()],
-        'skip': '404 Not Found',
     }]
 
     _SNI_TABLE = {
@@ -52,7 +55,7 @@ class ScrippsNetworksWatchIE(AWSIE):
     _AWS_USER_AGENT = 'aws-sdk-js/2.80.0 callback'
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         site_id, video_id = mobj.group('site', 'id')
 
         aws_identity_id_json = json.dumps({
@@ -114,12 +117,8 @@ class ScrippsNetworksIE(InfoExtractor):
             'timestamp': 1475678834,
             'upload_date': '20161005',
             'uploader': 'SCNI-SCND',
-            'duration': 29.995,
-            'chapters': [{'start_time': 0.0, 'end_time': 29.995, 'title': '<Untitled Chapter 1>'}],
-            'thumbnail': 'https://images.dds.discovery.com/up/tp/Scripps_-_Food_Category_Prod/122/987/0260338_630x355.jpg',
         },
         'add_ie': ['ThePlatform'],
-        'expected_warnings': ['No HLS formats found'],
     }, {
         'url': 'https://www.diynetwork.com/videos/diy-barnwood-tablet-stand-0265790',
         'only_matching': True,
@@ -147,7 +146,7 @@ class ScrippsNetworksIE(InfoExtractor):
     _TP_TEMPL = 'https://link.theplatform.com/s/ip77QC/media/guid/%d/%s?mbr=true'
 
     def _real_extract(self, url):
-        site, guid = self._match_valid_url(url).groups()
+        site, guid = re.match(self._VALID_URL, url).groups()
         return self.url_result(smuggle_url(
             self._TP_TEMPL % (self._ACCOUNT_MAP[site], guid),
             {'force_smil_url': True}), 'ThePlatform', guid)

@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -198,7 +201,7 @@ class LifeEmbedIE(InfoExtractor):
             formats.append({
                 'url': original_url,
                 'format_id': determine_ext(original_url, None),
-                'quality': 1,
+                'preference': 1,
             })
 
         playlist = self._parse_json(
@@ -222,6 +225,8 @@ class LifeEmbedIE(InfoExtractor):
                     extract_m3u8(video_url)
                 else:
                     extract_original(video_url)
+
+        self._sort_formats(formats)
 
         thumbnail = thumbnail or self._search_regex(
             r'"image"\s*:\s*"([^"]+)', webpage, 'thumbnail', default=None)

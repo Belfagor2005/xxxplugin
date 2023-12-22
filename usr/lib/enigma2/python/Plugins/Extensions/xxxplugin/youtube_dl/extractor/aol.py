@@ -1,15 +1,21 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .yahoo import YahooIE
+from ..compat import (
+    compat_parse_qs,
+    compat_urllib_parse_urlparse,
+)
 from ..utils import (
     ExtractorError,
     int_or_none,
-    parse_qs,
     url_or_none,
 )
 
 
-class AolIE(YahooIE):  # XXX: Do not subclass from concrete IE
+class AolIE(YahooIE):
     IE_NAME = 'aol.com'
     _VALID_URL = r'(?:aol-video:|https?://(?:www\.)?aol\.(?:com|ca|co\.uk|de|jp)/video/(?:[^/]+/)*)(?P<id>\d{9}|[0-9a-f]{24}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})'
 
@@ -113,12 +119,13 @@ class AolIE(YahooIE):  # XXX: Do not subclass from concrete IE
                         'height': int(mobj.group(2)),
                     })
                 else:
-                    qs = parse_qs(video_url)
+                    qs = compat_parse_qs(compat_urllib_parse_urlparse(video_url).query)
                     f.update({
                         'width': int_or_none(qs.get('w', [None])[0]),
                         'height': int_or_none(qs.get('h', [None])[0]),
                     })
                 formats.append(f)
+        self._sort_formats(formats, ('width', 'height', 'tbr', 'format_id'))
 
         return {
             'id': video_id,

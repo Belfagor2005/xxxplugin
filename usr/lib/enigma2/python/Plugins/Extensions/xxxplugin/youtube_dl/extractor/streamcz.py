@@ -1,11 +1,15 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
+import re
 
 from .common import InfoExtractor
 from ..utils import (
     float_or_none,
     int_or_none,
+    merge_dicts,
     parse_codecs,
-    traverse_obj,
     urljoin,
 )
 
@@ -52,25 +56,24 @@ class StreamCZIE(InfoExtractor):
 
     def _extract_formats(self, spl_url, video):
         for ext, pref, streams in (
-                ('ts', -1, traverse_obj(video, ('http_stream', 'qualities')) or {}),
-                ('mp4', 1, video.get('mp4') or {})):
+                ('ts', -1, video.get('http_stream', {}).get('qualities', {})),
+                ('mp4', 1, video.get('mp4'))):
             for format_id, stream in streams.items():
                 if not stream.get('url'):
                     continue
-                yield {
-                    'format_id': f'{format_id}-{ext}',
+                yield merge_dicts({
+                    'format_id': '-'.join((format_id, ext)),
                     'ext': ext,
                     'source_preference': pref,
                     'url': urljoin(spl_url, stream['url']),
                     'tbr': float_or_none(stream.get('bandwidth'), scale=1000),
                     'duration': float_or_none(stream.get('duration'), scale=1000),
-                    'width': traverse_obj(stream, ('resolution', 0)),
-                    'height': traverse_obj(stream, ('resolution', 1)) or int_or_none(format_id.replace('p', '')),
-                    **parse_codecs(stream.get('codec')),
-                }
+                    'width': stream.get('resolution', 2 * [0])[0] or None,
+                    'height': stream.get('resolution', 2 * [0])[1] or int_or_none(format_id.replace('p', '')),
+                }, parse_codecs(stream.get('codec')))
 
     def _real_extract(self, url):
-        display_id, video_id = self._match_valid_url(url).groups()
+        display_id, video_id = re.match(self._VALID_URL, url).groups()
 
         data = self._download_json(
             'https://www.televizeseznam.cz/api/graphql', video_id, 'Downloading GraphQL result',
@@ -109,6 +112,7 @@ class StreamCZIE(InfoExtractor):
                 })
 
         formats = list(self._extract_formats(spl_url, video))
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

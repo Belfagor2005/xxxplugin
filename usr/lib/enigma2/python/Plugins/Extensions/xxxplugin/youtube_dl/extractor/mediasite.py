@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 import json
 
@@ -11,9 +14,8 @@ from ..utils import (
     float_or_none,
     mimetype2ext,
     str_or_none,
-    try_call,
     try_get,
-    smuggle_url,
+    unescapeHTML,
     unsmuggle_url,
     url_or_none,
     urljoin,
@@ -24,8 +26,7 @@ _ID_RE = r'(?:[0-9a-f]{32,34}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 
 
 class MediasiteIE(InfoExtractor):
-    _VALID_URL = r'(?xi)https?://[^/]+/Mediasite/(?:Play|Showcase/[^/#?]+/Presentation)/(?P<id>%s)(?P<query>\?[^#]+|)' % _ID_RE
-    _EMBED_REGEX = [r'(?xi)<iframe\b[^>]+\bsrc=(["\'])(?P<url>(?:(?:https?:)?//[^/]+)?/Mediasite/Play/%s(?:\?.*?)?)\1' % _ID_RE]
+    _VALID_URL = r'(?xi)https?://[^/]+/Mediasite/(?:Play|Showcase/(?:default|livebroadcast)/Presentation)/(?P<id>%s)(?P<query>\?[^#]+|)' % _ID_RE
     _TESTS = [
         {
             'url': 'https://hitsmediaweb.h-its.org/mediasite/Play/2db6c271681e4f199af3c60d1f82869b1d',
@@ -113,65 +114,22 @@ class MediasiteIE(InfoExtractor):
         5: 'video3',
     }
 
-    @classmethod
-    def _extract_embed_urls(cls, url, webpage):
-        for embed_url in super()._extract_embed_urls(url, webpage):
-            yield smuggle_url(embed_url, {'UrlReferrer': url})
-
-    def __extract_slides(self, *, stream_id, snum, Stream, duration, images):
-        slide_base_url = Stream['SlideBaseUrl']
-
-        fname_template = Stream['SlideImageFileNameTemplate']
-        if fname_template != 'slide_{0:D4}.jpg':
-            self.report_warning('Unusual slide file name template; report a bug if slide downloading fails')
-        fname_template = re.sub(r'\{0:D([0-9]+)\}', r'{0:0\1}', fname_template)
-
-        fragments = []
-        for i, slide in enumerate(Stream['Slides']):
-            if i == 0:
-                if slide['Time'] > 0:
-                    default_slide = images.get('DefaultSlide')
-                    if default_slide is None:
-                        default_slide = images.get('DefaultStreamImage')
-                    if default_slide is not None:
-                        default_slide = default_slide['ImageFilename']
-                    if default_slide is not None:
-                        fragments.append({
-                            'path': default_slide,
-                            'duration': slide['Time'] / 1000,
-                        })
-
-            next_time = try_call(
-                lambda: Stream['Slides'][i + 1]['Time'],
-                lambda: duration,
-                lambda: slide['Time'],
-                expected_type=(int, float))
-
-            fragments.append({
-                'path': fname_template.format(slide.get('Number', i + 1)),
-                'duration': (next_time - slide['Time']) / 1000
-            })
-
-        return {
-            'format_id': '%s-%u.slides' % (stream_id, snum),
-            'ext': 'mhtml',
-            'url': slide_base_url,
-            'protocol': 'mhtml',
-            'acodec': 'none',
-            'vcodec': 'none',
-            'format_note': 'Slides',
-            'fragments': fragments,
-            'fragment_base_url': slide_base_url,
-        }
+    @staticmethod
+    def _extract_urls(webpage):
+        return [
+            unescapeHTML(mobj.group('url'))
+            for mobj in re.finditer(
+                r'(?xi)<iframe\b[^>]+\bsrc=(["\'])(?P<url>(?:(?:https?:)?//[^/]+)?/Mediasite/Play/%s(?:\?.*?)?)\1' % _ID_RE,
+                webpage)]
 
     def _real_extract(self, url):
         url, data = unsmuggle_url(url, {})
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         resource_id = mobj.group('id')
         query = mobj.group('query')
 
         webpage, urlh = self._download_webpage_handle(url, resource_id)  # XXX: add UrlReferrer?
-        redirect_url = urlh.url
+        redirect_url = urlh.geturl()
 
         # XXX: might have also extracted UrlReferrer and QueryString from the html
         service_path = compat_urlparse.urljoin(redirect_url, self._html_search_regex(
@@ -240,20 +198,15 @@ class MediasiteIE(InfoExtractor):
                         'ext': mimetype2ext(VideoUrl.get('MimeType')),
                     })
 
-            if Stream.get('HasSlideContent', False):
-                images = player_options['PlayerLayoutOptions']['Images']
-                stream_formats.append(self.__extract_slides(
-                    stream_id=stream_id,
-                    snum=snum,
-                    Stream=Stream,
-                    duration=presentation.get('Duration'),
-                    images=images,
-                ))
+            # TODO: if Stream['HasSlideContent']:
+            # synthesise an MJPEG video stream '%s-%u.slides' % (stream_type, snum)
+            # from Stream['Slides']
+            # this will require writing a custom downloader...
 
             # disprefer 'secondary' streams
             if stream_type != 0:
                 for fmt in stream_formats:
-                    fmt['quality'] = -10
+                    fmt['preference'] = -1
 
             thumbnail_url = Stream.get('ThumbnailUrl')
             if thumbnail_url:
@@ -263,6 +216,8 @@ class MediasiteIE(InfoExtractor):
                     'preference': -1 if stream_type != 0 else 0,
                 })
             formats.extend(stream_formats)
+
+        self._sort_formats(formats)
 
         # XXX: Presentation['Presenters']
         # XXX: Presentation['Transcript']
@@ -321,7 +276,7 @@ class MediasiteCatalogIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         mediasite_url = mobj.group('url')
         catalog_id = mobj.group('catalog_id')
         current_folder_id = mobj.group('current_folder_id') or catalog_id
@@ -397,7 +352,7 @@ class MediasiteNamedCatalogIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         mediasite_url = mobj.group('url')
         catalog_name = mobj.group('catalog_name')
 

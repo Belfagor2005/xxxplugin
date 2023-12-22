@@ -1,13 +1,18 @@
+# coding: utf-8
+
+from __future__ import unicode_literals
+from ..utils import (
+    ExtractorError,
+)
+
 from ..compat import (
     compat_b64decode,
     compat_urllib_parse_unquote,
     compat_urlparse,
 )
 from ..utils import (
-    ExtractorError,
     determine_ext,
     update_url_query,
-    traverse_obj,
 )
 from .bokecc import BokeCCBaseIE
 
@@ -36,7 +41,6 @@ class InfoQIE(BokeCCBaseIE):
             'ext': 'flv',
             'description': 'md5:308d981fb28fa42f49f9568322c683ff',
         },
-        'skip': 'Sorry, the page you visited does not exist',
     }, {
         'url': 'https://www.infoq.com/presentations/Simple-Made-Easy',
         'md5': '0e34642d4d9ef44bf86f66f6399672db',
@@ -90,9 +94,11 @@ class InfoQIE(BokeCCBaseIE):
 
     def _extract_http_audio(self, webpage, video_id):
         try:
-            http_audio_url = traverse_obj(self._form_hidden_inputs('mp3Form', webpage), 'filename')
+            fields = self._form_hidden_inputs('mp3Form', webpage)
         except ExtractorError:
-            http_audio_url = None
+            fields = {}
+
+        http_audio_url = fields.get('filename')
         if not http_audio_url:
             return []
 
@@ -116,7 +122,7 @@ class InfoQIE(BokeCCBaseIE):
         video_id = self._match_id(url)
         webpage = self._download_webpage(url, video_id)
 
-        video_title = self._html_extract_title(webpage)
+        video_title = self._html_search_regex(r'<title>(.*?)</title>', webpage, 'title')
         video_description = self._html_search_meta('description', webpage, 'description')
 
         if '/cn/' in url:
@@ -127,6 +133,8 @@ class InfoQIE(BokeCCBaseIE):
                 self._extract_rtmp_video(webpage)
                 + self._extract_http_video(webpage)
                 + self._extract_http_audio(webpage, video_id))
+
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

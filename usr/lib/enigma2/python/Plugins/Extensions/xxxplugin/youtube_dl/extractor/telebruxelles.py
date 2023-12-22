@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -59,13 +62,14 @@ class TeleBruxellesIE(InfoExtractor):
         rtmp_url = re.sub(r'^rmtp', 'rtmp', rtmp_url)
         rtmp_url = re.sub(r'"\s*\+\s*"', '', rtmp_url)
         formats = self._extract_wowza_formats(rtmp_url, article_id or display_id)
+        self._sort_formats(formats)
 
         is_live = 'stream/live' in rtmp_url
 
         return {
             'id': article_id or display_id,
             'display_id': display_id,
-            'title': title,
+            'title': self._live_title(title) if is_live else title,
             'description': description,
             'formats': formats,
             'is_live': is_live,

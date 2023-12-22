@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -38,7 +40,8 @@ class TeachableBaseIE(InfoExtractor):
         if self._logged_in:
             return
 
-        username, password = self._get_login_info(netrc_machine=self._SITES.get(site, site))
+        username, password = self._get_login_info(
+            netrc_machine=self._SITES.get(site, site))
         if username is None:
             return
 
@@ -56,7 +59,7 @@ class TeachableBaseIE(InfoExtractor):
             self._logged_in = True
             return
 
-        login_url = urlh.url
+        login_url = urlh.geturl()
 
         login_form = self._hidden_inputs(login_page)
 
@@ -140,15 +143,15 @@ class TeachableIE(TeachableBaseIE):
             r'<link[^>]+href=["\']https?://(?:process\.fs|assets)\.teachablecdn\.com',
             webpage)
 
-    @classmethod
-    def _extract_embed_urls(cls, url, webpage):
-        if cls._is_teachable(webpage):
-            if re.match(r'https?://[^/]+/(?:courses|p)', url):
-                yield f'{cls._URL_PREFIX}{url}'
-                raise cls.StopExtraction()
+    @staticmethod
+    def _extract_url(webpage, source_url):
+        if not TeachableIE._is_teachable(webpage):
+            return
+        if re.match(r'https?://[^/]+/(?:courses|p)', source_url):
+            return '%s%s' % (TeachableBaseIE._URL_PREFIX, source_url)
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         site = mobj.group('site') or mobj.group('site_t')
         video_id = mobj.group('id')
 
@@ -160,7 +163,7 @@ class TeachableIE(TeachableBaseIE):
 
         webpage = self._download_webpage(url, video_id)
 
-        wistia_urls = WistiaIE._extract_embed_urls(url, webpage)
+        wistia_urls = WistiaIE._extract_urls(webpage)
         if not wistia_urls:
             if any(re.search(p, webpage) for p in (
                     r'class=["\']lecture-contents-locked',
@@ -245,7 +248,7 @@ class TeachableCourseIE(TeachableBaseIE):
             TeachableCourseIE, cls).suitable(url)
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         site = mobj.group('site') or mobj.group('site_t')
         course_id = mobj.group('id')
 

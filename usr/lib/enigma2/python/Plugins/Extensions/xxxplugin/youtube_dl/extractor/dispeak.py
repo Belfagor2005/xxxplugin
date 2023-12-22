@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -72,11 +74,13 @@ class DigitallySpeakingIE(InfoExtractor):
             tbr = int_or_none(bitrate)
             vbr = int_or_none(self._search_regex(
                 r'-(\d+)\.mp4', video_path, 'vbr', default=None))
+            abr = tbr - vbr if tbr and vbr else None
             video_formats.append({
                 'format_id': bitrate,
                 'url': url,
                 'tbr': tbr,
                 'vbr': vbr,
+                'abr': abr,
             })
         return video_formats
 
@@ -90,7 +94,6 @@ class DigitallySpeakingIE(InfoExtractor):
                 'play_path': remove_end(audio.get('url'), '.flv'),
                 'ext': 'flv',
                 'vcodec': 'none',
-                'quality': 1,
                 'format_id': audio.get('code'),
             })
         for video_key, format_id, preference in (
@@ -104,6 +107,7 @@ class DigitallySpeakingIE(InfoExtractor):
                 'ext': 'flv',
                 'format_note': '%s video' % video_key,
                 'quality': preference,
+                'preference': preference,
                 'format_id': format_id,
             })
         return formats

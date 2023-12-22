@@ -1,9 +1,16 @@
+from __future__ import unicode_literals
+
 import re
-import urllib.parse
 
 from .common import InfoExtractor
-from ..compat import compat_urllib_parse_unquote
-from ..utils import ExtractorError, clean_html
+from ..compat import (
+    compat_urllib_parse_unquote,
+    compat_urllib_parse_unquote_plus,
+)
+from ..utils import (
+    clean_html,
+    ExtractorError,
+)
 
 
 class PlayvidIE(InfoExtractor):
@@ -57,7 +64,7 @@ class PlayvidIE(InfoExtractor):
                 val = videovars_match.group(2)
 
                 if key == 'title':
-                    video_title = urllib.parse.unquote_plus(val)
+                    video_title = compat_urllib_parse_unquote_plus(val)
                 if key == 'duration':
                     try:
                         duration = int(val)
@@ -74,10 +81,12 @@ class PlayvidIE(InfoExtractor):
                         'height': height,
                         'url': val,
                     })
+        self._sort_formats(formats)
 
         # Extract title - should be in the flashvars; if not, look elsewhere
         if video_title is None:
-            video_title = self._html_extract_title(webpage)
+            video_title = self._html_search_regex(
+                r'<title>(.*?)</title', webpage, 'title')
 
         return {
             'id': video_id,

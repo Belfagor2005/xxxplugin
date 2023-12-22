@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
@@ -8,6 +11,13 @@ from ..utils import (
     update_url_query,
     urljoin,
 )
+
+# compat_range
+try:
+    if callable(xrange):
+        range = xrange
+except (NameError, TypeError):
+    pass
 
 
 class CPACIE(InfoExtractor):
@@ -53,6 +63,8 @@ class CPACIE(InfoExtractor):
                     fmt['language_preference'] = -1
                 else:
                     fmt['language_preference'] = -10
+
+        self._sort_formats(formats)
 
         category = str_or_none(content['details']['category_%s_t' % (url_lang, )])
 

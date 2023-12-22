@@ -1,7 +1,13 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
 
+from ..utils import (
+    strip_or_none,
+    traverse_obj,
+)
 from .common import InfoExtractor
-from ..utils import strip_or_none, traverse_obj
 
 
 class BlerpIE(InfoExtractor):

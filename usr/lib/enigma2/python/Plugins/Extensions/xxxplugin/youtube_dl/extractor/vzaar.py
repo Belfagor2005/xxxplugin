@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
@@ -10,7 +15,6 @@ from ..utils import (
 
 class VzaarIE(InfoExtractor):
     _VALID_URL = r'https?://(?:(?:www|view)\.)?vzaar\.com/(?:videos/)?(?P<id>\d+)'
-    _EMBED_REGEX = [r'<iframe[^>]+src=["\'](?P<url>(?:https?:)?//(?:view\.vzaar\.com)/[0-9]+)']
     _TESTS = [{
         # HTTP and HLS
         'url': 'https://vzaar.com/videos/1152805',
@@ -46,6 +50,12 @@ class VzaarIE(InfoExtractor):
         'only_matching': True,
     }]
 
+    @staticmethod
+    def _extract_urls(webpage):
+        return re.findall(
+            r'<iframe[^>]+src=["\']((?:https?:)?//(?:view\.vzaar\.com)/[0-9]+)',
+            webpage)
+
     def _real_extract(self, url):
         video_id = self._match_id(url)
         video_data = self._download_json(
@@ -60,7 +70,7 @@ class VzaarIE(InfoExtractor):
             f = {
                 'url': source_url,
                 'format_id': 'http',
-                'quality': 1,
+                'preference': 1,
             }
             if 'audio' in source_url:
                 f.update({
@@ -87,8 +97,10 @@ class VzaarIE(InfoExtractor):
                 m3u8_id='hls', fatal=False)
             if hls_aes:
                 for f in m3u8_formats:
-                    f['hls_aes'] = {'uri': url_templ % ('goose', '') + qs}
+                    f['_decryption_key_url'] = url_templ % ('goose', '') + qs
             formats.extend(m3u8_formats)
+
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

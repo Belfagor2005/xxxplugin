@@ -1,12 +1,20 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
+from ..compat import (
+    compat_str,
+)
 from ..utils import (
     determine_ext,
     extract_attributes,
     int_or_none,
+    merge_dicts,
     traverse_obj,
     url_or_none,
+    variadic,
 )
 
 
@@ -22,23 +30,32 @@ class DLFBaseIE(InfoExtractor):
             attrs, 'data-audio-download-src', 'data-audio', 'data-audioreference',
             'data-audio-src', expected_type=url_or_none)
         ext = determine_ext(url)
+        formats = (self._extract_m3u8_formats(url, audio_id, fatal=False)
+                   if ext == 'm3u8' else [{'url': url, 'ext': ext, 'vcodec': 'none'}])
+        self._sort_formats(formats)
 
-        return {
+        def traverse_attrs(path):
+            path = list(variadic(path))
+            t = path.pop() if callable(path[-1]) else None
+            return traverse_obj(attrs, path, expected_type=t, get_all=False)
+
+        def txt_or_none(v, default=None):
+            return default if v is None else (compat_str(v).strip() or default)
+
+        return merge_dicts(*reversed([{
             'id': audio_id,
-            'extractor_key': DLFIE.ie_key(),
-            'extractor': DLFIE.IE_NAME,
-            **traverse_obj(attrs, {
-                'title': (('data-audiotitle', 'data-audio-title', 'data-audio-download-tracking-title'), {str}),
-                'duration': (('data-audioduration', 'data-audio-duration'), {int_or_none}),
-                'thumbnail': ('data-audioimage', {url_or_none}),
-                'uploader': 'data-audio-producer',
-                'series': 'data-audio-series',
-                'channel': 'data-audio-origin-site-name',
-                'webpage_url': ('data-audio-download-tracking-path', {url_or_none}),
-            }, get_all=False),
-            'formats': (self._extract_m3u8_formats(url, audio_id, fatal=False)
-                        if ext == 'm3u8' else [{'url': url, 'ext': ext, 'vcodec': 'none'}])
-        }
+            # 'extractor_key': DLFIE.ie_key(),
+            # 'extractor': DLFIE.IE_NAME,
+            'formats': formats,
+        }, dict((k, traverse_attrs(v)) for k, v in {
+            'title': (('data-audiotitle', 'data-audio-title', 'data-audio-download-tracking-title'), txt_or_none),
+            'duration': (('data-audioduration', 'data-audio-duration'), int_or_none),
+            'thumbnail': ('data-audioimage', url_or_none),
+            'uploader': 'data-audio-producer',
+            'series': 'data-audio-series',
+            'channel': 'data-audio-origin-site-name',
+            'webpage_url': ('data-audio-download-tracking-path', url_or_none),
+        }.items())]))
 
 
 class DLFIE(DLFBaseIE):
@@ -181,12 +198,7 @@ class DLFCorpusIE(DLFBaseIE):
         playlist_id = self._match_id(url)
         webpage = self._download_webpage(url, playlist_id)
 
-        return {
-            '_type': 'playlist',
-            'id': playlist_id,
-            'description': self._html_search_meta(
-                ['description', 'og:description', 'twitter:description'], webpage, default=None),
-            'title': self._html_search_meta(
-                ['og:title', 'twitter:title'], webpage, default=None),
-            'entries': map(self._parse_button_attrs, re.findall(self._BUTTON_REGEX, webpage)),
-        }
+        return self.playlist_result(
+            map(self._parse_button_attrs, re.findall(self._BUTTON_REGEX, webpage)),
+            playlist_id, self._html_search_meta(['og:title', 'twitter:title'], webpage, default=None),
+            self._html_search_meta(['description', 'og:description', 'twitter:description'], webpage, default=None))

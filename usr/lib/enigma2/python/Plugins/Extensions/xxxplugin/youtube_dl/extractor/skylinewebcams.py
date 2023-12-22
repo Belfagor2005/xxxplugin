@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 
 
@@ -33,7 +36,7 @@ class SkylineWebcamsIE(InfoExtractor):
             'id': video_id,
             'url': stream_url,
             'ext': 'mp4',
-            'title': title,
+            'title': self._live_title(title),
             'description': description,
             'is_live': True,
         }

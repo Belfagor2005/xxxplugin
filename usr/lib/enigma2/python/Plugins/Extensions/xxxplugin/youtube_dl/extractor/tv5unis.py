@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -11,7 +16,7 @@ class TV5UnisBaseIE(InfoExtractor):
     _GEO_COUNTRIES = ['CA']
 
     def _real_extract(self, url):
-        groups = self._match_valid_url(url).groups()
+        groups = re.match(self._VALID_URL, url).groups()
         product = self._download_json(
             'https://api.tv5unis.ca/graphql', groups[0], query={
                 'query': '''{

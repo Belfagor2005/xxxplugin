@@ -1,8 +1,11 @@
-from .brightcove import BrightcoveNewBaseIE
+# coding: utf-8
+from __future__ import unicode_literals
+
+from .brightcove import BrightcoveNewIE
 from ..utils import extract_attributes
 
 
-class BandaiChannelIE(BrightcoveNewBaseIE):
+class BandaiChannelIE(BrightcoveNewIE):
     IE_NAME = 'bandaichannel'
     _VALID_URL = r'https?://(?:www\.)?b-ch\.com/titles/(?P<id>\d+/\d+)'
     _TESTS = [{
@@ -18,6 +21,7 @@ class BandaiChannelIE(BrightcoveNewBaseIE):
             'duration': 1387.733,
         },
         'params': {
+            'format': 'bestvideo',
             'skip_download': True,
         },
     }]

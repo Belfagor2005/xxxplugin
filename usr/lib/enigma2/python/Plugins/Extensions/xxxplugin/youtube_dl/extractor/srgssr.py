@@ -1,9 +1,13 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     ExtractorError,
     float_or_none,
     int_or_none,
-    join_nonempty,
     parse_iso8601,
     qualities,
     try_get,
@@ -78,12 +82,11 @@ class SRGSSRIE(InfoExtractor):
         return media_data
 
     def _real_extract(self, url):
-        bu, media_type, media_id = self._match_valid_url(url).groups()
+        bu, media_type, media_id = re.match(self._VALID_URL, url).groups()
         media_data = self._get_media_data(bu, media_type, media_id)
         title = media_data['title']
 
         formats = []
-        subtitles = {}
         q = qualities(['SD', 'HD'])
         for source in (media_data.get('resourceList') or []):
             format_url = source.get('url')
@@ -91,22 +94,22 @@ class SRGSSRIE(InfoExtractor):
                 continue
             protocol = source.get('protocol')
             quality = source.get('quality')
-            format_id = join_nonempty(protocol, source.get('encoding'), quality)
+            format_id = []
+            for e in (protocol, source.get('encoding'), quality):
+                if e:
+                    format_id.append(e)
+            format_id = '-'.join(format_id)
 
             if protocol in ('HDS', 'HLS'):
                 if source.get('tokenType') == 'AKAMAI':
                     format_url = self._get_tokenized_src(
                         format_url, media_id, format_id)
-                    fmts, subs = self._extract_akamai_formats_and_subtitles(
-                        format_url, media_id)
-                    formats.extend(fmts)
-                    subtitles = self._merge_subtitles(subtitles, subs)
+                    formats.extend(self._extract_akamai_formats(
+                        format_url, media_id))
                 elif protocol == 'HLS':
-                    m3u8_fmts, m3u8_subs = self._extract_m3u8_formats_and_subtitles(
+                    formats.extend(self._extract_m3u8_formats(
                         format_url, media_id, 'mp4', 'm3u8_native',
-                        m3u8_id=format_id, fatal=False)
-                    formats.extend(m3u8_fmts)
-                    subtitles = self._merge_subtitles(subtitles, m3u8_subs)
+                        m3u8_id=format_id, fatal=False))
             elif protocol in ('HTTP', 'HTTPS'):
                 formats.append({
                     'format_id': format_id,
@@ -128,7 +131,9 @@ class SRGSSRIE(InfoExtractor):
                     'url': podcast_url,
                     'quality': q(quality),
                 })
+        self._sort_formats(formats)
 
+        subtitles = {}
         if media_type == 'video':
             for sub in (media_data.get('subtitleList') or []):
                 sub_url = sub.get('url')
@@ -240,7 +245,7 @@ class SRGSSRPlayIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         bu = mobj.group('bu')
         media_type = mobj.group('type') or mobj.group('type_2')
         media_id = mobj.group('id')

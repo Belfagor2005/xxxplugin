@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
 import re
 
@@ -22,19 +25,26 @@ class SafariBaseIE(InfoExtractor):
 
     LOGGED_IN = False
 
-    def _perform_login(self, username, password):
+    def _real_initialize(self):
+        self._login()
+
+    def _login(self):
+        username, password = self._get_login_info()
+        if username is None:
+            return
+
         _, urlh = self._download_webpage_handle(
             'https://learning.oreilly.com/accounts/login-check/', None,
             'Downloading login page')
 
         def is_logged(urlh):
-            return 'learning.oreilly.com/home/' in urlh.url
+            return 'learning.oreilly.com/home/' in urlh.geturl()
 
         if is_logged(urlh):
             self.LOGGED_IN = True
             return
 
-        redirect_url = urlh.url
+        redirect_url = urlh.geturl()
         parsed_url = compat_urlparse.urlparse(redirect_url)
         qs = compat_parse_qs(parsed_url.query)
         next_uri = compat_urlparse.urljoin(
@@ -117,7 +127,7 @@ class SafariIE(SafariBaseIE):
     _UICONF_ID = '29375172'
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
 
         reference_id = mobj.group('reference_id')
         if reference_id:
@@ -129,7 +139,7 @@ class SafariIE(SafariBaseIE):
 
             webpage, urlh = self._download_webpage_handle(url, video_id)
 
-            mobj = re.match(self._VALID_URL, urlh.url)
+            mobj = re.match(self._VALID_URL, urlh.geturl())
             reference_id = mobj.group('reference_id')
             if not reference_id:
                 reference_id = self._search_regex(
@@ -179,16 +189,11 @@ class SafariApiIE(SafariBaseIE):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         part = self._download_json(
             url, '%s/%s' % (mobj.group('course_id'), mobj.group('part')),
             'Downloading part JSON')
-        web_url = part['web_url']
-        if 'library/view' in web_url:
-            web_url = web_url.replace('library/view', 'videos')
-            natural_keys = part['natural_key']
-            web_url = f'{web_url.rsplit("/", 1)[0]}/{natural_keys[0]}-{natural_keys[1][:-5]}'
-        return self.url_result(web_url, SafariIE.ie_key())
+        return self.url_result(part['web_url'], SafariIE.ie_key())
 
 
 class SafariCourseIE(SafariBaseIE):

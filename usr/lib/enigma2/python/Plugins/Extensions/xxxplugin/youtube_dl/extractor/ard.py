@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import json
 import re
 
@@ -13,7 +16,6 @@ from ..utils import (
     try_get,
     unified_strdate,
     unified_timestamp,
-    update_url,
     update_url_query,
     url_or_none,
     xpath_text,
@@ -34,12 +36,14 @@ class ARDMediathekBaseIE(InfoExtractor):
 
         if not formats:
             if fsk:
-                self.raise_no_formats(
+                raise ExtractorError(
                     'This video is only available after 20:00', expected=True)
             elif media_info.get('_geoblocked'):
                 self.raise_geo_restricted(
                     'This video is not available due to geoblocking',
-                    countries=self._GEO_COUNTRIES, metadata_available=True)
+                    countries=self._GEO_COUNTRIES)
+
+        self._sort_formats(formats)
 
         subtitles = {}
         subtitle_url = media_info.get('_subtitleUrl')
@@ -47,9 +51,6 @@ class ARDMediathekBaseIE(InfoExtractor):
             subtitles['de'] = [{
                 'ext': 'ttml',
                 'url': subtitle_url,
-            }, {
-                'ext': 'vtt',
-                'url': subtitle_url.replace('/ebutt/', '/webvtt/') + '.vtt',
             }]
 
         return {
@@ -60,45 +61,6 @@ class ARDMediathekBaseIE(InfoExtractor):
             'formats': formats,
             'subtitles': subtitles,
         }
-
-    def _ARD_extract_episode_info(self, title):
-        """Try to extract season/episode data from the title."""
-        res = {}
-        if not title:
-            return res
-
-        for pattern in [
-            # Pattern for title like "Homo sapiens (S06/E07) - Originalversion"
-            # from: https://www.ardmediathek.de/one/sendung/doctor-who/Y3JpZDovL3dkci5kZS9vbmUvZG9jdG9yIHdobw
-            r'.*(?P<ep_info> \(S(?P<season_number>\d+)/E(?P<episode_number>\d+)\)).*',
-            # E.g.: title="Fritjof aus Norwegen (2) (AD)"
-            # from: https://www.ardmediathek.de/ard/sammlung/der-krieg-und-ich/68cMkqJdllm639Skj4c7sS/
-            r'.*(?P<ep_info> \((?:Folge |Teil )?(?P<episode_number>\d+)(?:/\d+)?\)).*',
-            r'.*(?P<ep_info>Folge (?P<episode_number>\d+)(?:\:| -|) )\"(?P<episode>.+)\".*',
-            # E.g.: title="Folge 25/42: Symmetrie"
-            # from: https://www.ardmediathek.de/ard/video/grips-mathe/folge-25-42-symmetrie/ard-alpha/Y3JpZDovL2JyLmRlL3ZpZGVvLzMyYzI0ZjczLWQ1N2MtNDAxNC05ZmZhLTFjYzRkZDA5NDU5OQ/
-            # E.g.: title="Folge 1063 - Vertrauen"
-            # from: https://www.ardmediathek.de/ard/sendung/die-fallers/Y3JpZDovL3N3ci5kZS8yMzAyMDQ4/
-            r'.*(?P<ep_info>Folge (?P<episode_number>\d+)(?:/\d+)?(?:\:| -|) ).*',
-        ]:
-            m = re.match(pattern, title)
-            if m:
-                groupdict = m.groupdict()
-                res['season_number'] = int_or_none(groupdict.get('season_number'))
-                res['episode_number'] = int_or_none(groupdict.get('episode_number'))
-                res['episode'] = str_or_none(groupdict.get('episode'))
-                # Build the episode title by removing numeric episode information:
-                if groupdict.get('ep_info') and not res['episode']:
-                    res['episode'] = str_or_none(
-                        title.replace(groupdict.get('ep_info'), ''))
-                if res['episode']:
-                    res['episode'] = res['episode'].strip()
-                break
-
-        # As a fallback use the whole title as the episode name:
-        if not res.get('episode'):
-            res['episode'] = title.strip()
-        return res
 
     def _extract_formats(self, media_info, video_id):
         type_ = media_info.get('_type')
@@ -198,7 +160,7 @@ class ARDMediathekIE(ARDMediathekBaseIE):
 
     def _real_extract(self, url):
         # determine video id from url
-        m = self._match_valid_url(url)
+        m = re.match(self._VALID_URL, url)
 
         document_id = None
 
@@ -264,25 +226,24 @@ class ARDMediathekIE(ARDMediathekBaseIE):
                     'format_id': fid,
                     'url': furl,
                 })
+            self._sort_formats(formats)
             info = {
                 'formats': formats,
             }
         else:  # request JSON file
             if not document_id:
                 video_id = self._search_regex(
-                    (r'/play/(?:config|media|sola)/(\d+)', r'contentId["\']\s*:\s*(\d+)'),
-                    webpage, 'media id', default=None)
+                    r'/play/(?:config|media)/(\d+)', webpage, 'media id')
             info = self._extract_media_info(
                 'http://www.ardmediathek.de/play/media/%s' % video_id,
                 webpage, video_id)
 
         info.update({
             'id': video_id,
-            'title': title,
+            'title': self._live_title(title) if info.get('is_live') else title,
             'description': description,
             'thumbnail': thumbnail,
         })
-        info.update(self._ARD_extract_episode_info(info['title']))
 
         return info
 
@@ -290,16 +251,16 @@ class ARDMediathekIE(ARDMediathekBaseIE):
 class ARDIE(InfoExtractor):
     _VALID_URL = r'(?P<mainurl>https?://(?:www\.)?daserste\.de/(?:[^/?#&]+/)+(?P<id>[^/?#&]+))\.html'
     _TESTS = [{
-        # available till 7.12.2023
-        'url': 'https://www.daserste.de/information/talk/maischberger/videos/maischberger-video-424.html',
-        'md5': 'a438f671e87a7eba04000336a119ccc4',
+        # available till 7.01.2022
+        'url': 'https://www.daserste.de/information/talk/maischberger/videos/maischberger-die-woche-video100.html',
+        'md5': '867d8aa39eeaf6d76407c5ad1bb0d4c1',
         'info_dict': {
-            'id': 'maischberger-video-424',
-            'display_id': 'maischberger-video-424',
+            'id': 'maischberger-die-woche-video100',
+            'display_id': 'maischberger-die-woche-video100',
             'ext': 'mp4',
-            'duration': 4452.0,
-            'title': 'maischberger am 07.12.2022',
-            'upload_date': '20221207',
+            'duration': 3687.0,
+            'title': 'maischberger. die woche vom 7. Januar 2021',
+            'upload_date': '20210107',
             'thumbnail': r're:^https?://.*\.jpg$',
         },
     }, {
@@ -307,9 +268,6 @@ class ARDIE(InfoExtractor):
         'only_matching': True,
     }, {
         'url': 'https://www.daserste.de/information/nachrichten-wetter/tagesthemen/videosextern/tagesthemen-17736.html',
-        'only_matching': True,
-    }, {
-        'url': 'https://www.daserste.de/unterhaltung/serie/in-aller-freundschaft-die-jungen-aerzte/videos/diversity-tag-sanam-afrashteh100.html',
         'only_matching': True,
     }, {
         'url': 'http://www.daserste.de/information/reportage-dokumentation/dokus/videos/die-story-im-ersten-mission-unter-falscher-flagge-100.html',
@@ -323,7 +281,7 @@ class ARDIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         display_id = mobj.group('id')
 
         player_url = mobj.group('mainurl') + '~playerXml.xml'
@@ -372,6 +330,7 @@ class ARDIE(InfoExtractor):
                     continue
                 f['url'] = format_url
             formats.append(f)
+        self._sort_formats(formats)
 
         _SUB_FORMATS = (
             ('./dataTimedText', 'ttml'),
@@ -400,32 +359,8 @@ class ARDIE(InfoExtractor):
 
 
 class ARDBetaMediathekIE(ARDMediathekBaseIE):
-    _VALID_URL = r'''(?x)https://
-        (?:(?:beta|www)\.)?ardmediathek\.de/
-        (?:(?P<client>[^/]+)/)?
-        (?:player|live|video|(?P<playlist>sendung|sammlung))/
-        (?:(?P<display_id>(?(playlist)[^?#]+?|[^?#]+))/)?
-        (?P<id>(?(playlist)|Y3JpZDovL)[a-zA-Z0-9]+)
-        (?(playlist)/(?P<season>\d+)?/?(?:[?#]|$))'''
-
+    _VALID_URL = r'https://(?:(?:beta|www)\.)?ardmediathek\.de/(?:[^/]+/)?(?:player|live|video)/(?:[^/]+/)*(?P<id>Y3JpZDovL[a-zA-Z0-9]+)'
     _TESTS = [{
-        'url': 'https://www.ardmediathek.de/video/filme-im-mdr/wolfsland-die-traurigen-schwestern/mdr-fernsehen/Y3JpZDovL21kci5kZS9iZWl0cmFnL2Ntcy8xZGY0ZGJmZS00ZWQwLTRmMGItYjhhYy0wOGQ4ZmYxNjVhZDI',
-        'md5': '3fd5fead7a370a819341129c8d713136',
-        'info_dict': {
-            'display_id': 'filme-im-mdr/wolfsland-die-traurigen-schwestern/mdr-fernsehen',
-            'id': '12172961',
-            'title': 'Wolfsland - Die traurigen Schwestern',
-            'description': r're:^Als der Polizeiobermeister Raaben',
-            'duration': 5241,
-            'thumbnail': 'https://api.ardmediathek.de/image-service/images/urn:ard:image:efa186f7b0054957',
-            'timestamp': 1670710500,
-            'upload_date': '20221210',
-            'ext': 'mp4',
-            'age_limit': 12,
-            'episode': 'Wolfsland - Die traurigen Schwestern',
-            'series': 'Filme im MDR'
-        },
-    }, {
         'url': 'https://www.ardmediathek.de/mdr/video/die-robuste-roswita/Y3JpZDovL21kci5kZS9iZWl0cmFnL2Ntcy84MWMxN2MzZC0wMjkxLTRmMzUtODk4ZS0wYzhlOWQxODE2NGI/',
         'md5': 'a1dc75a39c61601b980648f7c9f9f71d',
         'info_dict': {
@@ -438,23 +373,6 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
             'timestamp': 1596658200,
             'upload_date': '20200805',
             'ext': 'mp4',
-        },
-        'skip': 'Error',
-    }, {
-        'url': 'https://www.ardmediathek.de/video/tagesschau-oder-tagesschau-20-00-uhr/das-erste/Y3JpZDovL2Rhc2Vyc3RlLmRlL3RhZ2Vzc2NoYXUvZmM4ZDUxMjgtOTE0ZC00Y2MzLTgzNzAtNDZkNGNiZWJkOTll',
-        'md5': '1e73ded21cb79bac065117e80c81dc88',
-        'info_dict': {
-            'id': '10049223',
-            'ext': 'mp4',
-            'title': 'tagesschau, 20:00 Uhr',
-            'timestamp': 1636398000,
-            'description': 'md5:39578c7b96c9fe50afdf5674ad985e6b',
-            'upload_date': '20211108',
-            'display_id': 'tagesschau-oder-tagesschau-20-00-uhr/das-erste',
-            'duration': 915,
-            'episode': 'tagesschau, 20:00 Uhr',
-            'series': 'tagesschau',
-            'thumbnail': 'https://api.ardmediathek.de/image-service/images/urn:ard:image:fbb21142783b0a49',
         },
     }, {
         'url': 'https://beta.ardmediathek.de/ard/video/Y3JpZDovL2Rhc2Vyc3RlLmRlL3RhdG9ydC9mYmM4NGM1NC0xNzU4LTRmZGYtYWFhZS0wYzcyZTIxNGEyMDE',
@@ -472,14 +390,6 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
         'url': 'https://www.ardmediathek.de/swr/live/Y3JpZDovL3N3ci5kZS8xMzQ4MTA0Mg',
         'only_matching': True,
     }, {
-        # playlist of type 'sendung'
-        'url': 'https://www.ardmediathek.de/ard/sendung/doctor-who/Y3JpZDovL3dkci5kZS9vbmUvZG9jdG9yIHdobw/',
-        'only_matching': True,
-    }, {
-        # playlist of type 'sammlung'
-        'url': 'https://www.ardmediathek.de/ard/sammlung/team-muenster/5JpTzLSbWUAK8184IOvEir/',
-        'only_matching': True,
-    }, {
         'url': 'https://www.ardmediathek.de/video/coronavirus-update-ndr-info/astrazeneca-kurz-lockdown-und-pims-syndrom-81/ndr/Y3JpZDovL25kci5kZS84NzE0M2FjNi0wMWEwLTQ5ODEtOTE5NS1mOGZhNzdhOTFmOTI/',
         'only_matching': True,
     }, {
@@ -487,116 +397,14 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
         'only_matching': True,
     }]
 
-    def _ARD_load_playlist_snipped(self, playlist_id, display_id, client, mode, pageNumber):
-        """ Query the ARD server for playlist information
-        and returns the data in "raw" format """
-        if mode == 'sendung':
-            graphQL = json.dumps({
-                'query': '''{
-                    showPage(
-                        client: "%s"
-                        showId: "%s"
-                        pageNumber: %d
-                    ) {
-                        pagination {
-                            pageSize
-                            totalElements
-                        }
-                        teasers {        # Array
-                            mediumTitle
-                            links { target { id href title } }
-                            type
-                        }
-                    }}''' % (client, playlist_id, pageNumber),
-            }).encode()
-        else:  # mode == 'sammlung'
-            graphQL = json.dumps({
-                'query': '''{
-                    morePage(
-                        client: "%s"
-                        compilationId: "%s"
-                        pageNumber: %d
-                    ) {
-                        widget {
-                            pagination {
-                                pageSize
-                                totalElements
-                            }
-                            teasers {        # Array
-                                mediumTitle
-                                links { target { id href title } }
-                                type
-                            }
-                        }
-                    }}''' % (client, playlist_id, pageNumber),
-            }).encode()
-        # Ressources for ARD graphQL debugging:
-        # https://api-test.ardmediathek.de/public-gateway
-        show_page = self._download_json(
-            'https://api.ardmediathek.de/public-gateway',
-            '[Playlist] %s' % display_id,
-            data=graphQL,
-            headers={'Content-Type': 'application/json'})['data']
-        # align the structure of the returned data:
-        if mode == 'sendung':
-            show_page = show_page['showPage']
-        else:  # mode == 'sammlung'
-            show_page = show_page['morePage']['widget']
-        return show_page
-
-    def _ARD_extract_playlist(self, url, playlist_id, display_id, client, mode):
-        """ Collects all playlist entries and returns them as info dict.
-        Supports playlists of mode 'sendung' and 'sammlung', and also nested
-        playlists. """
-        entries = []
-        pageNumber = 0
-        while True:  # iterate by pageNumber
-            show_page = self._ARD_load_playlist_snipped(
-                playlist_id, display_id, client, mode, pageNumber)
-            for teaser in show_page['teasers']:  # process playlist items
-                if '/compilation/' in teaser['links']['target']['href']:
-                    # alternativ cond.: teaser['type'] == "compilation"
-                    # => This is an nested compilation, e.g. like:
-                    # https://www.ardmediathek.de/ard/sammlung/die-kirche-bleibt-im-dorf/5eOHzt8XB2sqeFXbIoJlg2/
-                    link_mode = 'sammlung'
-                else:
-                    link_mode = 'video'
-
-                item_url = 'https://www.ardmediathek.de/%s/%s/%s/%s/%s' % (
-                    client, link_mode, display_id,
-                    # perform HTLM quoting of episode title similar to ARD:
-                    re.sub('^-|-$', '',  # remove '-' from begin/end
-                           re.sub('[^a-zA-Z0-9]+', '-',  # replace special chars by -
-                                  teaser['links']['target']['title'].lower()
-                                  .replace('ä', 'ae').replace('ö', 'oe')
-                                  .replace('ü', 'ue').replace('ß', 'ss'))),
-                    teaser['links']['target']['id'])
-                entries.append(self.url_result(
-                    item_url,
-                    ie=ARDBetaMediathekIE.ie_key()))
-
-            if (show_page['pagination']['pageSize'] * (pageNumber + 1)
-               >= show_page['pagination']['totalElements']):
-                # we've processed enough pages to get all playlist entries
-                break
-            pageNumber = pageNumber + 1
-
-        return self.playlist_result(entries, playlist_id, playlist_title=display_id)
-
     def _real_extract(self, url):
-        video_id, display_id, playlist_type, client, season_number = self._match_valid_url(url).group(
-            'id', 'display_id', 'playlist', 'client', 'season')
-        display_id, client = display_id or video_id, client or 'ard'
-
-        if playlist_type:
-            # TODO: Extract only specified season
-            return self._ARD_extract_playlist(url, video_id, display_id, client, playlist_type)
+        video_id = self._match_id(url)
 
         player_page = self._download_json(
             'https://api.ardmediathek.de/public-gateway',
-            display_id, data=json.dumps({
+            video_id, data=json.dumps({
                 'query': '''{
-  playerPage(client:"%s", clipId: "%s") {
+  playerPage(client: "ard", clipId: "%s") {
     blockedByFsk
     broadcastedOn
     maturityContentRating
@@ -618,9 +426,6 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
     show {
       title
     }
-    image {
-      src
-    }
     synopsis
     title
     tracking {
@@ -629,7 +434,7 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
       }
     }
   }
-}''' % (client, video_id),
+}''' % video_id,
             }).encode(), headers={
                 'Content-Type': 'application/json'
             })['data']['playerPage']
@@ -654,20 +459,9 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
                 r'\(FSK\s*(\d+)\)\s*$', description, 'age limit', default=None))
         info.update({
             'age_limit': age_limit,
-            'display_id': display_id,
             'title': title,
             'description': description,
             'timestamp': unified_timestamp(player_page.get('broadcastedOn')),
             'series': try_get(player_page, lambda x: x['show']['title']),
-            'thumbnail': (media_collection.get('_previewImage')
-                          or try_get(player_page, lambda x: update_url(x['image']['src'], query=None, fragment=None))
-                          or self.get_thumbnail_from_html(display_id, url)),
         })
-        info.update(self._ARD_extract_episode_info(info['title']))
         return info
-
-    def get_thumbnail_from_html(self, display_id, url):
-        webpage = self._download_webpage(url, display_id, fatal=False) or ''
-        return (
-            self._og_search_thumbnail(webpage, default=None)
-            or self._html_search_meta('thumbnailUrl', webpage, default=None))

@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -78,6 +81,7 @@ class FazIE(InfoExtractor):
                             'tbr': tbr or int(mobj.group(3)),
                         })
                     formats.append(f)
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

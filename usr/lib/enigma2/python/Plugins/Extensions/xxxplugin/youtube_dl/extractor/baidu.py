@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import unescapeHTML
 
@@ -28,7 +33,7 @@ class BaiduVideoIE(InfoExtractor):
             path, category, playlist_id), playlist_id, note)
 
     def _real_extract(self, url):
-        category, playlist_id = self._match_valid_url(url).groups()
+        category, playlist_id = re.match(self._VALID_URL, url).groups()
         if category == 'show':
             category = 'tvshow'
         if category == 'tv':

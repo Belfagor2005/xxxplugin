@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     determine_ext,
@@ -11,17 +16,15 @@ class ExpressenIE(InfoExtractor):
     _VALID_URL = r'''(?x)
                     https?://
                         (?:www\.)?(?:expressen|di)\.se/
-                        (?:(?:tvspelare/video|video-?player/embed)/)?
-                        (?:tv|nyheter)/(?:[^/?#]+/)*
+                        (?:(?:tvspelare/video|videoplayer/embed)/)?
+                        tv/(?:[^/]+/)*
                         (?P<id>[^/?#&]+)
                     '''
-    _EMBED_REGEX = [r'<iframe[^>]+\bsrc=(["\'])(?P<url>(?:https?:)?//(?:www\.)?(?:expressen|di)\.se/(?:tvspelare/video|videoplayer/embed)/tv/.+?)\1']
     _TESTS = [{
         'url': 'https://www.expressen.se/tv/ledare/ledarsnack/ledarsnack-om-arbetslosheten-bland-kvinnor-i-speciellt-utsatta-omraden/',
-        'md5': 'deb2ca62e7b1dcd19fa18ba37523f66e',
+        'md5': '2fbbe3ca14392a6b1b36941858d33a45',
         'info_dict': {
-            'id': 'ba90f5a9-78d1-4511-aa02-c177b9c99136',
-            'display_id': 'ledarsnack-om-arbetslosheten-bland-kvinnor-i-speciellt-utsatta-omraden',
+            'id': '8690962',
             'ext': 'mp4',
             'title': 'Ledarsnack: Om arbetslösheten bland kvinnor i speciellt utsatta områden',
             'description': 'md5:f38c81ff69f3de4d269bbda012fcbbba',
@@ -42,13 +45,14 @@ class ExpressenIE(InfoExtractor):
     }, {
         'url': 'https://www.di.se/videoplayer/embed/tv/ditv/borsmorgon/implantica-rusar-70--under-borspremiaren-hor-styrelsemedlemmen/?embed=true&external=true&autoplay=true&startVolume=0&partnerId=di',
         'only_matching': True,
-    }, {
-        'url': 'https://www.expressen.se/video-player/embed/tv/nyheter/ekero-fodda-olof-gustafsson-forvaltar-knarkbaronen-pablo-escobars-namn',
-        'only_matching': True,
-    }, {
-        'url': 'https://www.expressen.se/nyheter/efter-egna-telefonbluffen-escobar-stammer-klarna/',
-        'only_matching': True,
     }]
+
+    @staticmethod
+    def _extract_urls(webpage):
+        return [
+            mobj.group('url') for mobj in re.finditer(
+                r'<iframe[^>]+\bsrc=(["\'])(?P<url>(?:https?:)?//(?:www\.)?(?:expressen|di)\.se/(?:tvspelare/video|videoplayer/embed)/tv/.+?)\1',
+                webpage)]
 
     def _real_extract(self, url):
         display_id = self._match_id(url)
@@ -63,7 +67,7 @@ class ExpressenIE(InfoExtractor):
                 display_id, transform_source=unescapeHTML)
 
         info = extract_data('video-tracking-info')
-        video_id = info['contentId']
+        video_id = info['videoId']
 
         data = extract_data('article-data')
         stream = data['stream']
@@ -76,6 +80,7 @@ class ExpressenIE(InfoExtractor):
             formats = [{
                 'url': stream,
             }]
+        self._sort_formats(formats)
 
         title = info.get('titleRaw') or data['title']
         description = info.get('descriptionRaw')

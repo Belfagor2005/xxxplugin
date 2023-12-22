@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import int_or_none
 
@@ -66,6 +69,7 @@ class R7IE(InfoExtractor):
                 f_copy['protocol'] = 'http'
                 f = f_copy
             formats.append(f)
+        self._sort_formats(formats)
 
         description = video.get('description')
         thumbnail = video.get('thumb')

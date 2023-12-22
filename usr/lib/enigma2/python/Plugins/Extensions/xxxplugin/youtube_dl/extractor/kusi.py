@@ -1,10 +1,14 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import random
-import urllib.parse
+import re
 
 from .common import InfoExtractor
+from ..compat import compat_urllib_parse_unquote_plus
 from ..utils import (
-    float_or_none,
     int_or_none,
+    float_or_none,
     timeconvert,
     update_url_query,
     xpath_text,
@@ -31,7 +35,7 @@ class KUSIIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         clip_id = mobj.group('clipId')
         video_id = clip_id or mobj.group('path')
 
@@ -66,11 +70,12 @@ class KUSIIE(InfoExtractor):
         formats = []
         for quality in quality_options:
             formats.append({
-                'url': urllib.parse.unquote_plus(quality.attrib['url']),
+                'url': compat_urllib_parse_unquote_plus(quality.attrib['url']),
                 'height': int_or_none(quality.attrib.get('height')),
                 'width': int_or_none(quality.attrib.get('width')),
                 'vbr': float_or_none(quality.attrib.get('bitratebits'), scale=1000),
             })
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

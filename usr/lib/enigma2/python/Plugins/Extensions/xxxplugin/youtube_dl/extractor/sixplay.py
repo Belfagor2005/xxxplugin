@@ -1,11 +1,17 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..compat import (
+    compat_parse_qs,
     compat_str,
+    compat_urllib_parse_urlparse,
 )
 from ..utils import (
     determine_ext,
     int_or_none,
-    parse_qs,
     try_get,
     qualities,
 )
@@ -35,7 +41,7 @@ class SixPlayIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        domain, video_id = self._match_valid_url(url).groups()
+        domain, video_id = re.search(self._VALID_URL, url).groups()
         service, consumer_name = {
             '6play.fr': ('6play', 'm6web'),
             'rtlplay.be': ('rtlbe_rtl_play', 'rtlbe'),
@@ -73,13 +79,13 @@ class SixPlayIE(InfoExtractor):
                 continue
             if container == 'm3u8' or ext == 'm3u8':
                 if protocol == 'usp':
-                    if parse_qs(asset_url).get('token', [None])[0]:
+                    if compat_parse_qs(compat_urllib_parse_urlparse(asset_url).query).get('token', [None])[0]:
                         urlh = self._request_webpage(
                             asset_url, video_id, fatal=False,
                             headers=self.geo_verification_headers())
                         if not urlh:
                             continue
-                        asset_url = urlh.url
+                        asset_url = urlh.geturl()
                     asset_url = asset_url.replace('_drmnp.ism/', '_unpnp.ism/')
                     for i in range(3, 0, -1):
                         asset_url = asset_url = asset_url.replace('_sd1/', '_sd%d/' % i)
@@ -104,6 +110,7 @@ class SixPlayIE(InfoExtractor):
                     'quality': quality_key(quality),
                     'ext': ext,
                 })
+        self._sort_formats(formats)
 
         def get(getter):
             for src in (data, clip_data):

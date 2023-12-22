@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -25,7 +28,14 @@ class FrontendMastersBaseIE(InfoExtractor):
         'high': {'width': 1920, 'height': 1080}
     }
 
-    def _perform_login(self, username, password):
+    def _real_initialize(self):
+        self._login()
+
+    def _login(self):
+        (username, password) = self._get_login_info()
+        if username is None:
+            return
+
         login_page = self._download_webpage(
             self._LOGIN_URL, None, 'Downloading login page')
 
@@ -160,6 +170,7 @@ class FrontendMastersIE(FrontendMastersBaseIE):
                     'format_id': format_id,
                 })
                 formats.append(f)
+        self._sort_formats(formats)
 
         subtitles = {
             'en': [{
@@ -196,7 +207,7 @@ class FrontendMastersLessonIE(FrontendMastersPageBaseIE):
     }
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         course_name, lesson_name = mobj.group('course_name', 'lesson_name')
 
         course = self._download_course(course_name, url)
@@ -241,9 +252,9 @@ class FrontendMastersCourseIE(FrontendMastersPageBaseIE):
         entries = []
         for lesson in lessons:
             lesson_name = lesson.get('slug')
-            lesson_id = lesson.get('hash') or lesson.get('statsId')
-            if not lesson_id or not lesson_name:
+            if not lesson_name:
                 continue
+            lesson_id = lesson.get('hash') or lesson.get('statsId')
             entries.append(self._extract_lesson(chapters, lesson_id, lesson))
 
         title = course.get('title')

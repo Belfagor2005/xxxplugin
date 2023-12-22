@@ -1,14 +1,16 @@
+from __future__ import unicode_literals
+
 import os
 import re
 import subprocess
 import time
 
 from .common import FileDownloader
+from ..compat import compat_str
 from ..utils import (
-    Popen,
     check_executable,
-    encodeArgument,
     encodeFilename,
+    encodeArgument,
     get_exe_version,
 )
 
@@ -24,7 +26,7 @@ class RtmpFD(FileDownloader):
             start = time.time()
             resume_percent = None
             resume_downloaded_data_len = None
-            proc = Popen(args, stderr=subprocess.PIPE)
+            proc = subprocess.Popen(args, stderr=subprocess.PIPE)
             cursor_in_new_line = True
             proc_stderr_closed = False
             try:
@@ -64,7 +66,7 @@ class RtmpFD(FileDownloader):
                             'eta': eta,
                             'elapsed': time_now - start,
                             'speed': speed,
-                        }, info_dict)
+                        })
                         cursor_in_new_line = False
                     else:
                         # no percent for live streams
@@ -80,7 +82,7 @@ class RtmpFD(FileDownloader):
                                 'status': 'downloading',
                                 'elapsed': time_now - start,
                                 'speed': speed,
-                            }, info_dict)
+                            })
                             cursor_in_new_line = False
                         elif self.params.get('verbose', False):
                             if not cursor_in_new_line:
@@ -91,7 +93,8 @@ class RtmpFD(FileDownloader):
                     self.to_screen('')
                 return proc.wait()
             except BaseException:  # Including KeyboardInterrupt
-                proc.kill(timeout=None)
+                proc.kill()
+                proc.wait()
                 raise
 
         url = info_dict['url']
@@ -114,7 +117,7 @@ class RtmpFD(FileDownloader):
 
         # Check for rtmpdump first
         if not check_executable('rtmpdump', ['-h']):
-            self.report_error('RTMP download detected but "rtmpdump" could not be run. Please install')
+            self.report_error('RTMP download detected but "rtmpdump" could not be run. Please install it.')
             return False
 
         # Download using rtmpdump. rtmpdump returns exit code 2 when
@@ -142,7 +145,7 @@ class RtmpFD(FileDownloader):
         if isinstance(conn, list):
             for entry in conn:
                 basic_args += ['--conn', entry]
-        elif isinstance(conn, str):
+        elif isinstance(conn, compat_str):
             basic_args += ['--conn', conn]
         if protocol is not None:
             basic_args += ['--protocol', protocol]
@@ -205,7 +208,7 @@ class RtmpFD(FileDownloader):
                 'filename': filename,
                 'status': 'finished',
                 'elapsed': time.time() - started,
-            }, info_dict)
+            })
             return True
         else:
             self.to_stderr('\n')

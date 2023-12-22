@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 
 
@@ -21,7 +24,8 @@ class MiaoPaiIE(InfoExtractor):
         webpage = self._download_webpage(
             url, video_id, headers={'User-Agent': self._USER_AGENT_IPAD})
 
-        title = self._html_extract_title(webpage)
+        title = self._html_search_regex(
+            r'<title>([^<]+)</title>', webpage, 'title')
         thumbnail = self._html_search_regex(
             r'<div[^>]+class=(?P<q1>[\'"]).*\bvideo_img\b.*(?P=q1)[^>]+data-url=(?P<q2>[\'"])(?P<url>[^\'"]+)(?P=q2)',
             webpage, 'thumbnail', fatal=False, group='url')

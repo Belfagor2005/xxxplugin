@@ -1,9 +1,16 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
 from .kaltura import KalturaIE
-from ..networking import HEADRequest, Request
-from ..utils import remove_start, smuggle_url, urlencode_postdata
+from ..utils import (
+    HEADRequest,
+    remove_start,
+    sanitized_Request,
+    smuggle_url,
+    urlencode_postdata,
+)
 
 
 class GDCVaultIE(InfoExtractor):
@@ -133,8 +140,8 @@ class GDCVaultIE(InfoExtractor):
             'password': password,
         }
 
-        request = Request(login_url, urlencode_postdata(login_form))
-        request.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        request = sanitized_Request(login_url, urlencode_postdata(login_form))
+        request.add_header('Content-Type', 'application/x-www-form-urlencoded')
         self._download_webpage(request, display_id, 'Logging in')
         start_page = self._download_webpage(webpage_url, display_id, 'Getting authenticated video page')
         self._download_webpage(logout_url, display_id, 'Logging out')
@@ -142,7 +149,7 @@ class GDCVaultIE(InfoExtractor):
         return start_page
 
     def _real_extract(self, url):
-        video_id, name = self._match_valid_url(url).groups()
+        video_id, name = re.match(self._VALID_URL, url).groups()
         display_id = name or video_id
 
         webpage_url = 'http://www.gdcvault.com/play/' + video_id
@@ -158,7 +165,7 @@ class GDCVaultIE(InfoExtractor):
             video_url = 'http://www.gdcvault.com' + direct_url
             # resolve the url so that we can detect the correct extension
             video_url = self._request_webpage(
-                HEADRequest(video_url), video_id).url
+                HEADRequest(video_url), video_id).geturl()
 
             return {
                 'id': video_id,

@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
@@ -10,7 +14,7 @@ from ..utils import (
 
 class NHLBaseIE(InfoExtractor):
     def _real_extract(self, url):
-        site, tmp_id = self._match_valid_url(url).groups()
+        site, tmp_id = re.match(self._VALID_URL, url).groups()
         video_data = self._download_json(
             'https://%s/%s/%sid/v1/%s/details/web-v1.json'
             % (self._CONTENT_DOMAIN, site[:3], 'item/' if site == 'mlb' else '', tmp_id), tmp_id)
@@ -48,6 +52,7 @@ class NHLBaseIE(InfoExtractor):
                     'height': height,
                     'tbr': int_or_none(self._search_regex(r'_(\d+)[kK]', playback_url, 'bitrate', default=None)),
                 })
+        self._sort_formats(formats)
 
         thumbnails = []
         cuts = video_data.get('image', {}).get('cuts') or []

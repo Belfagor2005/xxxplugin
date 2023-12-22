@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -37,6 +40,8 @@ class FczenitIE(InfoExtractor):
             'url': q['url'],
             'height': int_or_none(q.get('label')),
         } for q in msi_data['qualities'] if q.get('url')]
+
+        self._sort_formats(formats)
 
         tags = [tag['label'] for tag in msi_data.get('tags', []) if tag.get('label')]
 

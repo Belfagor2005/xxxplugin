@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -62,9 +65,4 @@ class CTVNewsIE(InfoExtractor):
             })
             entries = [ninecninemedia_url_result(clip_id) for clip_id in orderedSet(
                 re.findall(r'clip\.id\s*=\s*(\d+);', webpage))]
-            if not entries:
-                webpage = self._download_webpage(url, page_id)
-                if 'getAuthStates("' in webpage:
-                    entries = [ninecninemedia_url_result(clip_id) for clip_id in
-                               self._search_regex(r'getAuthStates\("([\d+,]+)"', webpage, 'clip ids').split(',')]
             return self.playlist_result(entries, page_id)

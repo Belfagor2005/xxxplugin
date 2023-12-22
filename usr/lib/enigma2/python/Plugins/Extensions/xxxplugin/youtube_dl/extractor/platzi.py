@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..compat import (
     compat_b64decode,
@@ -19,7 +22,14 @@ class PlatziBaseIE(InfoExtractor):
     _LOGIN_URL = 'https://platzi.com/login/'
     _NETRC_MACHINE = 'platzi'
 
-    def _perform_login(self, username, password):
+    def _real_initialize(self):
+        self._login()
+
+    def _login(self):
+        username, password = self._get_login_info()
+        if username is None:
+            return
+
         login_page = self._download_webpage(
             self._LOGIN_URL, None, 'Downloading login page')
 
@@ -36,7 +46,7 @@ class PlatziBaseIE(InfoExtractor):
             headers={'Referer': self._LOGIN_URL})
 
         # login succeeded
-        if 'platzi.com/login' not in urlh.url:
+        if 'platzi.com/login' not in urlh.geturl():
             return
 
         login_error = self._webpage_read_content(
@@ -127,6 +137,7 @@ class PlatziIE(PlatziBaseIE):
                         format_url, lecture_id, mpd_id=format_id,
                         note='Downloading %s MPD manifest' % server_id,
                         fatal=False))
+        self._sort_formats(formats)
 
         content = str_or_none(desc.get('content'))
         description = (clean_html(compat_b64decode(content).decode('utf-8'))

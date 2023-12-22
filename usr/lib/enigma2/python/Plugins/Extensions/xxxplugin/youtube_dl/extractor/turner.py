@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .adobepass import AdobePassIE
@@ -141,7 +144,7 @@ class TurnerBaseIE(AdobePassIE):
                     m3u8_id=format_id or 'hls', fatal=False)
                 if '/secure/' in video_url and '?hdnea=' in video_url:
                     for f in m3u8_formats:
-                        f['downloader_options'] = {'ffmpeg_args': ['-seekable', '0']}
+                        f['_seekable'] = False
                 formats.extend(m3u8_formats)
             elif ext == 'f4m':
                 formats.extend(self._extract_f4m_formats(
@@ -174,6 +177,7 @@ class TurnerBaseIE(AdobePassIE):
                             else:
                                 f['tbr'] = int(mobj.group(1))
                 formats.append(f)
+        self._sort_formats(formats)
 
         for source in video_data.findall('closedCaptions/source'):
             for track in source.findall('track'):
@@ -201,7 +205,7 @@ class TurnerBaseIE(AdobePassIE):
 
         return {
             'id': video_id,
-            'title': title,
+            'title': self._live_title(title) if is_live else title,
             'formats': formats,
             'subtitles': subtitles,
             'thumbnails': thumbnails,
@@ -217,7 +221,6 @@ class TurnerBaseIE(AdobePassIE):
         }
 
     def _extract_ngtv_info(self, media_id, tokenizer_query, ap_data=None):
-        is_live = ap_data.get('is_live')
         streams_data = self._download_json(
             'http://medium.ngtv.io/media/%s/tv' % media_id,
             media_id)['media']['tv']
@@ -234,11 +237,11 @@ class TurnerBaseIE(AdobePassIE):
                     'http://token.ngtv.io/token/token_spe',
                     m3u8_url, media_id, ap_data or {}, tokenizer_query)
             formats.extend(self._extract_m3u8_formats(
-                m3u8_url, media_id, 'mp4', m3u8_id='hls', live=is_live, fatal=False))
+                m3u8_url, media_id, 'mp4', m3u8_id='hls', fatal=False))
 
             duration = float_or_none(stream_data.get('totalRuntime'))
 
-            if not chapters and not is_live:
+            if not chapters:
                 for chapter in stream_data.get('contentSegments', []):
                     start_time = float_or_none(chapter.get('start'))
                     chapter_duration = float_or_none(chapter.get('duration'))
@@ -248,6 +251,7 @@ class TurnerBaseIE(AdobePassIE):
                         'start_time': start_time,
                         'end_time': start_time + chapter_duration,
                     })
+        self._sort_formats(formats)
 
         return {
             'formats': formats,

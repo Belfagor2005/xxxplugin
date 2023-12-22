@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -27,7 +30,7 @@ class RICEIE(InfoExtractor):
     _NS = 'http://schemas.datacontract.org/2004/07/ensembleVideo.Data.Service.Contracts.Models.Player.Config'
 
     def _real_extract(self, url):
-        qs = compat_parse_qs(self._match_valid_url(url).group('query'))
+        qs = compat_parse_qs(re.match(self._VALID_URL, url).group('query'))
         if not qs.get('PortalID') or not qs.get('DestinationID') or not qs.get('ContentID'):
             raise ExtractorError('Invalid URL', expected=True)
 
@@ -88,6 +91,7 @@ class RICEIE(InfoExtractor):
                         'ext': 'flv',
                     })
                 formats.append(fmt)
+        self._sort_formats(formats)
 
         thumbnails = []
         for content_asset in content_data.findall('.//contentAssets'):

@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..compat import compat_str
 from ..utils import (
@@ -26,6 +31,7 @@ class WatchBoxIE(InfoExtractor):
             'release_year': 2009,
         },
         'params': {
+            'format': 'bestvideo',
             'skip_download': True,
         },
         'expected_warnings': ['Failed to download m3u8 information'],
@@ -47,6 +53,7 @@ class WatchBoxIE(InfoExtractor):
             'episode_number': 1,
         },
         'params': {
+            'format': 'bestvideo',
             'skip_download': True,
         },
         'expected_warnings': ['Failed to download m3u8 information'],
@@ -56,7 +63,7 @@ class WatchBoxIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         kind, video_id = mobj.group('kind', 'id')
 
         webpage = self._download_webpage(url, video_id)
@@ -109,6 +116,7 @@ class WatchBoxIE(InfoExtractor):
                 'height': int_or_none(item.get('height')),
                 'tbr': int_or_none(item.get('bitrate')),
             })
+        self._sort_formats(formats)
 
         description = strip_or_none(item.get('descr'))
         thumbnail = item.get('media_content_thumbnail_large') or source.get('poster') or item.get('media_thumbnail')

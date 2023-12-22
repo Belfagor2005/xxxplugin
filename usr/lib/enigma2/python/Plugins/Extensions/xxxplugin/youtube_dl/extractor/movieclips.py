@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     smuggle_url,
@@ -23,7 +26,6 @@ class MovieClipsIE(InfoExtractor):
             'uploader': 'Movieclips',
         },
         'add_ie': ['ThePlatform'],
-        'skip': 'redirects to YouTube',
     }
 
     def _real_extract(self, url):

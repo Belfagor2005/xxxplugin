@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import random
 
 from .common import InfoExtractor
@@ -43,9 +46,10 @@ class MatchTVIE(InfoExtractor):
             })['data']['videoUrl']
         f4m_url = xpath_text(self._download_xml(video_url, video_id), './to')
         formats = self._extract_f4m_formats(f4m_url, video_id)
+        self._sort_formats(formats)
         return {
             'id': video_id,
-            'title': 'Матч ТВ - Прямой эфир',
+            'title': self._live_title('Матч ТВ - Прямой эфир'),
             'is_live': True,
             'formats': formats,
         }

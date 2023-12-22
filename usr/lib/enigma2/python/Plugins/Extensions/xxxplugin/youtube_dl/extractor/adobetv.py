@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import functools
 import re
 
@@ -7,7 +9,6 @@ from ..utils import (
     float_or_none,
     int_or_none,
     ISO639Utils,
-    join_nonempty,
     OnDemandPagedList,
     parse_duration,
     str_or_none,
@@ -65,11 +66,12 @@ class AdobeTVBaseIE(InfoExtractor):
                 if original_filename.startswith('s3://') and not s3_extracted:
                     formats.append({
                         'format_id': 'original',
-                        'quality': 1,
+                        'preference': 1,
                         'url': original_filename.replace('s3://', 'https://s3.amazonaws.com/'),
                     })
                     s3_extracted = True
             formats.append(f)
+        self._sort_formats(formats)
 
         return {
             'id': video_id,
@@ -130,7 +132,7 @@ class AdobeTVIE(AdobeTVBaseIE):
     }
 
     def _real_extract(self, url):
-        language, show_urlname, urlname = self._match_valid_url(url).groups()
+        language, show_urlname, urlname = re.match(self._VALID_URL, url).groups()
         if not language:
             language = 'en'
 
@@ -176,7 +178,7 @@ class AdobeTVShowIE(AdobeTVPlaylistBaseIE):
     _process_data = AdobeTVBaseIE._parse_video_data
 
     def _real_extract(self, url):
-        language, show_urlname = self._match_valid_url(url).groups()
+        language, show_urlname = re.match(self._VALID_URL, url).groups()
         if not language:
             language = 'en'
         query = {
@@ -213,7 +215,7 @@ class AdobeTVChannelIE(AdobeTVPlaylistBaseIE):
             show_data['url'], 'AdobeTVShow', str_or_none(show_data.get('id')))
 
     def _real_extract(self, url):
-        language, channel_urlname, category_urlname = self._match_valid_url(url).groups()
+        language, channel_urlname, category_urlname = re.match(self._VALID_URL, url).groups()
         if not language:
             language = 'en'
         query = {
@@ -231,7 +233,6 @@ class AdobeTVChannelIE(AdobeTVPlaylistBaseIE):
 class AdobeTVVideoIE(AdobeTVBaseIE):
     IE_NAME = 'adobetv:video'
     _VALID_URL = r'https?://video\.tv\.adobe\.com/v/(?P<id>\d+)'
-    _EMBED_REGEX = [r'<iframe[^>]+src=[\'"](?P<url>(?:https?:)?//video\.tv\.adobe\.com/v/\d+[^"]+)[\'"]']
 
     _TEST = {
         # From https://helpx.adobe.com/acrobat/how-to/new-experience-acrobat-dc.html?set=acrobat--get-started--essential-beginners
@@ -262,12 +263,13 @@ class AdobeTVVideoIE(AdobeTVBaseIE):
                 continue
             formats.append({
                 'filesize': int_or_none(source.get('kilobytes') or None, invscale=1000),
-                'format_id': join_nonempty(source.get('format'), source.get('label')),
+                'format_id': '-'.join(filter(None, [source.get('format'), source.get('label')])),
                 'height': int_or_none(source.get('height') or None),
                 'tbr': int_or_none(source.get('bitrate') or None),
                 'width': int_or_none(source.get('width') or None),
                 'url': source_src,
             })
+        self._sort_formats(formats)
 
         # For both metadata and downloaded files the duration varies among
         # formats. I just pick the max one

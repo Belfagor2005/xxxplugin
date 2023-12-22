@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -64,6 +67,7 @@ class CCCIE(InfoExtractor):
                 'language': language,
                 'vcodec': vcodec,
             })
+        self._sort_formats(formats)
 
         return {
             'id': event_id,
@@ -74,7 +78,6 @@ class CCCIE(InfoExtractor):
             'thumbnail': event_data.get('thumb_url'),
             'timestamp': parse_iso8601(event_data.get('date')),
             'duration': int_or_none(event_data.get('length')),
-            'view_count': int_or_none(event_data.get('view_count')),
             'tags': event_data.get('tags'),
             'formats': formats,
         }
@@ -90,17 +93,10 @@ class CCCPlaylistIE(InfoExtractor):
             'id': '30c3',
         },
         'playlist_count': 135,
-    }, {
-        'url': 'https://media.ccc.de/c/DS2023',
-        'info_dict': {
-            'title': 'Datenspuren 2023',
-            'id': 'DS2023',
-        },
-        'playlist_count': 37
     }]
 
     def _real_extract(self, url):
-        playlist_id = self._match_id(url)
+        playlist_id = self._match_id(url).lower()
 
         conf = self._download_json(
             'https://media.ccc.de/public/conferences/' + playlist_id,

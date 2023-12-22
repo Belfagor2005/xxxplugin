@@ -1,9 +1,14 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     clean_html,
     join_nonempty,
+    merge_dicts,
     parse_duration,
     str_or_none,
+    T,
     traverse_obj,
     unified_strdate,
     unified_timestamp,
@@ -12,6 +17,7 @@ from ..utils import (
 
 
 class GlobalPlayerBaseIE(InfoExtractor):
+
     def _get_page_props(self, url, video_id):
         webpage = self._download_webpage(url, video_id)
         return self._search_nextjs_data(webpage, video_id)['props']['pageProps']
@@ -20,25 +26,31 @@ class GlobalPlayerBaseIE(InfoExtractor):
         return urlhandle_detect_ext(self._request_webpage(  # Server rejects HEAD requests
             url, video_id, note='Determining source extension'))
 
+    @staticmethod
+    def _clean_desc(x):
+        x = clean_html(x)
+        if x:
+            x = x.replace('\xa0', ' ')
+        return x
+
     def _extract_audio(self, episode, series):
-        return {
+
+        return merge_dicts({
             'vcodec': 'none',
-            **traverse_obj(series, {
-                'series': 'title',
-                'series_id': 'id',
-                'thumbnail': 'imageUrl',
-                'uploader': 'itunesAuthor',  # podcasts only
-            }),
-            **traverse_obj(episode, {
-                'id': 'id',
-                'description': ('description', {clean_html}),
-                'duration': ('duration', {parse_duration}),
-                'thumbnail': 'imageUrl',
-                'url': 'streamUrl',
-                'timestamp': (('pubDate', 'startDate'), {unified_timestamp}),
-                'title': 'title',
-            }, get_all=False)
-        }
+        }, traverse_obj(series, {
+            'series': 'title',
+            'series_id': 'id',
+            'thumbnail': 'imageUrl',
+            'uploader': 'itunesAuthor',  # podcasts only
+        }), traverse_obj(episode, {
+            'id': 'id',
+            'description': ('description', T(self._clean_desc)),
+            'duration': ('duration', T(parse_duration)),
+            'thumbnail': 'imageUrl',
+            'url': 'streamUrl',
+            'timestamp': (('pubDate', 'startDate'), T(unified_timestamp)),
+            'title': 'title',
+        }, get_all=False), rev=True)
 
 
 class GlobalPlayerLiveIE(GlobalPlayerBaseIE):
@@ -52,7 +64,8 @@ class GlobalPlayerLiveIE(GlobalPlayerBaseIE):
             'title': 're:^Smooth Chill.+$',
             'thumbnail': 'https://herald.musicradio.com/media/f296ade8-50c9-4f60-911f-924e96873620.png',
             'description': 'Music To Chill To',
-            'live_status': 'is_live',
+            # 'live_status': 'is_live',
+            'is_live': True,
         },
     }, {
         # national station
@@ -62,7 +75,8 @@ class GlobalPlayerLiveIE(GlobalPlayerBaseIE):
             'ext': 'aac',
             'description': 'turn up the feel good!',
             'thumbnail': 'https://herald.musicradio.com/media/49b9e8cb-15bf-4bf2-8c28-a4850cc6b0f3.png',
-            'live_status': 'is_live',
+            # 'live_status': 'is_live',
+            'is_live': True,
             'title': 're:^Heart UK.+$',
             'display_id': 'heart-uk',
         },
@@ -74,7 +88,8 @@ class GlobalPlayerLiveIE(GlobalPlayerBaseIE):
             'ext': 'aac',
             'thumbnail': 'https://herald.musicradio.com/media/49b9e8cb-15bf-4bf2-8c28-a4850cc6b0f3.png',
             'title': 're:^Heart London.+$',
-            'live_status': 'is_live',
+            # 'live_status': 'is_live',
+            'is_live': True,
             'display_id': 'heart-london',
             'description': 'turn up the feel good!',
         },
@@ -85,19 +100,23 @@ class GlobalPlayerLiveIE(GlobalPlayerBaseIE):
         station = self._get_page_props(url, video_id)['station']
         stream_url = station['streamUrl']
 
-        return {
+        return merge_dicts({
             'id': station['id'],
-            'display_id': join_nonempty('brandSlug', 'slug', from_dict=station) or station.get('legacyStationPrefix'),
+            'display_id': (
+                join_nonempty('brandSlug', 'slug', from_dict=station)
+                or station.get('legacyStationPrefix')),
             'url': stream_url,
             'ext': self._request_ext(stream_url, video_id),
             'vcodec': 'none',
             'is_live': True,
-            **traverse_obj(station, {
-                'title': (('name', 'brandName'), {str_or_none}),
-                'description': 'tagline',
-                'thumbnail': 'brandLogo',
-            }, get_all=False),
-        }
+        }, {
+            'title': self._live_title(traverse_obj(
+                station, (('name', 'brandName'), T(str_or_none)),
+                get_all=False)),
+        }, traverse_obj(station, {
+            'description': 'tagline',
+            'thumbnail': 'brandLogo',
+        }), rev=True)
 
 
 class GlobalPlayerLivePlaylistIE(GlobalPlayerBaseIE):
@@ -108,10 +127,11 @@ class GlobalPlayerLivePlaylistIE(GlobalPlayerBaseIE):
         'info_dict': {
             'id': '8bLk',
             'ext': 'aac',
-            'live_status': 'is_live',
-            'description': 'md5:e10f5e10b01a7f2c14ba815509fbb38d',
+            # 'live_status': 'is_live',
+            'is_live': True,
+            'description': r're:(?s).+\bclassical\b.+\bClassic FM Hall [oO]f Fame\b',
             'thumbnail': 'https://images.globalplayer.com/images/551379?width=450&signature=oMLPZIoi5_dBSHnTMREW0Xg76mA=',
-            'title': 're:^Classic FM Hall of Fame.+$'
+            'title': 're:Classic FM Hall of Fame.+$'
         },
     }]
 
@@ -120,18 +140,17 @@ class GlobalPlayerLivePlaylistIE(GlobalPlayerBaseIE):
         station = self._get_page_props(url, video_id)['playlistData']
         stream_url = station['streamUrl']
 
-        return {
+        return merge_dicts({
             'id': video_id,
             'url': stream_url,
             'ext': self._request_ext(stream_url, video_id),
             'vcodec': 'none',
             'is_live': True,
-            **traverse_obj(station, {
-                'title': 'title',
-                'description': 'description',
-                'thumbnail': 'image',
-            }),
-        }
+        }, traverse_obj(station, {
+            'title': 'title',
+            'description': ('description', T(self._clean_desc)),
+            'thumbnail': 'image',
+        }), rev=True)
 
 
 class GlobalPlayerAudioIE(GlobalPlayerBaseIE):
@@ -146,12 +165,12 @@ class GlobalPlayerAudioIE(GlobalPlayerBaseIE):
             'thumbnail': 'md5:60286e7d12d795bd1bbc9efc6cee643e',
             'categories': ['Society & Culture', 'True Crime'],
             'uploader': 'Global',
-            'description': 'md5:da5b918eac9ae319454a10a563afacf9',
+            'description': r're:(?s).+\bscam\b.+?\bseries available now\b',
         },
     }, {
         # radio catchup
         'url': 'https://www.globalplayer.com/catchup/lbc/uk/46vyD7z/',
-        'playlist_mincount': 3,
+        'playlist_mincount': 2,
         'info_dict': {
             'id': '46vyD7z',
             'description': 'Nick Ferrari At Breakfast is Leading Britain\'s Conversation.',
@@ -165,19 +184,18 @@ class GlobalPlayerAudioIE(GlobalPlayerBaseIE):
         props = self._get_page_props(url, video_id)
         series = props['podcastInfo'] if podcast else props['catchupInfo']
 
-        return {
+        return merge_dicts({
             '_type': 'playlist',
             'id': video_id,
             'entries': [self._extract_audio(ep, series) for ep in traverse_obj(
                         series, ('episodes', lambda _, v: v['id'] and v['streamUrl']))],
-            'categories': traverse_obj(series, ('categories', ..., 'name')) or None,
-            **traverse_obj(series, {
-                'description': 'description',
-                'thumbnail': 'imageUrl',
-                'title': 'title',
-                'uploader': 'itunesAuthor',  # podcasts only
-            }),
-        }
+            'categories': traverse_obj(series, ('categories', Ellipsis, 'name')) or None,
+        }, traverse_obj(series, {
+            'description': ('description', T(self._clean_desc)),
+            'thumbnail': 'imageUrl',
+            'title': 'title',
+            'uploader': 'itunesAuthor',  # podcasts only
+        }), rev=True)
 
 
 class GlobalPlayerAudioEpisodeIE(GlobalPlayerBaseIE):
@@ -201,6 +219,8 @@ class GlobalPlayerAudioEpisodeIE(GlobalPlayerBaseIE):
     }, {
         # radio catchup
         'url': 'https://www.globalplayer.com/catchup/lbc/uk/episodes/2zGq26Vcv1fCWhddC4JAwETXWe/',
+        'only_matching': True,
+        # expired: refresh the details with a current show for a full test
         'info_dict': {
             'id': '2zGq26Vcv1fCWhddC4JAwETXWe',
             'ext': 'm4a',
@@ -242,13 +262,12 @@ class GlobalPlayerVideoIE(GlobalPlayerBaseIE):
         video_id = self._match_id(url)
         meta = self._get_page_props(url, video_id)['videoData']
 
-        return {
+        return merge_dicts({
             'id': video_id,
-            **traverse_obj(meta, {
-                'url': 'url',
-                'thumbnail': ('image', 'url'),
-                'title': 'title',
-                'upload_date': ('publish_date', {unified_strdate}),
-                'description': 'description',
-            }),
-        }
+        }, traverse_obj(meta, {
+            'url': 'url',
+            'thumbnail': ('image', 'url'),
+            'title': 'title',
+            'upload_date': ('publish_date', T(unified_strdate)),
+            'description': 'description',
+        }), rev=True)

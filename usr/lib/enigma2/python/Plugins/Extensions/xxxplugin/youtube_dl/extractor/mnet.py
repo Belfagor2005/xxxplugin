@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -59,6 +62,7 @@ class MnetIE(InfoExtractor):
             m3u8_url += '?' + token
         formats = self._extract_wowza_formats(
             m3u8_url, video_id, skip_protocols=['rtmp', 'rtsp', 'f4m'])
+        self._sort_formats(formats)
 
         description = info.get('ment')
         duration = parse_duration(info.get('time'))

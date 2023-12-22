@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..compat import (
     compat_str,
@@ -52,24 +57,26 @@ class GaiaIE(InfoExtractor):
     def _real_initialize(self):
         auth = self._get_cookies('https://www.gaia.com/').get('auth')
         if auth:
-            auth = self._parse_json(compat_urllib_parse_unquote(auth.value), None, fatal=False)
+            auth = self._parse_json(
+                compat_urllib_parse_unquote(auth.value),
+                None, fatal=False)
+        if not auth:
+            username, password = self._get_login_info()
+            if username is None:
+                return
+            auth = self._download_json(
+                'https://auth.gaia.com/v1/login',
+                None, data=urlencode_postdata({
+                    'username': username,
+                    'password': password
+                }))
+            if auth.get('success') is False:
+                raise ExtractorError(', '.join(auth['messages']), expected=True)
+        if auth:
             self._jwt = auth.get('jwt')
 
-    def _perform_login(self, username, password):
-        if self._jwt:
-            return
-        auth = self._download_json(
-            'https://auth.gaia.com/v1/login',
-            None, data=urlencode_postdata({
-                'username': username,
-                'password': password
-            }))
-        if auth.get('success') is False:
-            raise ExtractorError(', '.join(auth['messages']), expected=True)
-        self._jwt = auth.get('jwt')
-
     def _real_extract(self, url):
-        display_id, vtype = self._match_valid_url(url).groups()
+        display_id, vtype = re.search(self._VALID_URL, url).groups()
         node_id = self._download_json(
             'https://brooklyn.gaia.com/pathinfo', display_id, query={
                 'path': 'video/' + display_id,
@@ -88,6 +95,7 @@ class GaiaIE(InfoExtractor):
             media_id, headers=headers)
         formats = self._extract_m3u8_formats(
             media['mediaUrls']['bcHLS'], media_id, 'mp4')
+        self._sort_formats(formats)
 
         subtitles = {}
         text_tracks = media.get('textTracks', {})

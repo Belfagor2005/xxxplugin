@@ -1,10 +1,15 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
+from ..compat import compat_urlparse
 from ..utils import (
     ExtractorError,
     float_or_none,
     int_or_none,
     parse_iso8601,
-    parse_qs,
     try_get,
 )
 
@@ -17,8 +22,6 @@ class ArkenaIE(InfoExtractor):
                                 play\.arkena\.com/(?:config|embed)/avp/v\d/player/media/(?P<id>[^/]+)/[^/]+/(?P<account_id>\d+)
                             )
                         '''
-    # See https://support.arkena.com/display/PLAY/Ways+to+embed+your+video
-    _EMBED_REGEX = [r'<iframe[^>]+src=(["\'])(?P<url>(?:https?:)?//play\.arkena\.com/embed/avp/.+?)\1']
     _TESTS = [{
         'url': 'https://video.qbrick.com/play2/embed/player?accountId=1034090&mediaId=d8ab4607-00090107-aab86310',
         'md5': '97f117754e5f3c020f5f26da4a44ebaf',
@@ -50,14 +53,23 @@ class ArkenaIE(InfoExtractor):
         'only_matching': True,
     }]
 
+    @staticmethod
+    def _extract_url(webpage):
+        # See https://support.arkena.com/display/PLAY/Ways+to+embed+your+video
+        mobj = re.search(
+            r'<iframe[^>]+src=(["\'])(?P<url>(?:https?:)?//play\.arkena\.com/embed/avp/.+?)\1',
+            webpage)
+        if mobj:
+            return mobj.group('url')
+
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         account_id = mobj.group('account_id')
 
         # Handle http://video.arkena.com/play2/embed/player URL
         if not video_id:
-            qs = parse_qs(url)
+            qs = compat_urlparse.parse_qs(compat_urlparse.urlparse(url).query)
             video_id = qs.get('mediaId', [None])[0]
             account_id = qs.get('accountId', [None])[0]
             if not video_id or not account_id:
@@ -136,6 +148,7 @@ class ArkenaIE(InfoExtractor):
                         elif mime_type == 'application/vnd.ms-sstr+xml':
                             formats.extend(self._extract_ism_formats(
                                 href, video_id, ism_id='mss', fatal=False))
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

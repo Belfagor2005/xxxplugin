@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -82,6 +85,7 @@ class WSJIE(InfoExtractor):
                 'height': int_or_none(v.get('height')),
                 'fps': float_or_none(v.get('fps')),
             })
+        self._sort_formats(formats)
 
         return {
             'id': video_id,
@@ -115,6 +119,5 @@ class WSJArticleIE(InfoExtractor):
         article_id = self._match_id(url)
         webpage = self._download_webpage(url, article_id)
         video_id = self._search_regex(
-            r'(?:id=["\']video|video-|iframe\.html\?guid=|data-src=["\'])([a-fA-F0-9-]{36})',
-            webpage, 'video id')
+            r'data-src=["\']([a-fA-F0-9-]{36})', webpage, 'video id')
         return self.url_result('wsj:%s' % video_id, WSJIE.ie_key(), video_id)

@@ -1,14 +1,18 @@
+from __future__ import unicode_literals
+
 import itertools
+import re
 
 from .common import InfoExtractor
 from ..compat import (
     compat_b64decode,
+    compat_chr,
     compat_ord,
     compat_str,
     compat_urllib_parse_unquote,
+    compat_zip
 )
 from ..utils import (
-    ExtractorError,
     int_or_none,
     parse_iso8601,
     strip_or_none,
@@ -20,7 +24,7 @@ class MixcloudBaseIE(InfoExtractor):
     def _call_api(self, object_type, object_fields, display_id, username, slug=None):
         lookup_key = object_type + 'Lookup'
         return self._download_json(
-            'https://app.mixcloud.com/graphql', display_id, query={
+            'https://www.mixcloud.com/graphql', display_id, query={
                 'query': '''{
   %s(lookup: {username: "%s"%s}) {
     %s
@@ -46,15 +50,7 @@ class MixcloudIE(MixcloudBaseIE):
             'view_count': int,
             'timestamp': 1321359578,
             'upload_date': '20111115',
-            'uploader_url': 'https://www.mixcloud.com/dholbach/',
-            'artist': 'Submorphics & Chino , Telekinesis, Porter Robinson, Enei, Breakage ft Jess Mills',
-            'duration': 3723,
-            'tags': [],
-            'comment_count': int,
-            'repost_count': int,
-            'like_count': int,
         },
-        'params': {'skip_download': 'm3u8'},
     }, {
         'url': 'http://www.mixcloud.com/gillespeterson/caribou-7-inch-vinyl-mix-chat/',
         'info_dict': {
@@ -68,14 +64,7 @@ class MixcloudIE(MixcloudBaseIE):
             'view_count': int,
             'timestamp': 1422987057,
             'upload_date': '20150203',
-            'uploader_url': 'https://www.mixcloud.com/gillespeterson/',
-            'duration': 2992,
-            'tags': [],
-            'comment_count': int,
-            'repost_count': int,
-            'like_count': int,
         },
-        'params': {'skip_download': '404 playback error on site'},
     }, {
         'url': 'https://beta.mixcloud.com/RedLightRadio/nosedrip-15-red-light-radio-01-18-2016/',
         'only_matching': True,
@@ -86,11 +75,11 @@ class MixcloudIE(MixcloudBaseIE):
     def _decrypt_xor_cipher(key, ciphertext):
         """Encrypt/Decrypt XOR cipher. Both ways are possible because it's XOR."""
         return ''.join([
-            chr(compat_ord(ch) ^ compat_ord(k))
-            for ch, k in zip(ciphertext, itertools.cycle(key))])
+            compat_chr(compat_ord(ch) ^ compat_ord(k))
+            for ch, k in compat_zip(ciphertext, itertools.cycle(key))])
 
     def _real_extract(self, url):
-        username, slug = self._match_valid_url(url).groups()
+        username, slug = re.match(self._VALID_URL, url).groups()
         username, slug = compat_urllib_parse_unquote(username), compat_urllib_parse_unquote(slug)
         track_id = '%s_%s' % (username, slug)
 
@@ -137,20 +126,7 @@ class MixcloudIE(MixcloudBaseIE):
       tag {
         name
       }
-    }
-    restrictedReason
-    id''', track_id, username, slug)
-
-        if not cloudcast:
-            raise ExtractorError('Track not found', expected=True)
-
-        reason = cloudcast.get('restrictedReason')
-        if reason == 'tracklist':
-            raise ExtractorError('Track unavailable in your country due to licensing restrictions', expected=True)
-        elif reason == 'repeat_play':
-            raise ExtractorError('You have reached your play limit for this track', expected=True)
-        elif reason:
-            raise ExtractorError('Track is restricted', expected=True)
+    }''', track_id, username, slug)
 
         title = cloudcast['name']
 
@@ -174,7 +150,6 @@ class MixcloudIE(MixcloudBaseIE):
                 formats.append({
                     'format_id': 'http',
                     'url': decrypted,
-                    'vcodec': 'none',
                     'downloader_options': {
                         # Mixcloud starts throttling at >~5M
                         'http_chunk_size': 5242880,
@@ -182,7 +157,9 @@ class MixcloudIE(MixcloudBaseIE):
                 })
 
         if not formats and cloudcast.get('isExclusive'):
-            self.raise_login_required(metadata_available=True)
+            self.raise_login_required()
+
+        self._sort_formats(formats)
 
         comments = []
         for edge in (try_get(cloudcast, lambda x: x['comments']['edges']) or []):
@@ -237,7 +214,7 @@ class MixcloudPlaylistBaseIE(MixcloudBaseIE):
         return title
 
     def _real_extract(self, url):
-        username, slug = self._match_valid_url(url).groups()
+        username, slug = re.match(self._VALID_URL, url).groups()
         username = compat_urllib_parse_unquote(username)
         if not slug:
             slug = 'uploads'
@@ -274,9 +251,9 @@ class MixcloudPlaylistBaseIE(MixcloudBaseIE):
                 cloudcast_url = cloudcast.get('url')
                 if not cloudcast_url:
                     continue
-                item_slug = try_get(cloudcast, lambda x: x['slug'], compat_str)
+                slug = try_get(cloudcast, lambda x: x['slug'], compat_str)
                 owner_username = try_get(cloudcast, lambda x: x['owner']['username'], compat_str)
-                video_id = f'{owner_username}_{item_slug}' if item_slug and owner_username else None
+                video_id = '%s_%s' % (owner_username, slug) if slug and owner_username else None
                 entries.append(self.url_result(
                     cloudcast_url, MixcloudIE.ie_key(), video_id))
 
@@ -299,7 +276,7 @@ class MixcloudUserIE(MixcloudPlaylistBaseIE):
         'info_dict': {
             'id': 'dholbach_uploads',
             'title': 'Daniel Holbach (uploads)',
-            'description': 'md5:a3f468a60ac8c3e1f8616380fc469b2b',
+            'description': 'md5:b60d776f0bab534c5dabe0a34e47a789',
         },
         'playlist_mincount': 36,
     }, {
@@ -307,7 +284,7 @@ class MixcloudUserIE(MixcloudPlaylistBaseIE):
         'info_dict': {
             'id': 'dholbach_uploads',
             'title': 'Daniel Holbach (uploads)',
-            'description': 'md5:a3f468a60ac8c3e1f8616380fc469b2b',
+            'description': 'md5:b60d776f0bab534c5dabe0a34e47a789',
         },
         'playlist_mincount': 36,
     }, {
@@ -315,7 +292,7 @@ class MixcloudUserIE(MixcloudPlaylistBaseIE):
         'info_dict': {
             'id': 'dholbach_favorites',
             'title': 'Daniel Holbach (favorites)',
-            'description': 'md5:a3f468a60ac8c3e1f8616380fc469b2b',
+            'description': 'md5:b60d776f0bab534c5dabe0a34e47a789',
         },
         # 'params': {
         #     'playlist_items': '1-100',
@@ -338,9 +315,9 @@ class MixcloudUserIE(MixcloudPlaylistBaseIE):
         'info_dict': {
             'id': 'FirstEar_stream',
             'title': 'First Ear (stream)',
-            'description': 'we maraud for ears',
+            'description': 'Curators of good music\r\n\r\nfirstearmusic.com',
         },
-        'playlist_mincount': 269,
+        'playlist_mincount': 271,
     }]
 
     _TITLE_KEY = 'displayName'

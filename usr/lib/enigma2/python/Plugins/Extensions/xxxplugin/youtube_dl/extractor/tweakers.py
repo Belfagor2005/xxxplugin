@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     int_or_none,
@@ -47,6 +49,7 @@ class TweakersIE(InfoExtractor):
                     'height': height,
                     'ext': ext,
                 })
+        self._sort_formats(formats)
 
         return {
             'id': video_id,

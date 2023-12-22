@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -49,6 +52,7 @@ class PinkbikeIE(InfoExtractor):
                 'format_id': format_id,
                 'height': height,
             })
+        self._sort_formats(formats)
 
         title = remove_end(self._og_search_title(webpage), ' Video - Pinkbike')
         description = self._html_search_regex(

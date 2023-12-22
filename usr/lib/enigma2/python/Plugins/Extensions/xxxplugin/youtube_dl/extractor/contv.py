@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from .common import InfoExtractor
 from ..utils import (
     float_or_none,
@@ -68,6 +71,8 @@ class CONtvIE(InfoExtractor):
                 'format_id': 'http',
                 'url': media_mp4_url,
             })
+
+        self._sort_formats(formats)
 
         subtitles = {}
         captions = m_details.get('captions') or {}

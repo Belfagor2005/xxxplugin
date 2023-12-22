@@ -1,3 +1,8 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
+import re
+
 from .common import InfoExtractor
 from ..utils import (
     encode_base_n,
@@ -46,13 +51,13 @@ class EpornerIE(InfoExtractor):
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id')
         display_id = mobj.group('display_id') or video_id
 
         webpage, urlh = self._download_webpage_handle(url, display_id)
 
-        video_id = self._match_id(urlh.url)
+        video_id = self._match_id(urlh.geturl())
 
         hash = self._search_regex(
             r'hash\s*[:=]\s*["\']([\da-f]{32})', webpage, 'hash')
@@ -106,6 +111,7 @@ class EpornerIE(InfoExtractor):
                         'height': height,
                         'fps': fps,
                     })
+        self._sort_formats(formats)
 
         json_ld = self._search_json_ld(webpage, display_id, default={})
 

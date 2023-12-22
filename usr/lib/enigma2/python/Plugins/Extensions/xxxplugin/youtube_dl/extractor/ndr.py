@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -16,7 +19,7 @@ from ..utils import (
 
 class NDRBaseIE(InfoExtractor):
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         display_id = next(group for group in mobj.groups() if group)
         webpage = self._download_webpage(url, display_id)
         return self._extract_embed(webpage, display_id, url)
@@ -218,7 +221,7 @@ class NJoyIE(NDRBaseIE):
         }
 
 
-class NDREmbedBaseIE(InfoExtractor):  # XXX: Conventionally, Concrete class names do not end in BaseIE
+class NDREmbedBaseIE(InfoExtractor):
     IE_NAME = 'ndr:embed:base'
     _VALID_URL = r'(?:ndr:(?P<id_s>[\da-z]+)|https?://www\.ndr\.de/(?P<id>[\da-z]+)-ppjson\.json)'
     _TESTS = [{
@@ -230,7 +233,7 @@ class NDREmbedBaseIE(InfoExtractor):  # XXX: Conventionally, Concrete class name
     }]
 
     def _real_extract(self, url):
-        mobj = self._match_valid_url(url)
+        mobj = re.match(self._VALID_URL, url)
         video_id = mobj.group('id') or mobj.group('id_s')
 
         ppjson = self._download_json(
@@ -266,11 +269,14 @@ class NDREmbedBaseIE(InfoExtractor):  # XXX: Conventionally, Concrete class name
                     ff['vcodec'] = 'none'
                     ff['ext'] = ext or 'mp3'
                 formats.append(ff)
+        self._sort_formats(formats)
 
         config = playlist['config']
 
         live = playlist.get('config', {}).get('streamType') in ['httpVideoLive', 'httpAudioLive']
         title = config['title']
+        if live:
+            title = self._live_title(title)
         uploader = ppjson.get('config', {}).get('branding')
         upload_date = ppjson.get('config', {}).get('publicationDate')
         duration = int_or_none(config.get('duration'))
@@ -314,7 +320,7 @@ class NDREmbedBaseIE(InfoExtractor):  # XXX: Conventionally, Concrete class name
         }
 
 
-class NDREmbedIE(NDREmbedBaseIE):  # XXX: Do not subclass from concrete IE
+class NDREmbedIE(NDREmbedBaseIE):
     IE_NAME = 'ndr:embed'
     _VALID_URL = r'https?://(?:\w+\.)*ndr\.de/(?:[^/]+/)*(?P<id>[\da-z]+)-(?:(?:ard)?player|externalPlayer)\.html'
     _TESTS = [{
@@ -412,7 +418,7 @@ class NDREmbedIE(NDREmbedBaseIE):  # XXX: Do not subclass from concrete IE
     }]
 
 
-class NJoyEmbedIE(NDREmbedBaseIE):  # XXX: Do not subclass from concrete IE
+class NJoyEmbedIE(NDREmbedBaseIE):
     IE_NAME = 'njoy:embed'
     _VALID_URL = r'https?://(?:www\.)?n-joy\.de/(?:[^/]+/)*(?P<id>[\da-z]+)-(?:player|externalPlayer)_[^/]+\.html'
     _TESTS = [{

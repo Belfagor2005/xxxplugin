@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -8,43 +10,55 @@ class TestURLIE(InfoExtractor):
     """ Allows addressing of the test cases as test:yout.*be_1 """
 
     IE_DESC = False  # Do not list
-    _VALID_URL = r'test(?:url)?:(?P<extractor>.*?)(?:_(?P<num>\d+|all))?$'
+    _VALID_URL = r'test(?:url)?:(?P<id>(?P<extractor>.+?)(?:_(?P<num>[0-9]+))?)$'
 
     def _real_extract(self, url):
-        from . import gen_extractor_classes
+        from ..extractor import gen_extractors
 
-        extractor_id, num = self._match_valid_url(url).group('extractor', 'num')
-        if not extractor_id:
-            return {'id': ':test', 'title': '', 'url': url}
+        mobj = re.match(self._VALID_URL, url)
+        video_id = mobj.group('id')
+        extractor_id = mobj.group('extractor')
+        all_extractors = gen_extractors()
 
         rex = re.compile(extractor_id, flags=re.IGNORECASE)
-        matching_extractors = [e for e in gen_extractor_classes() if rex.search(e.IE_NAME)]
+        matching_extractors = [
+            e for e in all_extractors if rex.search(e.IE_NAME)]
 
         if len(matching_extractors) == 0:
-            raise ExtractorError(f'No extractors matching {extractor_id!r} found', expected=True)
+            raise ExtractorError(
+                'No extractors matching %r found' % extractor_id,
+                expected=True)
         elif len(matching_extractors) > 1:
-            extractor = next((  # Check for exact match
-                ie for ie in matching_extractors if ie.IE_NAME.lower() == extractor_id.lower()
-            ), None) or next((  # Check for exact match without plugin suffix
-                ie for ie in matching_extractors if ie.IE_NAME.split('+')[0].lower() == extractor_id.lower()
-            ), None)
-            if not extractor:
+            # Is it obvious which one to pick?
+            try:
+                extractor = next(
+                    ie for ie in matching_extractors
+                    if ie.IE_NAME.lower() == extractor_id.lower())
+            except StopIteration:
                 raise ExtractorError(
-                    'Found multiple matching extractors: %s' % ' '.join(ie.IE_NAME for ie in matching_extractors),
+                    ('Found multiple matching extractors: %s' %
+                        ' '.join(ie.IE_NAME for ie in matching_extractors)),
                     expected=True)
         else:
             extractor = matching_extractors[0]
 
-        testcases = tuple(extractor.get_testcases(True))
-        if num == 'all':
-            return self.playlist_result(
-                [self.url_result(tc['url'], extractor) for tc in testcases],
-                url, f'{extractor.IE_NAME} tests')
+        num_str = mobj.group('num')
+        num = int(num_str) if num_str else 0
+
+        testcases = []
+        t = getattr(extractor, '_TEST', None)
+        if t:
+            testcases.append(t)
+        testcases.extend(getattr(extractor, '_TESTS', []))
+
         try:
-            tc = testcases[int(num or 0)]
+            tc = testcases[num]
         except IndexError:
             raise ExtractorError(
-                f'Test case {num or 0} not found, got only {len(testcases)} tests', expected=True)
+                ('Test case %d not found, got only %d tests' %
+                    (num, len(testcases))),
+                expected=True)
 
-        self.to_screen(f'Test URL: {tc["url"]}')
-        return self.url_result(tc['url'], extractor)
+        self.to_screen('Test URL: %s' % tc['url'])
+
+        return self.url_result(tc['url'], video_id=video_id)

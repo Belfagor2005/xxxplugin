@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 
 from .common import InfoExtractor
@@ -21,7 +23,6 @@ class SpankwireIE(InfoExtractor):
                         )
                         (?P<id>\d+)
                     '''
-    _EMBED_REGEX = [r'<iframe[^>]+\bsrc=["\'](?P<url>(?:https?:)?//(?:www\.)?spankwire\.com/EmbedPlayer\.aspx/?\?.*?\bArticleId=\d+)']
     _TESTS = [{
         # download URL pattern: */<height>P_<tbr>K_<video_id>.mp4
         'url': 'http://www.spankwire.com/Buckcherry-s-X-Rated-Music-Video-Crazy-Bitch/video103545/',
@@ -66,6 +67,12 @@ class SpankwireIE(InfoExtractor):
         'only_matching': True,
     }]
 
+    @staticmethod
+    def _extract_urls(webpage):
+        return re.findall(
+            r'<iframe[^>]+\bsrc=["\']((?:https?:)?//(?:www\.)?spankwire\.com/EmbedPlayer\.aspx/?\?.*?\bArticleId=\d+)',
+            webpage)
+
     def _real_extract(self, url):
         video_id = self._match_id(url)
 
@@ -101,6 +108,7 @@ class SpankwireIE(InfoExtractor):
             formats.extend(self._extract_m3u8_formats(
                 m3u8_url, video_id, 'mp4', entry_protocol='m3u8_native',
                 m3u8_id='hls', fatal=False))
+        self._sort_formats(formats, ('height', 'tbr', 'width', 'format_id'))
 
         view_count = str_to_int(video.get('viewed'))
 

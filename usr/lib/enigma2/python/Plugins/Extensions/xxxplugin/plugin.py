@@ -385,7 +385,7 @@ def getpics(names, pics, tmpfold, picfold):
                     im = Image.open(tpicf).convert("RGBA")
                     # shrink if larger
                     try:
-                        im.thumbnail(size, Image.Resampling.LANCZOS)
+                        im.thumbnail(size, Image.LANCZOS)
                     except:
                         im.thumbnail(size, Image.ANTIALIAS)
                     imagew, imageh = im.size
@@ -394,7 +394,7 @@ def getpics(names, pics, tmpfold, picfold):
                         if imagew < size[0]:
                             ratio = size[0] / imagew
                             try:
-                                im = im.resize((int(imagew * ratio), int(imageh * ratio)), Image.Resampling.LANCZOS)
+                                im = im.resize((int(imagew * ratio), int(imageh * ratio)), Image.LANCZOS)
                             except:
                                 im = im.resize((int(imagew * ratio), int(imageh * ratio)), Image.ANTIALIAS)
 
@@ -417,7 +417,7 @@ def getpics(names, pics, tmpfold, picfold):
                     print(e)
                     im = Image.open(tpicf)
                     try:
-                        im.thumbnail(size, Image.Resampling.LANCZOS)
+                        im.thumbnail(size, Image.LANCZOS)
                     except:
                         im.thumbnail(size, Image.ANTIALIAS)
                     im.save(tpicf)

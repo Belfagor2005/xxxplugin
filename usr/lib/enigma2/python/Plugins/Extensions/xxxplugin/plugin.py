@@ -1243,23 +1243,26 @@ class Playstream1(Screen):
                 if six.PY3:
                     content = six.ensure_str(content)
                 print("content A =", content)
-                from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
+                # from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
+                from Plugins.Extensions.xxxplugin import youtube_dl
+                from youtube_dl import YoutubeDL
                 '''
                 ydl_opts = {'format': 'best'}
                 ydl_opts = {'format': 'bestaudio/best'}
-                '''
+                
                 ydl_opts = {'format': 'best',
                             'no_check_certificate': True,
                             }
+                '''
+                ydl_opts = {'format': 'best'}
                 ydl = YoutubeDL(ydl_opts)
                 ydl.add_default_info_extractors()
-                result = ydl.extract_info(content, download=False)
+                result = ydl.extract_info(url, download=False)
                 self.url = result["url"]
-                print('In playVideo url 5=', self.url)
+                print("Here in Test url =", url)
                 self.session.open(Playstream2, self.name, self.url)
             except:
                 pass
-
         return
 
     def playfile(self, serverint):

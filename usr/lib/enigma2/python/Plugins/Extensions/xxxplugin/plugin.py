@@ -17,11 +17,6 @@ from .lib import html_conv
 import codecs
 from Components.AVSwitch import AVSwitch
 try:
-    from Components.AVSwitch import iAVSwitch
-except Exception as e:
-    print(e)
-
-try:
     from enigma import eAVSwitch
 except Exception as e:
     print(e)
@@ -931,20 +926,18 @@ class GridMain(Screen):
         itype = self.index
         name = self.names[itype]
         url = self.urls[itype]
+        modl = name.lower()
         if PY3:
-            modl = name.lower()
             import importlib.util
             spec = importlib.util.spec_from_file_location(modl, url)
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
             print("In GridMain Going in PY3")
-            self.session.open(foo.main)
         else:
-            modl = name.lower()
             import imp
             foo = imp.load_source(modl, url)
             print("In GridMain Going in PY2")
-            self.session.open(foo.main)
+        self.session.open(foo.main)
 
 
 class TvInfoBarShowHide():

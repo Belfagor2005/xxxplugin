@@ -258,6 +258,8 @@ class ztubepage(Screen):
                     url1 = url + 'page/' + page
                 name = "Page " + page
                 i += 1
+                print('name:', name)
+                print('url:', url1)
                 self.cat_list.append(show_(name, url1))
             if len(self.cat_list) < 0:
                 return
@@ -347,8 +349,9 @@ class ztube(Screen):
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-
+            print('content:', content)
             regexcat = 'href="https\:\/\/ztube\.org\/videos\/(.*?)">(.*?)<'
+            # regexcat = 'href="https://ztube.org/videos/(.*?)">(.*?)</a>'
             match = re.compile(regexcat, re.DOTALL).findall(content)
             for url, name in match:
                 name = normalize(name)
@@ -370,6 +373,7 @@ class ztube(Screen):
         try:
             name = self['menulist'].getCurrent()[0][0]
             url = self['menulist'].getCurrent()[0][1]
+            print('url:', url)
             self.play_that_shit(url, name)
         except Exception as e:
             print(e)
@@ -575,7 +579,7 @@ class ztube3(Screen):
         # try:
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
-        print("url1 B =", url)
+        print("url1 c =", url)
         self.play_that_shit(url, name)
         # except Exception as e:
         # print(e)

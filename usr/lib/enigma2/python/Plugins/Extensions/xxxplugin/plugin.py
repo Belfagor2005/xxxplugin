@@ -11,10 +11,9 @@
 # '''
 
 from __future__ import print_function
-from . import _, skin_path, screenwidth
-from .lib import Utils
-from .lib import html_conv
-import codecs
+from . import (_, skin_path, screenwidth)
+from .lib import Utils, html_conv
+
 from Components.AVSwitch import AVSwitch
 try:
     from enigma import eAVSwitch
@@ -25,51 +24,64 @@ from Components.Button import Button
 from Components.ConfigList import ConfigListScreen
 from Components.Label import Label
 from Components.MenuList import MenuList
-from Components.MultiContent import MultiContentEntryPixmapAlphaTest
-from Components.MultiContent import MultiContentEntryText
+from Components.MultiContent import (MultiContentEntryPixmapAlphaTest, MultiContentEntryText)
 from Components.Pixmap import Pixmap, MovingPixmap
 from Components.ProgressBar import ProgressBar
 from Components.ScrollLabel import ScrollLabel
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
 from Components.Sources.List import List
 from Components.Sources.StaticText import StaticText
-from Components.config import ConfigDirectory, ConfigYesNo
-from Components.config import ConfigSelection, getConfigListEntry
-from Components.config import config, ConfigSubsection
-from Components.config import configfile
+from Components.config import (
+    ConfigDirectory,
+    ConfigYesNo,
+    ConfigSelection,
+    getConfigListEntry,
+    config,
+    ConfigSubsection,
+    configfile,
+)
 from PIL import Image, ImageFile, ImageChops
 from Plugins.Plugin import PluginDescriptor
-from Screens.InfoBarGenerics import InfoBarSeek, InfoBarAudioSelection
-from Screens.InfoBarGenerics import InfoBarSubtitleSupport
+from Screens.InfoBarGenerics import (
+    InfoBarSeek,
+    InfoBarAudioSelection,
+    InfoBarSubtitleSupport,
+)
 from Screens.LocationBox import LocationBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Tools.Downloader import downloadWithProgress
-from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER
-from enigma import eListboxPythonMultiContent, eServiceReference
-from enigma import eTimer
-from enigma import gFont
-from enigma import iPlayableService
-from enigma import loadPNG
-from os.path import exists as file_exists
-from os.path import splitext
+from enigma import (
+    RT_HALIGN_LEFT,
+    RT_VALIGN_CENTER,
+    eListboxPythonMultiContent,
+    eServiceReference,
+    eTimer,
+    gFont,
+    iPlayableService,
+    loadPNG,
+)
+from os.path import (splitext, exists as file_exists)
 from requests import get, exceptions
 from requests.exceptions import HTTPError
 from twisted.internet.reactor import callInThread
+import codecs
 import os
 import re
 import requests
 import sys
 import shutil
 import six
+
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 _session = None
 THISPLUG = '/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/'
+
+
 global defpic, dblank
 global Path_Movies, Path_Cache
-_session = None
-
 
 PY3 = sys.version_info.major >= 3
 if PY3:
@@ -216,8 +228,6 @@ except:
 
 Path_Movies = str(cfg.movie.value) + '/'
 Path_Cache = str(cfg.cachefold.value)
-print('Path Movies: ', Path_Movies)
-print('Path Cache: ', Path_Cache)
 
 
 def returnIMDB(text_clear):
@@ -1512,7 +1522,6 @@ class startInit(Screen):
                                                            'down': self.Down,
                                                            }, -1)
 
-        # self.onLayoutFinish.append(self.startSession)
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self.startSession)
@@ -1572,32 +1581,32 @@ class startInit(Screen):
         # self['info'].setText('START')
 
 
-class AutoStartTimerxxxplugin:
+# class AutoStartTimerxxxplugin:
 
-    def __init__(self, session):
-        self.session = session
-        global _firstStartxxxplugin
-        if _firstStartxxxplugin:
-            self.runUpdate()
+    # def __init__(self, session):
+        # self.session = session
+        # global _firstStartxxxplugin
+        # if _firstStartxxxplugin:
+            # self.runUpdate()
 
-    def runUpdate(self):
-        print("*** running update ***")
-        try:
-            from . import Update
-            Update.upd_done()
-            _firstStartxxxplugin = False
-        except Exception as e:
-            print('error _firstStartxxxplugin', e)
+    # def runUpdate(self):
+        # print("*** running update ***")
+        # try:
+            # from . import Update
+            # Update.upd_done()
+            # _firstStartxxxplugin = False
+        # except Exception as e:
+            # print('error _firstStartxxxplugin', e)
 
 
-def autostart(reason, session=None, **kwargs):
-    global autoStartTimerxplugin
-    global _firstStartxxxplugin
-    if reason == 0:
-        if session is not None:
-            _firstStartxxxplugin = True
-            autoStartTimerxplugin = AutoStartTimerxxxplugin(session)
-    return
+# def autostart(reason, session=None, **kwargs):
+    # global autoStartTimerxplugin
+    # global _firstStartxxxplugin
+    # if reason == 0:
+        # if session is not None:
+            # _firstStartxxxplugin = True
+            # autoStartTimerxplugin = AutoStartTimerxxxplugin(session)
+    # return
 
 
 def main(session, **kwargs):
@@ -1629,7 +1638,7 @@ def main(session, **kwargs):
 def Plugins(**kwargs):
     icona = 'icon.png'
     extDescriptor = PluginDescriptor(name=name_plug, description=_(title_plug), where=PluginDescriptor.WHERE_EXTENSIONSMENU, icon=icona, fnc=main)
-    result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main),
-              PluginDescriptor(name=name_plug, description=title_plug, where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=autostart)]
+    result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main))]
     result.append(extDescriptor)
     return result
+    # PluginDescriptor(name=name_plug, description=title_plug, where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=autostart

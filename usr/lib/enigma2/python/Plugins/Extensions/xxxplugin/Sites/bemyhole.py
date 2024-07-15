@@ -16,8 +16,7 @@ from Components.ActionMap import ActionMap
 from Components.Label import Label
 from Components.Pixmap import Pixmap
 from Screens.Screen import Screen
-from Tools.Directories import SCOPE_PLUGINS
-from Tools.Directories import resolveFilename
+from Tools.Directories import (SCOPE_PLUGINS, resolveFilename)
 from enigma import eTimer
 import codecs
 import os
@@ -26,14 +25,17 @@ import six
 import ssl
 import sys
 import unicodedata
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
-from Plugins.Extensions.xxxplugin.plugin import showlist, rvoneListEntry
-from Plugins.Extensions.xxxplugin.plugin import show_
-from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin.lib import html_conv
-from Plugins.Extensions.xxxplugin import _, skin_path
+from Plugins.Extensions.xxxplugin import (_, skin_path)
+from Plugins.Extensions.xxxplugin.lib import (Utils, html_conv)
+from Plugins.Extensions.xxxplugin.plugin import (
+        rvList,
+        Playstream1,
+        showlist,
+        rvoneListEntry,
+        show_,
+)
+
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
 
 
 if sys.version_info >= (2, 7, 9):
@@ -118,12 +120,7 @@ class main(Screen):
                                                                 'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.updateMenuList)
-        else:
-            self.timer.callback.append(self.updateMenuList)
-        self.timer.start(500, True)
+        self.onLayoutFinish.append(self.updateMenuList)
 
     def updateMenuList(self):
         self.menu_list = []
@@ -143,10 +140,7 @@ class main(Screen):
         from Screens.VirtualKeyBoard import VirtualKeyBoard
         self.namex = name
         self.urlx = url
-        self.session.openWithCallback(self.filterChannels,
-                                      VirtualKeyBoard, title=_(
-                                       "Filter this category..."
-                                      ), text='')
+        self.session.openWithCallback(self.filterChannels, VirtualKeyBoard, title=_("Filter this category..."), text='')
 
     def filterChannels(self, result):
         if result:
@@ -262,7 +256,7 @@ class bemyhole(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
+        self.timer.start(500, True)
 
     def up(self):
         self[self.currentList].up()
@@ -432,7 +426,7 @@ class bemyhole3(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
+        self.timer.start(500, True)
 
     def up(self):
         self[self.currentList].up()
@@ -478,12 +472,9 @@ class bemyhole3(Screen):
             print(e)
 
     def ok(self):
-        try:
-            name = self['menulist'].getCurrent()[0][0]
-            url = self['menulist'].getCurrent()[0][1]
-            self.play_that_shit(url, name)
-        except Exception as e:
-            print(e)
+        name = self['menulist'].getCurrent()[0][0]
+        url = self['menulist'].getCurrent()[0][1]
+        self.play_that_shit(url, name)
 
     def play_that_shit(self, url, name):
         self.session.open(bemyhole4, str(name), str(url))
@@ -632,7 +623,7 @@ class bemyhole5(Screen):
             self.timer_conn = self.timer.timeout.connect(self.cat)
         else:
             self.timer.callback.append(self.cat)
-        self.timer.start(600, True)
+        self.timer.start(500, True)
 
     def up(self):
         self[self.currentList].up()

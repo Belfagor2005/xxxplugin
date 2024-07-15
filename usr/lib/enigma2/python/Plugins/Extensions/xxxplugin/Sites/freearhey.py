@@ -16,8 +16,7 @@ from Components.ActionMap import ActionMap
 from Components.Label import Label
 from Components.Pixmap import Pixmap
 from Screens.Screen import Screen
-from Tools.Directories import SCOPE_PLUGINS
-from Tools.Directories import resolveFilename
+from Tools.Directories import (SCOPE_PLUGINS, resolveFilename)
 from enigma import eTimer
 import codecs
 import os
@@ -25,12 +24,19 @@ import re
 import six
 import ssl
 import sys
-from Plugins.Extensions.xxxplugin.plugin import rvList, Playstream1
-from Plugins.Extensions.xxxplugin.plugin import show_
-from Plugins.Extensions.xxxplugin.lib import Utils
-from Plugins.Extensions.xxxplugin import _, skin_path
+from Plugins.Extensions.xxxplugin import (_, skin_path)
+from Plugins.Extensions.xxxplugin.lib import (Utils, html_conv)
+from Plugins.Extensions.xxxplugin.plugin import (
+        rvList,
+        Playstream1,
+        Playstream2,
+        showlist,
+        rvoneListEntry,
+        show_,
+)
+
 PY3 = sys.version_info.major >= 3
-print('Py3: ', PY3)
+
 
 if sys.version_info >= (2, 7, 9):
     try:
@@ -83,12 +89,7 @@ class main(Screen):
                                                                 'green': self.ok,
                                                                 'cancel': self.exit,
                                                                 'red': self.exit}, -1)
-        self.timer = eTimer()
-        if Utils.DreamOS():
-            self.timer_conn = self.timer.timeout.connect(self.updateMenuList)
-        else:
-            self.timer.callback.append(self.updateMenuList)
-        self.timer.start(500, True)
+        self.onLayoutFinish.append(self.updateMenuList)
 
     def up(self):
         self[self.currentList].up()

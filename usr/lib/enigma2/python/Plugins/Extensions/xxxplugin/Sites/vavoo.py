@@ -16,8 +16,7 @@ from Components.ActionMap import ActionMap
 from Components.Label import Label
 from Components.Pixmap import Pixmap
 from Screens.Screen import Screen
-from Tools.Directories import SCOPE_PLUGINS
-from Tools.Directories import resolveFilename
+from Tools.Directories import (SCOPE_PLUGINS, resolveFilename)
 from enigma import eTimer
 import codecs
 import json

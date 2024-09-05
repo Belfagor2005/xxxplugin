@@ -10,7 +10,7 @@ global skin_path
 
 PluginLanguageDomain = 'xxxplugin'
 PluginLanguagePath = 'Extensions/xxxplugin/locale'
-THISPLUG = '/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/'
+THISPLUG = resolveFilename(SCOPE_PLUGINS, "Extensions/{}/".format('xxxplugin'))
 skin_path = THISPLUG + '/res/skins/hd/'
 screenwidth = getDesktop(0).size()
 isDreamOS = False

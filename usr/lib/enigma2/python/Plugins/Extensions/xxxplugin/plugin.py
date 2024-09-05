@@ -6,19 +6,15 @@
 # ****************************************
 # *        coded by Lululla              *
 # *          skin by MMark               *
-# *   start init 09/10/2022              *
+# *   start init 05/09/2024              *
 # ****************************************
 # '''
 
 from __future__ import print_function
-from . import (_, skin_path, screenwidth)
+from . import (_, skin_path, screenwidth, THISPLUG)
 from .lib import Utils, html_conv
 
 from Components.AVSwitch import AVSwitch
-try:
-    from enigma import eAVSwitch
-except Exception as e:
-    print(e)
 from Components.ActionMap import ActionMap
 from Components.Button import Button
 from Components.ConfigList import ConfigListScreen
@@ -40,7 +36,7 @@ from Components.config import (
     ConfigSubsection,
     configfile,
 )
-from PIL import Image, ImageFile, ImageChops
+from PIL import Image, ImageFile  # , ImageChops
 from Plugins.Plugin import PluginDescriptor
 from Screens.InfoBarGenerics import (
     InfoBarSeek,
@@ -63,8 +59,6 @@ from enigma import (
     loadPNG,
 )
 from os.path import (splitext, exists as file_exists)
-from requests import get, exceptions
-from requests.exceptions import HTTPError
 from twisted.internet.reactor import callInThread
 import codecs
 import os
@@ -77,7 +71,6 @@ import six
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 _session = None
-THISPLUG = '/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin/'
 
 
 global defpic, dblank
@@ -110,9 +103,9 @@ def getversioninfo():
 
 
 currversion = getversioninfo()
-Version = currversion + ' - 08.10.2023'
+Version = currversion + ' - 05.09.2024'
 title_plug = '..:: XXX Revolution V. %s ::..' % Version
-folder_path = "/tmp/xplugin/"
+folder_path = "/tmp/xxxplugin/"
 name_plug = 'XXX Revolution'
 piccons = os.path.join(THISPLUG, 'res/img/')
 res_plugin_path = os.path.join(THISPLUG, 'res/')
@@ -131,15 +124,12 @@ except:
 
 if screenwidth.width() == 2560:
     defpic = THISPLUG + 'res/img/no_work.png'
-    dblank = THISPLUG + 'res/img/undefinided.png'
 
 elif screenwidth.width() == 1920:
-    defpic = THISPLUG + 'res/img/tvs2.png'
-    dblank = THISPLUG + 'res/img/undefinided.png'
-
+    defpic = THISPLUG + 'res/img/tvs.png'
 else:
     defpic = THISPLUG + 'res/img/no_work.png'
-    dblank = THISPLUG + 'res/img/undefinided.png'
+dblank = THISPLUG + 'res/img/undefinided.png'
 
 
 class rvList(MenuList):
@@ -164,13 +154,13 @@ def rvoneListEntry(name):
     pngx = os.path.join(res_plugin_path, 'pics/setting2.png')
     if screenwidth.width() == 2560:
         res.append(MultiContentEntryPixmapAlphaTest(pos=(5, 5), size=(50, 50), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(90, 0), size=(1200, 50), font=0, text=name, color=0xa6d1fe, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+        res.append(MultiContentEntryText(pos=(90, 0), size=(1200, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
     elif screenwidth.width() == 1920:
         res.append(MultiContentEntryPixmapAlphaTest(pos=(5, 5), size=(40, 40), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(70, 0), size=(1000, 50), font=0, text=name, color=0xa6d1fe, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+        res.append(MultiContentEntryText(pos=(70, 0), size=(1000, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
     else:
         res.append(MultiContentEntryPixmapAlphaTest(pos=(3, 10), size=(40, 40), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(50, 0), size=(500, 50), font=0, text=name, color=0xa6d1fe, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+        res.append(MultiContentEntryText(pos=(50, 0), size=(500, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
     return res
 
 
@@ -196,38 +186,36 @@ def show_(name, link):
 
 
 mdpchoices = [
-        ("4097", ("IPTV(4097)")),
-        ("1", ("Dvb(1)")),
-    ]
+    ("4097", ("IPTV(4097)")),
+    ("1", ("Dvb(1)")),
+]
+players = [
+    ("/usr/bin/gstplayer", ("5001", "Gstreamer(5001)")),
+    ("/usr/bin/exteplayer3", ("5002", "Exteplayer3(5002)")),
+    ("/usr/bin/apt-get", ("8193", "DreamOS GStreamer(8193)"))
+]
 
-if file_exists("/usr/bin/gstplayer"):
-    mdpchoices.append(("5001", ("Gstreamer(5001)")))
-
-if file_exists("/usr/bin/exteplayer3"):
-    mdpchoices.append(("5002", ("Exteplayer3(5002)")))
-
-if file_exists("/usr/bin/apt-get"):
-    mdpchoices.append(("8193", ("DreamOS GStreamer(8193)")))
+mdpchoices.extend(choice for path, choice in players if file_exists(path))
 
 config.plugins.xxxplugin = ConfigSubsection()
 cfg = config.plugins.xxxplugin
 cfg.services = ConfigSelection(default='4097', choices=mdpchoices)
 cfg.thumb = ConfigSelection(default="True", choices=[("True", _("yes")), ("False", _("no"))])
-cfg.cachefold = ConfigDirectory("/media/hdd", False)
 cfg.movie = ConfigDirectory("/media/hdd/movie")
-
+cfg.cachefold = ConfigDirectory("/media/hdd", False)
 
 try:
     from Components.UsageConfig import defaultMoviePath
     downloadpath = defaultMoviePath()
     cfg.movie = ConfigDirectory(default=downloadpath)
+    cfg.cachefold = ConfigDirectory(default=downloadpath)
 except:
     if file_exists("/usr/bin/apt-get"):
         cfg.movie = ConfigDirectory(default='/media/hdd/movie')
-
+        cfg.cachefold = ConfigDirectory(default='/media/hdd')
 
 Path_Movies = str(cfg.movie.value) + '/'
-Path_Cache = str(cfg.cachefold.value)
+Path_Cache = str(cfg.cachefold.value).replace('movie', 'xxxplugin')
 
 
 def returnIMDB(text_clear):
@@ -259,6 +247,9 @@ def returnIMDB(text_clear):
 
 def threadGetPage(url=None, file=None, key=None, success=None, fail=None, *args, **kwargs):
     print('[xxxplugin][threadGetPage] url, file, key, args, kwargs', url, "   ", file, "   ", key, "   ", args, "   ", kwargs)
+    from requests import get, exceptions
+    from requests.exceptions import HTTPError
+    # from twisted.internet.reactor import callInThread
     try:
         url = url.rstrip('\r\n')
         url = url.rstrip()
@@ -280,7 +271,6 @@ def threadGetPage(url=None, file=None, key=None, success=None, fail=None, *args,
 
 def getpics(names, pics, tmpfold, picfold):
     # from PIL import Image
-    # global defpic
     pix = []
     if cfg.thumb.value == "False":
         npic = len(pics)
@@ -330,8 +320,6 @@ def getpics(names, pics, tmpfold, picfold):
                     url = url.replace("AxNxD", "&").replace("%0A", "")
                     poster = Utils.checkRedirect(url)
                     if poster:
-                        # if PY3:
-                            # poster = poster.encode()
                         if "|" in url:
                             n3 = url.find("|", 0)
                             n1 = url.find("Referer", n3)
@@ -343,19 +331,22 @@ def getpics(names, pics, tmpfold, picfold):
                                 f1.write(p)
                         else:
                             try:
+                                '''
                                 # print("Going in urlopen url =", url)
                                 # p = Utils.gettUrl(url)
                                 # with open(tpicf, 'wb') as f1:
                                     # f1.write(p)
+                                '''
                                 try:
                                     with open(tpicf, 'wb') as f:
                                         f.write(requests.get(url, stream=True, allow_redirects=True).content)
                                     print('=============11111111=================\n')
                                 except Exception as e:
-                                    print("Error: Exception")
-                                    print('===========2222222222=================\n')
+                                    print("Error: Exception", e)
+                                    '''
                                     # if PY3:
                                         # poster = poster.encode()
+                                    '''
                                     callInThread(threadGetPage, url=poster, file=tpicf, success=downloadPic, fail=downloadError)
 
                                     '''
@@ -363,8 +354,7 @@ def getpics(names, pics, tmpfold, picfold):
                                     open(tpicf, 'wb').write(requests.get(poster, stream=True, allow_redirects=True).content)
                                     '''
                             except Exception as e:
-                                print("Error: Exception 2")
-                                print(e)
+                                print("Error: Exception 2", e)
 
                 except:
                     cmd = "cp " + defpic + " " + tpicf
@@ -427,8 +417,7 @@ def getpics(names, pics, tmpfold, picfold):
                         im.thumbnail(size, Image.ANTIALIAS)
                     im.save(tpicf)
             except Exception as e:
-                print("******* picon resize failed *******")
-                print(e)
+                print("******* picon resize failed *******", e)
                 tpicf = defpic
         else:
             print("******* make picon failed *******")
@@ -514,7 +503,7 @@ class ConfigEx(ConfigListScreen, Screen):
             self.session.openWithCallback(self.VirtualKeyBoardCallback, VirtualKeyBoard, title=self['config'].getCurrent()[0], text=self['config'].getCurrent()[1].value)
 
     def cachedel(self):
-        fold = os.path.join(str(cfg.cachefold.value), "xxxplugin/pic")
+        fold = os.path.join(Path_Cache, "pic")
         Utils.cachedel(fold)
         self.mbox = self.session.open(MessageBox, _('All cache fold empty!'), MessageBox.TYPE_INFO, timeout=5)
 
@@ -632,12 +621,10 @@ class Main(Screen):
                                      "InputActions",
                                      "ColorActions",
                                      "ButtonSetupActions",
-                                     "DirectionActions"], {
-                                                            "ok": self.okClicked,
-                                                            "back": self.close,
-                                                            "red": self.close,
-                                                            # "green": self.okClicked,
-                                                           }, -1)
+                                     "DirectionActions"], {"ok": self.okClicked,
+                                                           "back": self.close,
+                                                           # "green": self.okClicked
+                                                           "red": self.close}, -1)
         self.onLayoutFinish.append(self.startSession2)
 
     def startSession(self):
@@ -652,31 +639,22 @@ class Main(Screen):
         # sort test
         i = 0
         name = ""
-        desc = ""
+        # desc = ""
         pic = ""
         url = ""
         path = THISPLUG + "Sites"
         # print('path= ', path)
         try:
+            def should_exclude(file):
+                exclude_keywords = ['pycache', 'extractor', 'init', 'Utils', 'html_conv', 'no_work']
+                return any(keyword in file for keyword in exclude_keywords)
             for root, dirs, files in os.walk(path):
-                # print(files)
                 for file in files:
-                    if file.endswith('.py') and not file.endswith('.pyo') and not file.endswith('.pyc'):
-                        # print('name= ', file)
-                        if "pycache" in file:
+                    if file.endswith('.py') and not file.endswith(('.pyo', '.pyc')):
+                        if should_exclude(file):
                             continue
-                        if 'extractor' in file:
-                            continue
-                        if 'init' in file:
-                            continue
-                        if 'Utils' in file:
-                            continue
-                        if 'html_conv' in file:
-                            continue
-                        if 'no_work' in file:
-                            continue
+
                         name, ext = file.split(".")  # [-1]
-                        desc = 'XXX %s' % name
                         url = THISPLUG + "Sites/%s.py" % name
                         pic = os.path.join(piccons, '%s.png' % name)
                         if name not in self.names:
@@ -684,6 +662,7 @@ class Main(Screen):
                             item = name + "###" + url + "###" + pic
                             items.append(item)
                 items.sort()
+
                 for item in items:
                     name = item.split('###')[0]
                     url = item.split('###')[1]
@@ -754,8 +733,8 @@ class GridMain(Screen):
             self.pos.append([793, 348])
             self.pos.append([1031, 348])
 
-        tmpfold = os.path.join(str(cfg.cachefold.value), "xxxplugin/tmp")
-        picfold = os.path.join(str(cfg.cachefold.value), "xxxplugin/pic")
+        tmpfold = os.path.join(Path_Cache, "tmp")
+        picfold = os.path.join(Path_Cache, "pic")
 
         picx = getpics(names, pics, tmpfold, picfold)
         # print("In Gridmain pics = ", pics)
@@ -773,23 +752,25 @@ class GridMain(Screen):
         for x in list:
             print("x in list =", x)
         self["frame"] = MovingPixmap()
+
+        self.PIXMAPS_PER_PAGE = 10
         i = 0
-        while i < 20:
+        while i < self.PIXMAPS_PER_PAGE:
             self["label" + str(i + 1)] = StaticText()
             self["pixmap" + str(i + 1)] = Pixmap()
             i += 1
-        # i = 0
+
+        self.npics = len(self.names)
+        self.npage = int(float(self.npics // self.PIXMAPS_PER_PAGE)) + 1
         self.index = 0
+        self.maxentry = len(list) - 1
         self.ipage = 1
-        ln = len(self.names)
-        self.npage = int(float(ln / 10)) + 1
-        # print("self.npage =", self.npage)
+
         self["actions"] = ActionMap(["OkCancelActions",
                                      "EPGSelectActions",
                                      "MenuActions",
                                      "DirectionActions",
-                                     "NumberActions"], {
-                                                        "ok": self.okClicked,
+                                     "NumberActions"], {"ok": self.okClicked,
                                                         "epg": self.showIMDB,
                                                         "info": self.about,
                                                         "cancel": self.cancel,
@@ -797,12 +778,122 @@ class GridMain(Screen):
                                                         "left": self.key_left,
                                                         "right": self.key_right,
                                                         "up": self.key_up,
-                                                        "down": self.key_down
-                                                       })
+                                                        "down": self.key_down})
 
-        # print("Going in openTest")
         self.onLayoutFinish.append(self.openTest)
         # self.onLayoutFinish.append(self.about)
+
+    def paintFrame(self):
+        try:
+            # If the index exceeds the maximum number of items, it returns to the first item
+            if self.index > self.maxentry:
+                self.index = self.minentry
+            self.idx = self.index
+            name = self.names[self.idx]
+            self['info'].setText(str(name))
+            ifr = self.index - (self.PIXMAPS_PER_PAGE * (self.ipage - 1))
+            ipos = self.pos[ifr]
+            self["frame"].moveTo(ipos[0], ipos[1], 1)
+            self["frame"].startMoving()
+        except Exception as e:
+            print('Error in paintFrame: ', e)
+
+    def openTest(self):
+        if self.ipage < self.npage:
+            self.maxentry = (self.PIXMAPS_PER_PAGE * self.ipage) - 1
+            self.minentry = (self.ipage - 1) * self.PIXMAPS_PER_PAGE
+
+        elif self.ipage == self.npage:
+            self.maxentry = len(self.pics) - 1
+            self.minentry = (self.ipage - 1) * self.PIXMAPS_PER_PAGE
+            i1 = 0
+            while i1 < self.PIXMAPS_PER_PAGE:
+                self["label" + str(i1 + 1)].setText(" ")
+                self["pixmap" + str(i1 + 1)].instance.setPixmapFromFile(dblank)
+                i1 += 1
+        self.npics = len(self.pics)
+        i = 0
+        i1 = 0
+        self.picnum = 0
+        ln = self.maxentry - (self.minentry - 1)
+        while i < ln:
+            idx = self.minentry + i
+            # self["label" + str(i + 1)].setText(self.names[idx])  # this show label to bottom of png pixmap
+            pic = self.pics[idx]
+            if not os.path.exists(self.pics[idx]):
+                pic = dblank
+            self["pixmap" + str(i + 1)].instance.setPixmapFromFile(pic)
+            i += 1
+        self.index = self.minentry
+        self.paintFrame()
+
+    def key_left(self):
+        # Decrement the index only if we are not at the first pixmap
+        if self.index >= 0:
+            self.index -= 1
+        else:
+            # If we are at the first pixmap, go back to the last pixmap of the last page
+            self.ipage = self.npage
+            self.index = self.npics - 1
+        # Check if we need to change pages
+        if self.index < self.minentry:
+            self.ipage -= 1
+            if self.ipage < 1:  # If we go beyond the first page
+                self.ipage = self.npage
+                self.index = self.npics - 1  # Back to the last pixmap of the last page
+            self.openTest()
+        else:
+            self.paintFrame()
+
+    def key_right(self):
+        # Increment the index only if we are not at the last pixmap
+        if self.index < self.npics - 1:
+            self.index += 1
+        else:
+            # If we are at the last pixmap, go back to the first pixmap of the first page
+            self.index = 0
+            self.ipage = 1
+            self.openTest()
+        # Check if we need to change pages
+        if self.index > self.maxentry:
+            self.ipage += 1
+            if self.ipage > self.npage:  # If we exceed the number of pages
+                self.index = 0
+                self.ipage = 1  # Back to first page
+            self.openTest()
+        else:
+            self.paintFrame()
+
+    def key_up(self):
+        if self.index >= 5:
+            self.index -= 5
+        else:
+            if self.ipage > 1:
+                self.ipage -= 1
+                self.index = self.maxentry  # Back to the last line of the previous page
+                self.openTest()
+            else:
+                # If we are on the first page, go back to the last pixmap of the last page
+                self.ipage = self.npage
+                self.index = self.npics - 1
+                self.openTest()
+        self.paintFrame()
+
+    def key_down(self):
+        if self.index <= self.maxentry - 5:
+            self.index += 5
+        else:
+            if self.ipage < self.npage:
+                self.ipage += 1
+                self.index = self.minentry  # Back to the top of the next page
+                self.openTest()
+            else:
+                # If we are on the last page, go back to the first pixmap of the first page
+                self.index = 0
+                self.ipage = 1
+                self.openTest()
+
+        self.paintFrame()
 
     def configure(self):
         self.session.open(ConfigEx)
@@ -821,116 +912,6 @@ class GridMain(Screen):
         text_clear = self.names[idx]
         if returnIMDB(text_clear):
             print('show imdb/tmdb')
-
-    def paintFrame(self):
-        try:
-            ifr = self.index - (10 * (self.ipage - 1))
-            # print("ifr =", ifr)
-            ipos = self.pos[ifr]
-            # print("ipos =", ipos)
-            self["frame"].moveTo(ipos[0], ipos[1], 1)
-            self["frame"].startMoving()
-            # self.info()
-        except Exception as e:
-            print('error  in paintframe: ', e)
-
-    def openTest(self):
-        print("self.index, openTest self.ipage, self.npage =", self.index, self.ipage, self.npage)
-        if self.ipage < self.npage:
-            self.maxentry = (10 * self.ipage) - 1
-            self.minentry = (self.ipage - 1) * 10
-            print("self.ipage , self.minentry, self.maxentry =", self.ipage, self.minentry, self.maxentry)
-
-        elif self.ipage == self.npage:
-            print("self.ipage , len(self.pics) =", self.ipage, len(self.pics))
-            self.maxentry = len(self.pics) - 1
-            self.minentry = (self.ipage - 1) * 10
-            print("self.ipage , self.minentry, self.maxentry B=", self.ipage, self.minentry, self.maxentry)
-            i1 = 0
-            blpic = dblank
-            while i1 < 12:
-                self["label" + str(i1 + 1)].setText(" ")
-                self["pixmap" + str(i1 + 1)].instance.setPixmapFromFile(blpic)
-                i1 += 1
-        print("len(self.pics), self.minentry, self.maxentry =", len(self.pics), self.minentry, self.maxentry)
-        self.npics = len(self.pics)
-        i = 0
-        i1 = 0
-        self.picnum = 0
-        ln = self.maxentry - (self.minentry - 1)
-        while i < ln:
-            idx = self.minentry + i
-            self["label" + str(i + 1)].setText(self.names[idx])
-            pic = self.pics[idx]
-            if file_exists(pic):
-                print("pic path exists")
-            else:
-                print("pic path not exists")
-            picd = defpic
-            file_name, file_extension = splitext(pic)
-            if file_extension != ".png":
-                pic = str(file_name) + ".png"
-            if self["pixmap" + str(i + 1)].instance:
-                try:
-                    self["pixmap" + str(i + 1)].instance.setPixmapFromFile(pic)  # ok
-                except Exception as e:
-                    print(e)
-                    self["pixmap" + str(i + 1)].instance.setPixmapFromFile(picd)
-            i += 1
-
-        self.index = self.minentry
-        self.paintFrame()
-
-    def key_left(self):
-        self.index -= 1
-        if self.index < 0:
-            self.index = self.maxentry
-            self.key_up()
-        else:
-            self.paintFrame()
-
-    def key_right(self):
-        i = self.npics - 1
-        if self.index == i:
-            self.index = 0
-            self.ipage = 1
-            self.openTest()
-        self.index += 1
-        if self.index > self.maxentry:
-            self.index = 0
-            self.key_down()
-        else:
-            self.paintFrame()
-
-    def key_up(self):
-        self.index = self.index - 5
-        if self.index < (self.minentry):
-            if self.ipage > 1:
-                self.ipage = self.ipage - 1
-                self.openTest()
-            elif self.ipage == 1:
-                return
-            else:
-                self.index = 0
-            self.paintFrame()
-        else:
-            self.paintFrame()
-
-    def key_down(self):
-        self.index = self.index + 5
-        if self.index > (self.maxentry):
-            if self.ipage < self.npage:
-                self.ipage = self.ipage + 1
-                self.openTest()
-            elif self.ipage == self.npage:
-                self.index = 0
-                self.ipage = 1
-                self.openTest()
-            else:
-                self.index = 0
-            self.paintFrame()
-        else:
-            self.paintFrame()
 
     def okClicked(self):
         itype = self.index
@@ -1109,13 +1090,15 @@ class Playstream1(Screen):
             if 'm3u8' not in self.urlm3u:
                 path = urlparse(self.urlm3u).path
                 ext = splitext(path)[1]
-                if ext != '.mp4' or ext != '.mkv' or ext != '.avi' or ext != '.flv':  # or ext != 'm3u8':
+                if ext not in ['.mp4', '.mkv', '.avi', '.flv']:
                     ext = '.mp4'
-                fileTitle = re.sub(r'[\<\>\:\"\/\\\|\?\*\[\]]', '_', self.namem3u)
-                fileTitle = re.sub(r' ', '_', fileTitle)
-                fileTitle = re.sub(r'_+', '_', fileTitle)
-                fileTitle = fileTitle.replace("(", "_").replace(")", "_").replace("#", "").replace("+", "_").replace("\'", "_").replace("'", "_").replace("!", "_").replace("&", "_")
+                # Sostituisco i caratteri indesiderati nel nome del file
+                fileTitle = re.sub(r'[<>:"/\\|?*\[\]#()+\'!&]', '_', self.namem3u)  # Rimpiazzo tutti i caratteri indesiderati
+                fileTitle = re.sub(r'\s+', '_', fileTitle)  # Rimpiazzo gli spazi con underscore
+                fileTitle = re.sub(r'_+', '_', fileTitle)   # Riduco gli underscore consecutivi a uno solo
+                # Converto il titolo in minuscolo e aggiungo l'estensione
                 fileTitle = fileTitle.lower() + ext
+                # Imposto il percorso del file
                 self.in_tmp = Path_Movies + fileTitle
                 self.downloading = True
                 self.download = downloadWithProgress(self.urlm3u, self.in_tmp)
@@ -1247,12 +1230,12 @@ class Playstream1(Screen):
                     content = six.ensure_str(content)
                 print("content A =", content)
                 # from Plugins.Extensions.xxxplugin.youtube_dl import YoutubeDL
-                from Plugins.Extensions.xxxplugin import youtube_dl
-                from youtube_dl import YoutubeDL
+                # from Plugins.Extensions.xxxplugin import youtube_dl
+                from .youtube_dl import YoutubeDL
                 '''
                 ydl_opts = {'format': 'best'}
                 ydl_opts = {'format': 'bestaudio/best'}
-                
+
                 ydl_opts = {'format': 'best',
                             'no_check_certificate': True,
                             }
@@ -1451,6 +1434,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
         # if file_exists("/usr/bin/exteplayer3"):
             # streamtypelist.append("5002")
             """
+        '''
         # if file_exists("/usr/bin/apt-get"):
             # streamtypelist.append("8193")
         # for index, item in enumerate(streamtypelist, start=0):
@@ -1459,6 +1443,7 @@ class Playstream2(Screen, InfoBarBase, TvInfoBarShowHide, InfoBarSeek, InfoBarAu
                 # break
         # nextStreamType = islice(cycle(streamtypelist), currentindex + 1, None)
         # self.servicetype = str(next(nextStreamType))
+        '''
         print('servicetype2: ', self.servicetype)
         self.openPlay(self.servicetype, url)
 
@@ -1570,61 +1555,23 @@ class startInit(Screen):
         # self.timer.start(600, 1)
         # self.contdown()
 
-    # def contdown(self):
-        # import time
-        # time.sleep(1)
-        # n = 10000
-        # while n > 0:
-            # print(n)
-            # self['info'].setText(str(n))
-            # n -= 1
-        # self['info'].setText('START')
-
-
-# class AutoStartTimerxxxplugin:
-
-    # def __init__(self, session):
-        # self.session = session
-        # global _firstStartxxxplugin
-        # if _firstStartxxxplugin:
-            # self.runUpdate()
-
-    # def runUpdate(self):
-        # print("*** running update ***")
-        # try:
-            # from . import Update
-            # Update.upd_done()
-            # _firstStartxxxplugin = False
-        # except Exception as e:
-            # print('error _firstStartxxxplugin', e)
-
-
-# def autostart(reason, session=None, **kwargs):
-    # global autoStartTimerxplugin
-    # global _firstStartxxxplugin
-    # if reason == 0:
-        # if session is not None:
-            # _firstStartxxxplugin = True
-            # autoStartTimerxplugin = AutoStartTimerxxxplugin(session)
-    # return
-
 
 def main(session, **kwargs):
     try:
         _session = session
 
         try:
-            os.mkdir(os.path.join(str(cfg.cachefold.value), "xxxplugin"))
+            os.mkdir(os.path.join(Path_Cache, ""))
         except:
             pass
 
         try:
-            os.mkdir(os.path.join(str(cfg.cachefold.value), "xxxplugin/pic"))
+            os.mkdir(os.path.join(Path_Cache, "pic"))
         except:
             pass
 
         try:
-            os.mkdir(os.path.join(str(cfg.cachefold.value), "xxxplugin/tmp"))
+            os.mkdir(os.path.join(Path_Cache, "tmp"))
         except:
             pass
         exo = Main(_session)
@@ -1638,7 +1585,7 @@ def main(session, **kwargs):
 def Plugins(**kwargs):
     icona = 'icon.png'
     extDescriptor = PluginDescriptor(name=name_plug, description=_(title_plug), where=PluginDescriptor.WHERE_EXTENSIONSMENU, icon=icona, fnc=main)
-    result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main))]
+    result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main)]
     result.append(extDescriptor)
     return result
     # PluginDescriptor(name=name_plug, description=title_plug, where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=autostart

@@ -194,8 +194,9 @@ players = [
     ("/usr/bin/exteplayer3", ("5002", "Exteplayer3(5002)")),
     ("/usr/bin/apt-get", ("8193", "DreamOS GStreamer(8193)"))
 ]
-
 mdpchoices.extend(choice for path, choice in players if file_exists(path))
+
+
 
 config.plugins.xxxplugin = ConfigSubsection()
 cfg = config.plugins.xxxplugin
@@ -219,28 +220,35 @@ Path_Cache = str(cfg.cachefold.value).replace('movie', 'xxxplugin')
 
 
 def returnIMDB(text_clear):
-    from Tools.Directories import SCOPE_PLUGINS, resolveFilename
     TMDB = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('TMDB'))
+    tmdb = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('tmdb'))
     IMDb = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('IMDb'))
-    if file_exists(TMDB):
+    text = html_conv.html_unescape(text_clear)
+    if os.path.exists(TMDB):
         try:
             from Plugins.Extensions.TMBD.plugin import TMBD
-            text = html_conv.html_unescape(text_clear)
             _session.open(TMBD.tmdbScreen, text, 0)
         except Exception as e:
-            print("[XCF] Tmdb: ", e)
+            print("[XCF] Tmdb: ", str(e))
         return True
-    elif file_exists(IMDb):
+
+    elif os.path.exists(tmdb):
+        try:
+            from Plugins.Extensions.tmdb.plugin import tmdb
+            _session.open(tmdb.tmdbScreen, text, 0)
+        except Exception as e:
+            print("[XCF] Tmdb: ", str(e))
+        return True
+
+    elif os.path.exists(IMDb):
         try:
             from Plugins.Extensions.IMDb.plugin import main as imdb
-            text = html_conv.html_unescape(text_clear)
             imdb(_session, text)
         except Exception as e:
-            print("[XCF] imdb: ", e)
+            print("[XCF] imdb: ", str(e))
         return True
     else:
-        text_clear = html_conv.html_unescape(text_clear)
-        _session.open(MessageBox, text_clear, MessageBox.TYPE_INFO)
+        _session.open(MessageBox, text, MessageBox.TYPE_INFO)
         return True
     return False
 
@@ -343,10 +351,8 @@ def getpics(names, pics, tmpfold, picfold):
                                     print('=============11111111=================\n')
                                 except Exception as e:
                                     print("Error: Exception", e)
-                                    '''
                                     # if PY3:
                                         # poster = poster.encode()
-                                    '''
                                     callInThread(threadGetPage, url=poster, file=tpicf, success=downloadPic, fail=downloadError)
 
                                     '''

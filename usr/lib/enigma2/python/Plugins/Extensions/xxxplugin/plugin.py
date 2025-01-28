@@ -11,7 +11,7 @@
 # '''
 
 from __future__ import print_function
-from . import (_, skin_path, screenwidth, THISPLUG)
+from . import _, skin_path, screenwidth, THISPLUG
 from .lib import Utils, html_conv
 
 from Components.AVSwitch import AVSwitch
@@ -132,56 +132,79 @@ else:
 dblank = THISPLUG + 'res/img/undefinided.png'
 
 
+def get_screen_settings():
+    """Helper per configurazioni basate sulla risoluzione dello schermo."""
+    if screenwidth.width() == 2560:
+        return {
+            "item_height": 60,
+            "font_size": 42,
+            "pixmap_size": (50, 50),
+            "pixmap_pos": (5, 5),
+            "text_pos": (90, 0),
+            "text_size": (1200, 50),
+        }
+    elif screenwidth.width() == 1920:
+        return {
+            "item_height": 50,
+            "font_size": 30,
+            "pixmap_size": (40, 40),
+            "pixmap_pos": (5, 5),
+            "text_pos": (70, 0),
+            "text_size": (1000, 50),
+        }
+    else:
+        return {
+            "item_height": 50,
+            "font_size": 24,
+            "pixmap_size": (40, 40),
+            "pixmap_pos": (3, 10),
+            "text_pos": (50, 0),
+            "text_size": (500, 50),
+        }
+
+
 class rvList(MenuList):
     def __init__(self, list):
+        screen_settings = get_screen_settings()
         MenuList.__init__(self, list, False, eListboxPythonMultiContent)
-        if screenwidth.width() == 2560:
-            self.l.setItemHeight(60)
-            textfont = int(42)
-            self.l.setFont(0, gFont('Regular', textfont))
-        elif screenwidth.width() == 1920:
-            self.l.setItemHeight(50)
-            textfont = int(30)
-            self.l.setFont(0, gFont('Regular', textfont))
-        else:
-            self.l.setItemHeight(50)
-            textfont = int(24)
-            self.l.setFont(0, gFont('Regular', textfont))
+        self.l.setItemHeight(screen_settings["item_height"])
+        self.l.setFont(0, gFont('Regular', screen_settings["font_size"]))
 
 
 def rvoneListEntry(name):
+    screen_settings = get_screen_settings()
     res = [name]
     pngx = os.path.join(res_plugin_path, 'pics/setting2.png')
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryPixmapAlphaTest(pos=(5, 5), size=(50, 50), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(90, 0), size=(1200, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryPixmapAlphaTest(pos=(5, 5), size=(40, 40), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(70, 0), size=(1000, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryPixmapAlphaTest(pos=(3, 10), size=(40, 40), png=loadPNG(pngx)))
-        res.append(MultiContentEntryText(pos=(50, 0), size=(500, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    res.append(MultiContentEntryPixmapAlphaTest(
+        pos=screen_settings["pixmap_pos"],
+        size=screen_settings["pixmap_size"],
+        png=loadPNG(pngx)
+    ))
+    res.append(MultiContentEntryText(
+        pos=screen_settings["text_pos"],
+        size=screen_settings["text_size"],
+        font=0,
+        text=name,
+        flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER
+    ))
     return res
 
 
-def showlist(data, list):
-    icount = 0
-    plist = []
-    for line in data:
-        name = data[icount]
-        plist.append(rvoneListEntry(name))
-        icount += 1
-        list.setList(plist)
+def showlist(data, list_widget):
+    plist = [rvoneListEntry(name) for name in data]
+    list_widget.setList(plist)
 
 
 def show_(name, link):
+    screen_settings = get_screen_settings()
     res = [(name, link)]
-    if screenwidth.width() == 2560:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1200, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    elif screenwidth.width() == 1920:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(1000, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
-    else:
-        res.append(MultiContentEntryText(pos=(0, 0), size=(500, 50), font=0, text=name, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER))
+    res.append(MultiContentEntryText(
+        pos=(0, 0),
+        size=screen_settings["text_size"],
+        font=0,
+        text=name,
+        flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER
+    ))
     return res
 
 
@@ -220,37 +243,26 @@ Path_Cache = str(cfg.cachefold.value).replace('movie', 'xxxplugin')
 
 
 def returnIMDB(text_clear):
-    TMDB = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('TMDB'))
-    tmdb = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('tmdb'))
-    IMDb = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format('IMDb'))
+    plugins = {
+        "TMDB": ("TMBD", "tmdbScreen"),
+        "tmdb": ("tmdb", "tmdbScreen"),
+        "IMDb": ("IMDb", "main")
+    }
     text = html_conv.html_unescape(text_clear)
-    if os.path.exists(TMDB):
-        try:
-            from Plugins.Extensions.TMBD.plugin import TMBD
-            _session.open(TMBD.tmdbScreen, text, 0)
-        except Exception as e:
-            print("[XCF] Tmdb: ", str(e))
-        return True
-
-    elif os.path.exists(tmdb):
-        try:
-            from Plugins.Extensions.tmdb.plugin import tmdb
-            _session.open(tmdb.tmdbScreen, text, 0)
-        except Exception as e:
-            print("[XCF] Tmdb: ", str(e))
-        return True
-
-    elif os.path.exists(IMDb):
-        try:
-            from Plugins.Extensions.IMDb.plugin import main as imdb
-            imdb(_session, text)
-        except Exception as e:
-            print("[XCF] imdb: ", str(e))
-        return True
-    else:
-        _session.open(MessageBox, text, MessageBox.TYPE_INFO)
-        return True
+    for plugin_name, (module_name, func_name) in plugins.items():
+        plugin_path = resolveFilename(SCOPE_PLUGINS, "Extensions/{}".format(plugin_name))
+        if os.path.exists(plugin_path):
+            try:
+                plugin_module = __import__("Plugins.Extensions.{}.plugin".format(module_name), fromlist=[func_name])
+                plugin_function = getattr(plugin_module, func_name)
+                _session.open(plugin_function, text, 0 if func_name == "tmdbScreen" else None)
+                return True
+            except Exception as e:
+                print("[XCF] {} error: {}".format(plugin_name, str(e)))
+                return False
+    _session.open(MessageBox, text, MessageBox.TYPE_INFO)
     return False
+
 
 
 def threadGetPage(url=None, file=None, key=None, success=None, fail=None, *args, **kwargs):
@@ -1594,4 +1606,3 @@ def Plugins(**kwargs):
     result = [PluginDescriptor(name=name_plug, description=title_plug, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icona, fnc=main)]
     result.append(extDescriptor)
     return result
-    # PluginDescriptor(name=name_plug, description=title_plug, where=[PluginDescriptor.WHERE_SESSIONSTART], fnc=autostart

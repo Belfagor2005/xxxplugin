@@ -300,10 +300,6 @@ class drtuber2(Screen):
 			 'DirectionActions',
 			 'MovieSelectionActions'],
 			{
-				'up': self.up,
-				'down': self.down,
-				'left': self.left,
-				'right': self.right,
 				'ok': self.ok,
 				'green': self.ok,
 				'cancel': self.exit,

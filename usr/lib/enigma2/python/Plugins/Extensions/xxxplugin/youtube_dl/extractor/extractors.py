@@ -159,6 +159,7 @@ from .businessinsider import BusinessInsiderIE
 from .buzzfeed import BuzzFeedIE
 from .byutv import BYUtvIE
 from .c56 import C56IE
+from .caffeine import CaffeineTVIE
 from .callin import CallinIE
 from .camdemy import (
     CamdemyIE,
@@ -382,7 +383,6 @@ from .fc2 import (
     FC2EmbedIE,
 )
 from .fczenit import FczenitIE
-from .filemoon import FileMoonIE
 from .fifa import FifaIE
 from .filmon import (
     FilmOnIE,
@@ -443,6 +443,7 @@ from .gamespot import GameSpotIE
 from .gamestar import GameStarIE
 from .gaskrank import GaskrankIE
 from .gazeta import GazetaIE
+from .gbnews import GBNewsIE
 from .gdcvault import GDCVaultIE
 from .gedidigital import GediDigitalIE
 from .generic import GenericIE
@@ -897,21 +898,13 @@ from .ooyala import (
 )
 from .ora import OraTVIE
 from .orf import (
-    ORFTVthekIE,
-    ORFFM4IE,
+    ORFONIE,
+    ORFONLiveIE,
     ORFFM4StoryIE,
-    ORFOE1IE,
-    ORFOE3IE,
-    ORFNOEIE,
-    ORFWIEIE,
-    ORFBGLIE,
-    ORFOOEIE,
-    ORFSTMIE,
-    ORFKTNIE,
-    ORFSBGIE,
-    ORFTIRIE,
-    ORFVBGIE,
     ORFIPTVIE,
+    ORFPodcastIE,
+    ORFRadioIE,
+    ORFRadioCollectionIE,
 )
 from .outsidetv import OutsideTVIE
 from .packtpub import (
@@ -1652,7 +1645,15 @@ from .younow import (
     YouNowChannelIE,
     YouNowMomentIE,
 )
-from .youporn import YouPornIE
+from .youporn import (
+    YouPornIE,
+    YouPornCategoryIE,
+    YouPornChannelIE,
+    YouPornCollectionIE,
+    YouPornStarIE,
+    YouPornTagIE,
+    YouPornVideosIE,
+)
 from .yourporn import YourPornIE
 from .yourupload import YourUploadIE
 from .youtube import (

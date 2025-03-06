@@ -1,19 +1,19 @@
 #!/bin/bash
 
-##setup command=wget -q --no-check-certificate https://raw.githubusercontent.com/Belfagor2005/vavoo/main/installer.sh -O - | /bin/sh
+##setup command=wget -q --no-check-certificate https://raw.githubusercontent.com/Belfagor2005/xxxplugin/main/installer.sh -O - | /bin/sh
 
 ######### Only This 2 lines to edit with new version ######
-version='1.33'
-changelog='\nGenerate m3u file from config'
+version='1.4'
+changelog='\nRecode all file and sites'
 ##############################################################
 
-TMPPATH=/tmp/vavoo-main
+TMPPATH=/tmp/xxxplugin-main
 FILEPATH=/tmp/main.tar.gz
 
 if [ ! -d /usr/lib64 ]; then
-	PLUGINPATH=/usr/lib/enigma2/python/Plugins/Extensions/vavoo
+	PLUGINPATH=/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin
 else
-	PLUGINPATH=/usr/lib64/enigma2/python/Plugins/Extensions/vavoo
+	PLUGINPATH=/usr/lib64/enigma2/python/Plugins/Extensions/xxxplugin
 fi
 
 ## check depends packges
@@ -98,9 +98,9 @@ if [ $OSTYPE != "DreamOs" ]; then
 fi
 sleep 2
 
-wget --no-check-certificate 'https://github.com/Belfagor2005/vavoo/archive/refs/heads/main.tar.gz'
+wget --no-check-certificate 'https://github.com/Belfagor2005/xxxplugin/archive/refs/heads/main.tar.gz'
 tar -xzf main.tar.gz
-cp -r 'vavoo-main/usr' '/'
+cp -r 'xxxplugin-main/usr' '/'
 set +e
 cd
 sleep 2

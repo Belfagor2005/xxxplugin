@@ -203,7 +203,7 @@ class main(Screen):
 		global search
 		if search is True:
 			search = False
-			self.cat()
+			self.updateMenuList()
 		else:
 			self.close()
 

@@ -25,16 +25,16 @@ import six
 import ssl
 import sys
 from Plugins.Extensions.xxxplugin import (_, skin_path)
-from Plugins.Extensions.xxxplugin.lib import (Utils, html_conv)
+from Plugins.Extensions.xxxplugin.lib import Utils
 from Plugins.Extensions.xxxplugin.plugin import (
-        rvList,
-        Playstream1,
-        Playstream2,
-        showlist,
-        rvoneListEntry,
-        show_,
+    rvList,
+    # Playstream1,
+    Playstream2,
+    # showlist,
+    rvoneListEntry,
+    show_,
 )
-# print("wapbold.py skin_path =", skin_path)
+
 PY3 = sys.version_info.major >= 3
 print('Py3: ', PY3)
 
@@ -75,7 +75,7 @@ Panel_list = [
     ('Latest'),
     ('Featured-Videos'),
     ('SEARCH'),
-    ]
+]
 
 
 class main(Screen):
@@ -98,17 +98,23 @@ class main(Screen):
         self.loading_ok = False
         self.count = 0
         self.loading = 0
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions',
-                                     'DirectionActions',
-                                     'MovieSelectionActions'], {'up': self.up,
-                                                                'down': self.down,
-                                                                'left': self.left,
-                                                                'right': self.right,
-                                                                'ok': self.ok,
-                                                                'green': self.ok,
-                                                                'cancel': self.exit,
-                                                                'red': self.exit}, -1)
+        self['actions'] = ActionMap(
+            ['OkCancelActions',
+             'ColorActions',
+             'DirectionActions',
+             'MovieSelectionActions'],
+            {
+                'up': self.up,
+                'down': self.down,
+                'left': self.left,
+                'right': self.right,
+                'ok': self.ok,
+                'green': self.ok,
+                'cancel': self.exit,
+                'red': self.exit
+            },
+            -1
+        )
         self.onLayoutFinish.append(self.updateMenuList)
 
     def updateMenuList(self):
@@ -129,24 +135,21 @@ class main(Screen):
         from Screens.VirtualKeyBoard import VirtualKeyBoard
         self.namex = name
         self.urlx = url
-        self.session.openWithCallback(self.filterChannels,
-                                      VirtualKeyBoard, title=_(
-                                       "Filter this category..."
-                                      ), text='')
+        self.session.openWithCallback(
+            self.filterChannels,
+            VirtualKeyBoard, title=_("Filter this category..."),
+            text=''
+        )
 
     def filterChannels(self, result):
         if result:
             global search
             name = str(result)
-            # pcd fix
             result = str(result).replace(" ", "+")
-            # url = self.urlx + str(result) + '/'
             url = self.urlx + result + '/'
             #
             try:
                 search = True
-#                print("wapbold.py going in getVideos name = ", name)
-#                print("wapbold.py going in getVideos url = ", url)
                 self.session.open(getVideos, name, url)
             except:
                 return
@@ -238,10 +241,18 @@ class getPage(Screen):
         self['poster'] = Pixmap()
         self['text'] = Label('Only for Adult by Lululla')
         self.currentList = 'menulist'
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions'], {'ok': self.ok,
-                                                       'cancel': self.exit,
-                                                       'red': self.exit}, -1)
+        self['actions'] = ActionMap(
+            ['OkCancelActions',
+             'ColorActions',
+             'DirectionActions',
+             'MovieSelectionActions'],
+            {
+                'cancel': self.exit,
+                'ok': self.ok,
+                'red': self.exit
+            },
+            -1
+        )
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self._gotPageLoad)
@@ -252,16 +263,12 @@ class getPage(Screen):
     def _gotPageLoad(self):
         self.cat_list = []
         name = self.name
-        # url = self.url
         try:
             pages = 100
             i = 1
             while i < pages:
                 page = str(i)
-                # pcd fix
-                # print("getPage self.name =", self.name)
                 url1 = self.url + "page/" + str(page)
-                #
                 name = "Page " + page
                 i += 1
                 self.cat_list.append(show_(name, url1))
@@ -279,15 +286,6 @@ class getPage(Screen):
     def ok(self):
         name = self['menulist'].getCurrent()[0][0]
         url = self['menulist'].getCurrent()[0][1]
-        # print("getPage self.url =", self.url)
-        # print("getPage url =", url)
-        # pcd fix
-        """
-        if 'tags' in self.url:
-            self.session.open(drtuber4, name, url)
-        else:
-            self.session.open(drtuber3, name, url)
-        """
         self.session.open(getVideos, name, url)
 
     def exit(self):
@@ -319,23 +317,27 @@ class getVideos(Screen):
         self['poster'] = Pixmap()
         self.name = name
         self.url = url
-        # print("getVideos self.url 2")
-        # print("getVideos self.url 1=", self.url)
         self.currentList = 'menulist'
         self.loading_ok = False
         self.count = 0
         self.loading = 0
-        self['actions'] = ActionMap(['OkCancelActions',
-                                     'ColorActions',
-                                     'DirectionActions',
-                                     'MovieSelectionActions'], {'up': self.up,
-                                                                'down': self.down,
-                                                                'left': self.left,
-                                                                'right': self.right,
-                                                                'ok': self.ok,
-                                                                'green': self.ok,
-                                                                'cancel': self.exit,
-                                                                'red': self.exit}, -1)
+        self['actions'] = ActionMap(
+            ['OkCancelActions',
+             'ColorActions',
+             'DirectionActions',
+             'MovieSelectionActions'],
+            {
+                'up': self.up,
+                'down': self.down,
+                'left': self.left,
+                'right': self.right,
+                'ok': self.ok,
+                'green': self.ok,
+                'cancel': self.exit,
+                'red': self.exit
+            },
+            -1
+        )
         self.timer = eTimer()
         if Utils.DreamOS():
             self.timer_conn = self.timer.timeout.connect(self.cat)
@@ -366,14 +368,11 @@ class getVideos(Screen):
     def cat(self):
         self.cat_list = []
         try:
-            # print("getVideos self.url =", self.url)
             content = Utils.getUrl(self.url)
             if six.PY3:
                 content = six.ensure_str(content)
-            # print("getVideos content =", content)
             regexcat = 'a href="/download-sex-videos(.*?)".*?data-src="(.*?)".*?play-circle"></i>(.*?)<'
             match = re.compile(regexcat, re.DOTALL).findall(content)
-            # print("getVideos match =", match)
             for url, pic, name in match:
                 name = name
                 url = "https://wapbold.net/download-sex-videos" + url
@@ -398,13 +397,12 @@ class getVideos(Screen):
             print(e)
 
     def playVideo(self, url, name):
-        # print("Here in playVideo url 1=", url)
         content = Utils.getUrl(url)
         regexvideo = 'source src="(.*?)"'
-        match = re.compile(regexvideo, re.DOTALL).findall(content)
-        # print( "Here in playVideo match 1=", match)
-        url1 = match[0]
-        self.play(url1)
+        match = re.findall(regexvideo, content)  # Trova tutte le occorrenze
+        if match:
+            url1 = match[0]  # Usa il primo risultato
+            self.play(url1)
 
     def play(self, url):
         name = self.name

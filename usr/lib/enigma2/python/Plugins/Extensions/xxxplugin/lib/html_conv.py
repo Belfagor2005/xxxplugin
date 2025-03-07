@@ -2,7 +2,7 @@ from six import unichr, iteritems
 from six.moves import html_entities
 import sys
 import types
-import re  # Assicurati che il modulo 're' venga importato
+import re
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
@@ -15,10 +15,10 @@ if PY3:
 
 	MAXSIZE = sys.maxsize
 else:
-	string_types = (str,)  # Sostituito basestring con str
-	integer_types = (int,)  # Sostituito long con int
+	string_types = (str,)
+	integer_types = (int,)
 	class_types = (type, types.ClassType)
-	text_type = str  # Sostituito unicode con str
+	text_type = str
 	binary_type = str
 
 	if sys.platform.startswith("java"):
@@ -77,7 +77,8 @@ def ensure_str(s, encoding='utf-8', errors='strict'):
 
 
 def html_escape(value):
-	return _ESCAPE_RE.sub(lambda match: _ESCAPE_DICT[match.group(0)], ensure_str(value).strip())
+    value = ensure_str(value).strip()
+    return _ESCAPE_RE.sub(lambda match: _ESCAPE_DICT.get(match.group(0), match.group(0)), value)
 
 
 def html_unescape(value):

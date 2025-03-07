@@ -1,8 +1,8 @@
-import re
 from six import unichr, iteritems
 from six.moves import html_entities
 import sys
 import types
+import re
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
@@ -15,10 +15,10 @@ if PY3:
 
 	MAXSIZE = sys.maxsize
 else:
-	string_types = (basestring,)
-	integer_types = (int, long)
+	string_types = (str,)  # Sostituito basestring con str
+	integer_types = (int,)  # Sostituito long con int
 	class_types = (type, types.ClassType)
-	text_type = unicode
+	text_type = str	 # Sostituito unicode con str
 	binary_type = str
 
 	if sys.platform.startswith("java"):
@@ -40,7 +40,7 @@ else:
 			MAXSIZE = int((1 << 63) - 1)
 		del X
 
-_UNICODE_MAP = {k: unichr(v) for k, v in iteritems(html_entities.name2codepoint)}
+_UNICODE_MAP = {k: chr(v) if PY3 else unichr(v) for k, v in iteritems(html_entities.name2codepoint)}
 _ESCAPE_RE = re.compile("[&<>\"']")
 _UNESCAPE_RE = re.compile(r"&\s*(#?)(\w+?)\s*;")  # Whitespace handling added due to "hand-assed" parsers of html pages
 # Dictionary for escaping special HTML characters
@@ -77,7 +77,9 @@ def ensure_str(s, encoding='utf-8', errors='strict'):
 
 
 def html_escape(value):
-	return _ESCAPE_RE.sub(lambda match: _ESCAPE_DICT[match.group(0)], ensure_str(value).strip())
+    # Verifica che 'value' sia una stringa e rimuove gli spazi bianchi
+    value = ensure_str(value).strip()
+    return _ESCAPE_RE.sub(lambda match: _ESCAPE_DICT.get(match.group(0), match.group(0)), value)
 
 
 def html_unescape(value):
@@ -87,7 +89,7 @@ def html_unescape(value):
 def _convert_entity(m):
 	if m.group(1) == "#":
 		try:
-			return unichr(int(m.group(2)[1:], 16)) if m.group(2)[:1].lower() == "x" else unichr(int(m.group(2)))
+			return chr(int(m.group(2)[1:], 16)) if m.group(2)[:1].lower() == "x" else chr(int(m.group(2)))
 		except ValueError:
 			return "&#%s;" % m.group(2)
 	return _UNICODE_MAP.get(m.group(2), "&%s;" % m.group(2))

@@ -16,7 +16,7 @@ else
     PLUGINPATH=/usr/lib64/enigma2/python/Plugins/Extensions/xxxplugin
 fi
 
-## check depends packges
+## check depends packages
 if [ -f /var/lib/dpkg/status ]; then
     STATUS=/var/lib/dpkg/status
     OSTYPE=DreamOs
@@ -29,10 +29,10 @@ echo ""
 echo "Checking dependencies..."
 
 ## Check and install wget if needed
-if [ ! -f /usr/bin/wget ]; then
+if ! command -v wget >/dev/null 2>&1; then
     echo "Installing wget..."
-    if [ $OSTYPE = "DreamOs" ]; then
-        apt-get update && apt-get install wget -y
+    if [ "$OSTYPE" = "DreamOs" ]; then
+        apt-get update && apt-get install -y wget
     else
         opkg update && opkg install wget
     fi
@@ -51,36 +51,36 @@ else
 fi
 
 ## Check and install required packages
-if [ $PYTHON = "PY3" ] && ! grep -qs "Package: $Packagesix" $STATUS; then
+if [ "$PYTHON" = "PY3" ] && ! grep -qs "Package: $Packagesix" "$STATUS"; then
     echo "Installing $Packagesix..."
-    if [ $OSTYPE = "DreamOs" ]; then
-        apt-get install python3-six -y
+    if [ "$OSTYPE" = "DreamOs" ]; then
+        apt-get update && apt-get install -y python3-six
     else
-        opkg install python3-six
+        opkg update && opkg install python3-six
     fi
 fi
 
-if ! grep -qs "Package: $Packagerequests" $STATUS; then
+if ! grep -qs "Package: $Packagerequests" "$STATUS"; then
     echo "Installing $Packagerequests..."
-    if [ $OSTYPE = "DreamOs" ]; then
-        apt-get install $Packagerequests -y
+    if [ "$OSTYPE" = "DreamOs" ]; then
+        apt-get update && apt-get install -y "$Packagerequests"
     else
-        opkg install $Packagerequests
+        opkg update && opkg install "$Packagerequests"
     fi
 fi
 
 ## Cleanup previous installations
-[ -r $TMPPATH ] && rm -rf $TMPPATH > /dev/null 2>&1
-[ -r $FILEPATH ] && rm -f $FILEPATH > /dev/null 2>&1
-[ -r $PLUGINPATH ] && rm -rf $PLUGINPATH > /dev/null 2>&1
+[ -d "$TMPPATH" ] && rm -rf "$TMPPATH" >/dev/null 2>&1
+[ -f "$FILEPATH" ] && rm -f "$FILEPATH" >/dev/null 2>&1
+[ -d "$PLUGINPATH" ] && rm -rf "$PLUGINPATH" >/dev/null 2>&1
 
 ## Download and install plugin
-mkdir -p $TMPPATH
-cd $TMPPATH
+mkdir -p "$TMPPATH"
+cd "$TMPPATH"
 set -e
 
 echo ""
-if [ $OSTYPE = "DreamOs" ]; then
+if [ "$OSTYPE" = "DreamOs" ]; then
     echo "OE2.5/2.6 image detected"
 else
     echo "OE2.0 image detected"
@@ -89,22 +89,23 @@ else
 fi
 
 echo "Downloading plugin..."
-wget --no-check-certificate -O $FILEPATH 'https://github.com/Belfagor2005/xxxplugin/archive/refs/heads/main.tar.gz'
-tar -xzf $FILEPATH -C $TMPPATH
-cp -r $TMPPATH/xxxplugin-main/usr /
+wget --no-check-certificate -O "$FILEPATH" 'https://github.com/Belfagor2005/xxxplugin/archive/refs/heads/main.tar.gz'
+tar -xzf "$FILEPATH" -C "$TMPPATH"
+cp -r "$TMPPATH/xxxplugin-main/usr" /
+
 set +e
 
 ## Verify installation
-if [ ! -d $PLUGINPATH ]; then
+if [ ! -d "$PLUGINPATH" ]; then
     echo "ERROR: Plugin installation failed!"
-    rm -rf $TMPPATH > /dev/null 2>&1
-    rm -f $FILEPATH > /dev/null 2>&1
+    rm -rf "$TMPPATH" >/dev/null 2>&1
+    rm -f "$FILEPATH" >/dev/null 2>&1
     exit 1
 fi
 
 ## Cleanup
-rm -rf $TMPPATH > /dev/null 2>&1
-rm -f $FILEPATH > /dev/null 2>&1
+rm -rf "$TMPPATH" >/dev/null 2>&1
+rm -f "$FILEPATH" >/dev/null 2>&1
 sync
 
 ## Show installation info
@@ -114,7 +115,8 @@ distro_value=$(grep '^distro=' "$FILE" 2>/dev/null | awk -F '=' '{print $2}' || 
 distro_version=$(grep '^version=' "$FILE" 2>/dev/null | awk -F '=' '{print $2}' || echo "Unknown")
 python_vers=$(python --version 2>&1 || echo "Python not found")
 
-echo "#########################################################
+cat <<EOF
+#########################################################
 #               INSTALLED SUCCESSFULLY                  #
 #                developed by LULULLA                   #
 #               https://corvoboys.org                   #
@@ -126,7 +128,8 @@ BOX MODEL: $box_type
 OO SYSTEM: $OSTYPE
 PYTHON: $python_vers
 IMAGE NAME: $distro_value
-IMAGE VERSION: $distro_version"
+IMAGE VERSION: $distro_version
+EOF
 
 sleep 5
 killall -9 enigma2

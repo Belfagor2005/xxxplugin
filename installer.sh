@@ -1,123 +1,184 @@
 #!/bin/bash
+## setup command=wget -q --no-check-certificate https://raw.githubusercontent.com/Belfagor2005/xxxplugin/main/installer.sh -O - | /bin/sh
 
-##setup command=wget -q --no-check-certificate https://raw.githubusercontent.com/Belfagor2005/xxxplugin/main/installer.sh -O - | /bin/sh
-
-######### Only This 2 lines to edit with new version ######
 version='1.4'
 changelog='\nRecode all file and sites'
-##############################################################
 
-TMPPATH=/tmp/xxxplugin-main
-FILEPATH=/tmp/main.tar.gz
+TMPPATH=/tmp/xxxplugin-install
+FILEPATH=/tmp/xxxplugin-main.tar.gz
 
+echo "Starting xxxplugin installation..."
+
+# Determine plugin path based on architecture
 if [ ! -d /usr/lib64 ]; then
     PLUGINPATH=/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin
 else
     PLUGINPATH=/usr/lib64/enigma2/python/Plugins/Extensions/xxxplugin
 fi
 
-## check depends packages
-if [ -f /var/lib/dpkg/status ]; then
-    STATUS=/var/lib/dpkg/status
-    OSTYPE=DreamOs
-else
-    STATUS=/var/lib/opkg/status
-    OSTYPE=Dream
-fi
+# Cleanup function
+cleanup() {
+    echo "🧹 Cleaning up temporary files..."
+    [ -d "$TMPPATH" ] && rm -rf "$TMPPATH"
+    [ -f "$FILEPATH" ] && rm -f "$FILEPATH"
+    [ -d "/tmp/xxxplugin-main" ] && rm -rf "/tmp/xxxplugin-main"
+}
 
-echo ""
-echo "Checking dependencies..."
-
-## Check and install wget if needed
-if ! command -v wget >/dev/null 2>&1; then
-    echo "Installing wget..."
-    if [ "$OSTYPE" = "DreamOs" ]; then
-        apt-get update && apt-get install -y wget
+# Detect OS type
+detect_os() {
+    if [ -f /var/lib/dpkg/status ]; then
+        OSTYPE="DreamOs"
+        STATUS="/var/lib/dpkg/status"
+    elif [ -f /etc/opkg/opkg.conf ] || [ -f /var/lib/opkg/status ]; then
+        OSTYPE="OE"
+        STATUS="/var/lib/opkg/status"
     else
-        opkg update && opkg install wget
+        OSTYPE="Unknown"
+        STATUS=""
     fi
-fi
+    echo "🔍 Detected OS type: $OSTYPE"
+}
 
-## Check Python version
-if python --version 2>&1 | grep -q '^Python 3\.'; then
-    echo "Python3 detected"
-    PYTHON=PY3
-    Packagesix=python3-six
-    Packagerequests=python3-requests
-else
-    echo "Python2 detected"
-    PYTHON=PY2
-    Packagerequests=python-requests
-fi
+detect_os
 
-## Check and install required packages
-if [ "$PYTHON" = "PY3" ] && ! grep -qs "Package: $Packagesix" "$STATUS"; then
-    echo "Installing $Packagesix..."
-    if [ "$OSTYPE" = "DreamOs" ]; then
-        apt-get update && apt-get install -y python3-six
-    else
-        opkg update && opkg install python3-six
-    fi
-fi
-
-if ! grep -qs "Package: $Packagerequests" "$STATUS"; then
-    echo "Installing $Packagerequests..."
-    if [ "$OSTYPE" = "DreamOs" ]; then
-        apt-get update && apt-get install -y "$Packagerequests"
-    else
-        opkg update && opkg install "$Packagerequests"
-    fi
-fi
-
-## Cleanup previous installations
-[ -d "$TMPPATH" ] && rm -rf "$TMPPATH" >/dev/null 2>&1
-[ -f "$FILEPATH" ] && rm -f "$FILEPATH" >/dev/null 2>&1
-[ -d "$PLUGINPATH" ] && rm -rf "$PLUGINPATH" >/dev/null 2>&1
-
-## Download and install plugin
+# Cleanup before starting
+cleanup
 mkdir -p "$TMPPATH"
-cd "$TMPPATH"
-set -e
 
-echo ""
-if [ "$OSTYPE" = "DreamOs" ]; then
-    echo "OE2.5/2.6 image detected"
-else
-    echo "OE2.0 image detected"
-    echo "Installing additional dependencies..."
-    opkg update && opkg install ffmpeg gstplayer exteplayer3 enigma2-plugin-systemplugins-serviceapp
+# Install wget if missing
+if ! command -v wget >/dev/null 2>&1; then
+    echo "📥 Installing wget..."
+    case "$OSTYPE" in
+        "DreamOs")
+            apt-get update && apt-get install -y wget || { echo "❌ Failed to install wget"; exit 1; }
+            ;;
+        "OE")
+            opkg update && opkg install wget || { echo "❌ Failed to install wget"; exit 1; }
+            ;;
+        *)
+            echo "❌ Unsupported OS type. Cannot install wget."
+            exit 1
+            ;;
+    esac
 fi
 
-echo "Downloading plugin..."
-wget --no-check-certificate -O "$FILEPATH" 'https://github.com/Belfagor2005/xxxplugin/archive/refs/heads/main.tar.gz'
-tar -xzf "$FILEPATH" -C "$TMPPATH"
-cp -r "$TMPPATH/xxxplugin-main/usr" /
+# Detect Python version
+if python --version 2>&1 | grep -q '^Python 3\.'; then
+    echo "🐍 Python3 image detected"
+    PYTHON="PY3"
+    Packagesix="python3-six"
+    Packagerequests="python3-requests"
+else
+    echo "🐍 Python2 image detected"
+    PYTHON="PY2"
+    Packagerequests="python-requests"
+    Packagesix="python-six"
+fi
 
-set +e
+# Install required packages
+install_pkg() {
+    local pkg=$1
+    if [ -z "$STATUS" ] || ! grep -qs "Package: $pkg" "$STATUS" 2>/dev/null; then
+        echo "📦 Installing $pkg..."
+        case "$OSTYPE" in
+            "DreamOs")
+                apt-get update && apt-get install -y "$pkg" || { echo "⚠️ Could not install $pkg, continuing anyway..."; }
+                ;;
+            "OE")
+                opkg update && opkg install "$pkg" || { echo "⚠️ Could not install $pkg, continuing anyway..."; }
+                ;;
+            *)
+                echo "⚠️ Cannot install $pkg on unknown OS type, continuing..."
+                ;;
+        esac
+    else
+        echo "✅ $pkg already installed"
+    fi
+}
 
-## Verify installation
-if [ ! -d "$PLUGINPATH" ]; then
-    echo "ERROR: Plugin installation failed!"
-    rm -rf "$TMPPATH" >/dev/null 2>&1
-    rm -f "$FILEPATH" >/dev/null 2>&1
+# Install Python dependencies
+if [ "$PYTHON" = "PY3" ]; then
+    install_pkg "$Packagesix"
+fi
+install_pkg "$Packagerequests"
+
+# Install additional multimedia packages for OE systems
+if [ "$OSTYPE" = "OE" ]; then
+    echo "📥 Installing additional multimedia packages..."
+    for pkg in ffmpeg gstplayer exteplayer3 enigma2-plugin-systemplugins-serviceapp; do
+        install_pkg "$pkg"
+    done
+fi
+
+# Download and extract
+echo "⬇️ Downloading xxxplugin..."
+wget --no-check-certificate 'https://github.com/Belfagor2005/xxxplugin/archive/refs/heads/main.tar.gz' -O "$FILEPATH"
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to download xxxplugin package!"
+    cleanup
     exit 1
 fi
 
-## Cleanup
-rm -rf "$TMPPATH" >/dev/null 2>&1
-rm -f "$FILEPATH" >/dev/null 2>&1
+echo "📦 Extracting package..."
+tar -xzf "$FILEPATH" -C "$TMPPATH"
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to extract xxxplugin package!"
+    cleanup
+    exit 1
+fi
+
+# Install plugin files
+echo "🔧 Installing plugin files..."
+mkdir -p "$PLUGINPATH"
+
+# Find the correct directory in the extracted structure
+if [ -d "$TMPPATH/xxxplugin-main/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin" ]; then
+    cp -r "$TMPPATH/xxxplugin-main/usr/lib/enigma2/python/Plugins/Extensions/xxxplugin"/* "$PLUGINPATH/" 2>/dev/null
+    echo "✅ Copied from standard plugin directory"
+elif [ -d "$TMPPATH/xxxplugin-main/usr/lib64/enigma2/python/Plugins/Extensions/xxxplugin" ]; then
+    cp -r "$TMPPATH/xxxplugin-main/usr/lib64/enigma2/python/Plugins/Extensions/xxxplugin"/* "$PLUGINPATH/" 2>/dev/null
+    echo "✅ Copied from lib64 plugin directory"
+elif [ -d "$TMPPATH/xxxplugin-main/usr" ]; then
+    # Copy entire usr tree
+    cp -r "$TMPPATH/xxxplugin-main/usr"/* /usr/ 2>/dev/null
+    echo "✅ Copied entire usr structure"
+else
+    echo "❌ Could not find plugin files in extracted archive"
+    echo "📋 Available directories in tmp:"
+    find "$TMPPATH" -type d | head -10
+    cleanup
+    exit 1
+fi
+
 sync
 
-## Show installation info
+# Verify installation
+echo "🔍 Verifying installation..."
+if [ -d "$PLUGINPATH" ] && [ -n "$(ls -A "$PLUGINPATH" 2>/dev/null)" ]; then
+    echo "✅ Plugin directory found and not empty: $PLUGINPATH"
+    echo "📁 Contents:"
+    ls -la "$PLUGINPATH/" | head -10
+else
+    echo "❌ Plugin installation failed or directory is empty!"
+    cleanup
+    exit 1
+fi
+
+# Cleanup
+cleanup
+sync
+
+# System info
 FILE="/etc/image-version"
 box_type=$(head -n 1 /etc/hostname 2>/dev/null || echo "Unknown")
-distro_value=$(grep '^distro=' "$FILE" 2>/dev/null | awk -F '=' '{print $2}' || echo "Unknown")
-distro_version=$(grep '^version=' "$FILE" 2>/dev/null | awk -F '=' '{print $2}' || echo "Unknown")
-python_vers=$(python --version 2>&1 || echo "Python not found")
+distro_value=$(grep '^distro=' "$FILE" 2>/dev/null | awk -F '=' '{print $2}')
+distro_version=$(grep '^version=' "$FILE" 2>/dev/null | awk -F '=' '{print $2}')
+python_vers=$(python --version 2>&1)
 
 cat <<EOF
+
 #########################################################
-#               INSTALLED SUCCESSFULLY                  #
+#       xxxplugin $version INSTALLED SUCCESSFULLY       #
 #                developed by LULULLA                   #
 #               https://corvoboys.org                   #
 #########################################################
@@ -125,12 +186,22 @@ cat <<EOF
 #########################################################
 ^^^^^^^^^^Debug information:
 BOX MODEL: $box_type
-OO SYSTEM: $OSTYPE
+OS SYSTEM: $OSTYPE
 PYTHON: $python_vers
-IMAGE NAME: $distro_value
-IMAGE VERSION: $distro_version
+IMAGE NAME: ${distro_value:-Unknown}
+IMAGE VERSION: ${distro_version:-Unknown}
 EOF
 
+echo "🔄 Restarting enigma2 in 5 seconds..."
 sleep 5
-killall -9 enigma2
+
+# Restart Enigma2
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart enigma2
+elif command -v init >/dev/null 2>&1; then
+    init 4 && sleep 2 && init 3
+else
+    killall -9 enigma2
+fi
+
 exit 0
